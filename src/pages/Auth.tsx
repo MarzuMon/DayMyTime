@@ -5,6 +5,44 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+function ForgotPassword({ email: parentEmail }: { email: string }) {
+  const email = parentEmail;
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleReset = async () => {
+    if (!email) return;
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setSent(true);
+      toast({ title: 'Check your email', description: 'Password reset link sent.' });
+    }
+    setLoading(false);
+  };
+
+  if (sent) return <p className="text-center text-xs text-muted-foreground mt-3">Reset link sent to {email}</p>;
+
+  return (
+    <div className="mt-3 text-center">
+      <button
+        type="button"
+        onClick={handleReset}
+        disabled={loading}
+        className="text-xs text-primary hover:underline"
+      >
+        Forgot password?
+      </button>
+    </div>
+  );
+}
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -91,6 +129,10 @@ export default function Auth() {
             {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Sign Up'}
           </Button>
         </form>
+
+        {isLogin && (
+          <ForgotPassword email={email} />
+        )}
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
