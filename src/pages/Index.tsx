@@ -6,10 +6,11 @@ import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
 import { Button } from '@/components/ui/button';
-import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock } from 'lucide-react';
+import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut } from 'lucide-react';
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
 import heroPattern from '@/assets/hero-pattern.png';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 type ViewMode = 'list' | 'timeline';
 
@@ -21,17 +22,19 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default');
   const { toast } = useToast();
+  const { signOut } = useAuth();
 
-  const refreshSchedules = useCallback(() => {
-    const s = getSchedules();
+  const refreshSchedules = useCallback(async () => {
+    const s = await getSchedules();
     setSchedules(s);
     return s;
   }, []);
 
   useEffect(() => {
-    const s = refreshSchedules();
-    setNotifPermission(getNotificationPermission());
-    scheduleAllNotifications(s, refreshSchedules);
+    refreshSchedules().then(s => {
+      setNotifPermission(getNotificationPermission());
+      scheduleAllNotifications(s, refreshSchedules);
+    });
   }, [refreshSchedules]);
 
   const handleEnableNotifications = async () => {
@@ -45,26 +48,26 @@ const Index = () => {
     }
   };
 
-  const handleSave = (schedule: Schedule) => {
+  const handleSave = async (schedule: Schedule) => {
     let updated: Schedule[];
     if (editingSchedule) {
-      updated = updateSchedule(schedule);
+      updated = await updateSchedule(schedule);
     } else {
-      updated = addSchedule(schedule);
+      updated = await addSchedule(schedule);
     }
     setSchedules(updated);
     setEditingSchedule(null);
     scheduleAllNotifications(updated, refreshSchedules);
   };
 
-  const handleDelete = (id: string) => {
-    const updated = deleteSchedule(id);
+  const handleDelete = async (id: string) => {
+    const updated = await deleteSchedule(id);
     setSchedules(updated);
     scheduleAllNotifications(updated, refreshSchedules);
   };
 
-  const handleToggle = (id: string) => {
-    const updated = toggleComplete(id);
+  const handleToggle = async (id: string) => {
+    const updated = await toggleComplete(id);
     setSchedules(updated);
     scheduleAllNotifications(updated, refreshSchedules);
   };
@@ -118,9 +121,14 @@ const Index = () => {
       <header className="relative overflow-hidden border-b bg-card">
         <img src={heroPattern} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="relative max-w-2xl mx-auto px-4 py-10 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <CalendarDays className="h-7 w-7 text-primary" />
-            <h1 className="font-display text-3xl font-bold tracking-tight">TimeWise</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-7 w-7 text-primary" />
+              <h1 className="font-display text-3xl font-bold tracking-tight">TimeWise</h1>
+            </div>
+            <Button size="sm" variant="ghost" onClick={signOut}>
+              <LogOut className="h-4 w-4 mr-1" /> Sign out
+            </Button>
           </div>
           <p className="text-muted-foreground text-sm">
             Your smart visual scheduler. Simple, fast, meeting-ready.
