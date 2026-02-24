@@ -6,7 +6,7 @@ import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
 import { Button } from '@/components/ui/button';
-import { Plus, CalendarDays, Filter, Bell, BellOff, LayoutList, Clock } from 'lucide-react';
+import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock } from 'lucide-react';
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
 import heroPattern from '@/assets/hero-pattern.png';
 import { useToast } from '@/hooks/use-toast';
