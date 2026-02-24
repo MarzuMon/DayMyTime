@@ -1,4 +1,4 @@
-import { Schedule, categoryConfig, platformConfig } from '@/lib/types';
+import { type Schedule, categoryConfig, platformConfig } from '@/lib/types';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { Clock, ExternalLink, Check, Trash2, Pencil, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
