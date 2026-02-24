@@ -100,7 +100,7 @@ export default function Landing() {
             {/* Free Card */}
             <div className="rounded-xl border bg-card p-6 shadow-card">
               <h3 className="font-display font-bold text-lg mb-1">Free</h3>
-              <p className="text-3xl font-bold mb-1">$0<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+              <p className="text-3xl font-bold mb-1">₹0<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
               <p className="text-sm text-muted-foreground mb-6">Ad-supported</p>
               <Button className="w-full" variant="outline" onClick={() => navigate('/app')}>Get Started</Button>
             </div>
@@ -108,7 +108,7 @@ export default function Landing() {
             <div className="rounded-xl border-2 border-primary bg-card p-6 shadow-elevated relative">
               <span className="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">Popular</span>
               <h3 className="font-display font-bold text-lg mb-1">Pro</h3>
-              <p className="text-3xl font-bold mb-1">$4.99<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+              <p className="text-3xl font-bold mb-1">₹199<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
               <p className="text-sm text-muted-foreground mb-6">Everything unlimited</p>
               <Button className="w-full" onClick={() => navigate('/app')}>Start Free Trial</Button>
             </div>
