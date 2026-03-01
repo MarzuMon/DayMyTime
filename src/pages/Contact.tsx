@@ -43,6 +43,11 @@ export default function Contact() {
       message: result.data.message,
     });
 
+    // Also trigger email notification (fire-and-forget)
+    supabase.functions.invoke('send-contact-email', {
+      body: { name: result.data.name, email: result.data.email, message: result.data.message },
+    }).catch(() => {}); // Don't block on email failure
+
     setSubmitting(false);
 
     if (error) {
