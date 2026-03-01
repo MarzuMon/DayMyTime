@@ -170,54 +170,6 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Filters + View Toggle */}
-      <div className="max-w-2xl mx-auto px-4 pt-6">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 flex-1">
-            <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <button
-              onClick={() => setFilterCategory('all')}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
-                filterCategory === 'all'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
-            >
-              All
-            </button>
-            {Object.entries(categoryConfig).map(([key, { label, emoji }]) => (
-              <button
-                key={key}
-                onClick={() => setFilterCategory(key as ScheduleCategory)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
-                  filterCategory === key
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                }`}
-              >
-                {emoji} {label}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-1 border rounded-lg p-0.5 bg-secondary flex-shrink-0">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-              title="List view"
-            >
-              <LayoutList className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('timeline')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'timeline' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-              title="Timeline view"
-            >
-              <Clock className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
         {/* Weekly Template Plan */}
@@ -225,6 +177,54 @@ const Index = () => {
 
         {/* Daily Schedule Template */}
         <DailyScheduleSection />
+
+        {/* Filters + View Toggle */}
+        <div>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 flex-1">
+              <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <button
+                onClick={() => setFilterCategory('all')}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+                  filterCategory === 'all'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                }`}
+              >
+                All
+              </button>
+              {Object.entries(categoryConfig).map(([key, { label, emoji }]) => (
+                <button
+                  key={key}
+                  onClick={() => setFilterCategory(key as ScheduleCategory)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+                    filterCategory === key
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  {emoji} {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 border rounded-lg p-0.5 bg-secondary flex-shrink-0">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                title="List view"
+              >
+                <LayoutList className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('timeline')}
+                className={`p-1.5 rounded-md transition-colors ${viewMode === 'timeline' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                title="Timeline view"
+              >
+                <Clock className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
 
         {filtered.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
