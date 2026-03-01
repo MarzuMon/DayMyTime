@@ -17,29 +17,39 @@ export default function TeamTimetable() {
   const [schedules, setSchedules] = useState<TeamSchedule[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchTeam = async () => {
+    const { data } = await supabase
+      .from('schedules')
+      .select('id, title, scheduled_time, duration, category, user_id')
+      .gte('scheduled_time', new Date().toISOString())
+      .order('scheduled_time', { ascending: true })
+      .limit(20);
+
+    if (!data || data.length === 0) { setSchedules([]); setLoading(false); return; }
+
+    const userIds = [...new Set(data.map(s => s.user_id))];
+    const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+    setSchedules(data.map(s => ({
+      ...s,
+      display_name: profileMap.get(s.user_id)?.display_name || 'Unknown',
+      avatar_url: profileMap.get(s.user_id)?.avatar_url || null,
+    })));
+    setLoading(false);
+  };
+
   useEffect(() => {
-    async function fetchTeam() {
-      const { data } = await supabase
-        .from('schedules')
-        .select('id, title, scheduled_time, duration, category, user_id')
-        .gte('scheduled_time', new Date().toISOString())
-        .order('scheduled_time', { ascending: true })
-        .limit(20);
-
-      if (!data || data.length === 0) { setLoading(false); return; }
-
-      const userIds = [...new Set(data.map(s => s.user_id))];
-      const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
-
-      setSchedules(data.map(s => ({
-        ...s,
-        display_name: profileMap.get(s.user_id)?.display_name || 'Unknown',
-        avatar_url: profileMap.get(s.user_id)?.avatar_url || null,
-      })));
-      setLoading(false);
-    }
     fetchTeam();
+
+    const channel = supabase
+      .channel('team-schedules')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, () => {
+        fetchTeam();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   if (loading) return null;

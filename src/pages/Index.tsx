@@ -6,13 +6,15 @@ import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
 import { Button } from '@/components/ui/button';
-import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle } from 'lucide-react';
+import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun } from 'lucide-react';
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
 import heroPattern from '@/assets/hero-pattern.png';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@/hooks/use-theme';
 import TeamTimetable from '@/components/TeamTimetable';
+import DailyScheduleSection from '@/components/DailyScheduleSection';
 
 type ViewMode = 'list' | 'timeline';
 
@@ -26,6 +28,7 @@ const Index = () => {
   const { toast } = useToast();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
@@ -130,6 +133,9 @@ const Index = () => {
               <h1 className="font-display text-3xl font-bold tracking-tight">Day My Time</h1>
             </div>
             <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" onClick={toggleTheme}>
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
               </Button>
@@ -228,6 +234,9 @@ const Index = () => {
             {renderSection('Completed', completedSchedules)}
           </>
         )}
+
+        {/* Daily Schedule Template */}
+        <DailyScheduleSection />
 
         {/* Team Timetable */}
         <TeamTimetable />
