@@ -220,6 +220,9 @@ const Index = () => {
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
+        {/* Weekly Template Plan */}
+        <WeeklyTemplateView />
+
         {filtered.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
             <CalendarDays className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
@@ -239,12 +242,8 @@ const Index = () => {
             {renderSection('Completed', completedSchedules)}
           </>
         )}
-
         {/* Daily Schedule Template */}
         <DailyScheduleSection />
-
-        {/* Weekly Template Plan */}
-        <WeeklyTemplateView />
 
         {/* Team Timetable */}
         <TeamTimetable />
