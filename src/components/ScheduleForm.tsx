@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { categoryConfig } from '@/lib/types';
-import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, Volume2, LayoutTemplate } from 'lucide-react';
+import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, Volume2, LayoutTemplate, Play } from 'lucide-react';
 import { useAdminSetting } from '@/hooks/use-admin-settings';
+import { playAlarmTone } from '@/lib/alarmTones';
 
 interface GlobalTemplate {
   id: string;
@@ -243,18 +244,29 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             <Label className="flex items-center gap-2 text-sm font-medium">
               <Volume2 className="h-3.5 w-3.5 text-muted-foreground" /> Alarm Tone
             </Label>
-            <Select value={alarmTone} onValueChange={setAlarmTone}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ALARM_TONES.map(tone => (
-                  <SelectItem key={tone.value} value={tone.value}>
-                    {tone.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={alarmTone} onValueChange={(v) => { setAlarmTone(v); playAlarmTone(v); }}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ALARM_TONES.map(tone => (
+                    <SelectItem key={tone.value} value={tone.value}>
+                      {tone.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={() => playAlarmTone(alarmTone)}
+                title="Preview tone"
+              >
+                <Play className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex gap-2 pt-2">
