@@ -23,6 +23,8 @@ import {
   Crown, TrendingUp, ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
+import UserManagementTab from '@/components/author/UserManagementTab';
+import TemplateManagementTab from '@/components/author/TemplateManagementTab';
 
 interface AdPlacement {
   id: string;
@@ -360,40 +362,8 @@ export default function Author() {
             </div>
           </TabsContent>
 
-          {/* Users Tab with Pro Toggle */}
           <TabsContent value="users" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-                <CardDescription>Recent users ({users.length}) — toggle Pro status</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {users.map(u => (
-                    <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary">
-                      <div>
-                        <p className="font-medium text-sm">{u.display_name || 'No name'}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Joined {new Date(u.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${u.is_pro ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                          {u.is_pro ? 'Pro' : 'Free'}
-                        </span>
-                        <Switch
-                          checked={u.is_pro}
-                          onCheckedChange={() => toggleUserPro(u.id, u.is_pro)}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  {users.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-8">No users yet</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <UserManagementTab users={users} onTogglePro={toggleUserPro} />
           </TabsContent>
 
           {/* Monetization Tab */}
@@ -495,19 +465,8 @@ export default function Author() {
             </Card>
           </TabsContent>
 
-          {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Template Management</CardTitle>
-                <CardDescription>Manage shared schedule templates for all users</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  Templates are managed per-user in the main app. Global template sharing coming soon.
-                </p>
-              </CardContent>
-            </Card>
+            <TemplateManagementTab />
           </TabsContent>
         </Tabs>
       </main>
