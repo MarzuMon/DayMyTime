@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
+import { useUserRole } from '@/hooks/use-user-role';
 import TeamTimetable from '@/components/TeamTimetable';
 import DailyScheduleSection from '@/components/DailyScheduleSection';
 import WeeklyTemplateView from '@/components/WeeklyTemplateView';
@@ -30,6 +31,7 @@ const Index = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { isAdmin } = useUserRole();
 
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
@@ -137,9 +139,11 @@ const Index = () => {
               <Button size="sm" variant="ghost" onClick={toggleTheme}>
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => navigate('/author')}>
-                <LayoutList className="h-4 w-4 mr-1" /> Author
-              </Button>
+              {isAdmin && (
+                <Button size="sm" variant="ghost" onClick={() => navigate('/author')}>
+                  <LayoutList className="h-4 w-4 mr-1" /> Author
+                </Button>
+              )}
               <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
               </Button>

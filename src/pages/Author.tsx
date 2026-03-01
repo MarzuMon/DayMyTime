@@ -4,14 +4,23 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminSetting } from '@/hooks/use-admin-settings';
+import { useUserRole } from '@/hooks/use-user-role';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  ChartContainer, ChartTooltip, ChartTooltipContent
+} from '@/components/ui/chart';
+import {
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, ResponsiveContainer
+} from 'recharts';
+import {
   ArrowLeft, Sun, Moon, Users, CalendarDays, BarChart3,
-  Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee, Save
+  Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee,
+  Crown, TrendingUp, ShieldCheck
 } from 'lucide-react';
 
 interface AdPlacement {
@@ -40,10 +49,18 @@ const DEFAULT_PRO: ProFeature[] = [
   { id: 'analytics', name: 'Advanced Analytics', enabled: false, description: 'Detailed usage analytics' },
 ];
 
+const CHART_COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--accent))',
+  'hsl(var(--secondary))',
+  'hsl(var(--muted))',
+];
+
 export default function Author() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { isAdmin, loading: roleLoading } = useUserRole();
 
   const { value: ads, save: saveAds, loading: adsLoading } = useAdminSetting<AdPlacement[]>('ad_placements', DEFAULT_ADS);
   const { value: proFeatures, save: saveProFeatures, loading: proLoading } = useAdminSetting<ProFeature[]>('pro_features', DEFAULT_PRO);
@@ -51,24 +68,49 @@ export default function Author() {
   const { value: adsense, save: saveAdsense, loading: adsenseLoading } = useAdminSetting<{ enabled: boolean; publisherId: string }>('adsense', { enabled: false, publisherId: '' });
   const { value: bankDetails, save: saveBankDetails, loading: bankLoading } = useAdminSetting<{ holder: string; account: string; ifsc: string; upi: string }>('bank_details', { holder: '', account: '', ifsc: '', upi: '' });
 
-  // Stats
-  const [stats, setStats] = useState({ totalUsers: 0, totalSchedules: 0, activeToday: 0 });
+  const [stats, setStats] = useState({ totalUsers: 0, totalSchedules: 0, proUsers: 0 });
   const [users, setUsers] = useState<{ id: string; display_name: string; is_pro: boolean; created_at: string }[]>([]);
+  const [signupChartData, setSignupChartData] = useState<{ day: string; count: number }[]>([]);
 
   useEffect(() => {
-    fetchStats();
-    fetchUsers();
-  }, []);
+    if (!roleLoading && !isAdmin) {
+      navigate('/app', { replace: true });
+    }
+  }, [isAdmin, roleLoading, navigate]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchStats();
+      fetchUsers();
+    }
+  }, [isAdmin]);
 
   const fetchStats = async () => {
     const [schedulesRes, profilesRes] = await Promise.all([
       supabase.from('schedules').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('profiles').select('id, is_pro, created_at'),
     ]);
+    const profiles = profilesRes.data || [];
+    const proCount = profiles.filter(p => p.is_pro).length;
+
+    // Build signup chart (last 7 days)
+    const days: { day: string; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const label = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const count = profiles.filter(p => {
+        const cd = new Date(p.created_at);
+        return cd.toDateString() === d.toDateString();
+      }).length;
+      days.push({ day: label, count });
+    }
+    setSignupChartData(days);
+
     setStats({
-      totalUsers: profilesRes.count || 0,
+      totalUsers: profilesRes.data?.length || 0,
       totalSchedules: schedulesRes.count || 0,
-      activeToday: 0,
+      proUsers: proCount,
     });
   };
 
@@ -87,15 +129,29 @@ export default function Author() {
     saveProFeatures(updated);
   };
 
-  const isLoading = adsLoading || proLoading || pricingLoading || adsenseLoading || bankLoading;
+  const isLoading = adsLoading || proLoading || pricingLoading || adsenseLoading || bankLoading || roleLoading;
 
-  if (isLoading) {
+  if (isLoading || !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">
         Loading...
       </div>
     );
   }
+
+  const proConversion = stats.totalUsers > 0 ? Math.round((stats.proUsers / stats.totalUsers) * 100) : 0;
+  const freeUsers = stats.totalUsers - stats.proUsers;
+
+  const pieData = [
+    { name: 'Pro', value: stats.proUsers },
+    { name: 'Free', value: freeUsers },
+  ];
+
+  const chartConfig = {
+    count: { label: 'Signups', color: 'hsl(var(--primary))' },
+    pro: { label: 'Pro Users', color: 'hsl(var(--primary))' },
+    free: { label: 'Free Users', color: 'hsl(var(--muted))' },
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,8 +163,11 @@ export default function Author() {
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
             <div className="flex items-center gap-2">
-              <LayoutTemplate className="h-5 w-5 text-primary" />
+              <ShieldCheck className="h-5 w-5 text-primary" />
               <h1 className="font-display text-xl font-bold">Author Dashboard</h1>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground flex items-center gap-1">
+                <Crown className="h-3 w-3" /> Admin
+              </span>
             </div>
           </div>
           <Button size="sm" variant="ghost" onClick={toggleTheme}>
@@ -119,7 +178,7 @@ export default function Author() {
 
       <main className="max-w-5xl mx-auto px-4 py-6">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="flex items-center gap-3 pt-6">
               <Users className="h-8 w-8 text-primary" />
@@ -140,10 +199,19 @@ export default function Author() {
           </Card>
           <Card>
             <CardContent className="flex items-center gap-3 pt-6">
-              <BarChart3 className="h-8 w-8 text-primary" />
+              <Crown className="h-8 w-8 text-primary" />
               <div>
-                <p className="text-2xl font-bold">{users.filter(u => u.is_pro).length}</p>
+                <p className="text-2xl font-bold">{stats.proUsers}</p>
                 <p className="text-sm text-muted-foreground">Pro Users</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <TrendingUp className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">{proConversion}%</p>
+                <p className="text-sm text-muted-foreground">Pro Conversion</p>
               </div>
             </CardContent>
           </Card>
@@ -151,8 +219,9 @@ export default function Author() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="analytics"><BarChart3 className="h-4 w-4 mr-1.5" /> Analytics</TabsTrigger>
+            <TabsTrigger value="pro-analytics"><Crown className="h-4 w-4 mr-1.5" /> Pro Stats</TabsTrigger>
             <TabsTrigger value="users"><Users className="h-4 w-4 mr-1.5" /> Users</TabsTrigger>
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
             <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
@@ -160,31 +229,124 @@ export default function Author() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-                <CardDescription>Key metrics for your application</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-secondary">
-                    <p className="text-sm text-muted-foreground">Signups this week</p>
-                    <p className="text-xl font-bold">{users.filter(u => {
-                      const d = new Date(u.created_at);
-                      const week = new Date();
-                      week.setDate(week.getDate() - 7);
-                      return d > week;
-                    }).length}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Signups Bar Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Signups (Last 7 Days)</CardTitle>
+                  <CardDescription>New user registrations by day</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                    <BarChart data={signupChartData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                      <XAxis dataKey="day" className="text-xs" />
+                      <YAxis allowDecimals={false} className="text-xs" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="count" fill="var(--color-count)" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              {/* Overview Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Stats</CardTitle>
+                  <CardDescription>Key metrics overview</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Signups this week</p>
+                      <p className="text-xl font-bold">{signupChartData.reduce((s, d) => s + d.count, 0)}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Pro conversion</p>
+                      <p className="text-xl font-bold">{proConversion}%</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Avg schedules/user</p>
+                      <p className="text-xl font-bold">
+                        {stats.totalUsers > 0 ? (stats.totalSchedules / stats.totalUsers).toFixed(1) : '0'}
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Free users</p>
+                      <p className="text-xl font-bold">{freeUsers}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Pro Analytics Tab */}
+          <TabsContent value="pro-analytics" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Pro vs Free Pie Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Crown className="h-4 w-4" /> Pro vs Free Users</CardTitle>
+                  <CardDescription>Distribution of user accounts</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, value }) => `${name}: ${value}`}
+                      >
+                        {pieData.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </PieChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              {/* Pro Revenue Estimate */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Revenue Estimate</CardTitle>
+                  <CardDescription>Based on current pro users & pricing</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Monthly MRR</p>
+                      <p className="text-xl font-bold">₹{(stats.proUsers * pricing.monthly).toLocaleString('en-IN')}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Annual ARR</p>
+                      <p className="text-xl font-bold">₹{(stats.proUsers * pricing.yearly).toLocaleString('en-IN')}</p>
+                    </div>
                   </div>
                   <div className="p-4 rounded-lg bg-secondary">
-                    <p className="text-sm text-muted-foreground">Pro conversion</p>
-                    <p className="text-xl font-bold">
-                      {stats.totalUsers > 0 ? Math.round((users.filter(u => u.is_pro).length / stats.totalUsers) * 100) : 0}%
-                    </p>
+                    <p className="text-sm text-muted-foreground">Pro user list</p>
+                    <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
+                      {users.filter(u => u.is_pro).length === 0 && (
+                        <p className="text-xs text-muted-foreground">No pro users yet</p>
+                      )}
+                      {users.filter(u => u.is_pro).map(u => (
+                        <div key={u.id} className="flex items-center gap-2 text-sm">
+                          <Crown className="h-3 w-3 text-primary" />
+                          <span>{u.display_name || 'Unnamed'}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Users Tab */}
@@ -219,7 +381,6 @@ export default function Author() {
 
           {/* Monetization Tab */}
           <TabsContent value="monetization" className="space-y-4">
-            {/* Ad Placements */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Megaphone className="h-4 w-4" /> Ad Placements</CardTitle>
@@ -237,7 +398,6 @@ export default function Author() {
               </CardContent>
             </Card>
 
-            {/* Pro Features */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Settings className="h-4 w-4" /> Pro Features</CardTitle>
@@ -255,7 +415,6 @@ export default function Author() {
               </CardContent>
             </Card>
 
-            {/* Pricing */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Pricing</CardTitle>
@@ -274,7 +433,6 @@ export default function Author() {
               </CardContent>
             </Card>
 
-            {/* AdSense */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Megaphone className="h-4 w-4" /> Google AdSense</CardTitle>
@@ -287,15 +445,12 @@ export default function Author() {
                 {adsense.enabled && (
                   <div>
                     <label className="text-sm font-medium">Publisher ID</label>
-                    <div className="flex gap-2">
-                      <Input value={adsense.publisherId} onChange={e => saveAdsense({ ...adsense, publisherId: e.target.value })} placeholder="ca-pub-XXXXXXXX" />
-                    </div>
+                    <Input value={adsense.publisherId} onChange={e => saveAdsense({ ...adsense, publisherId: e.target.value })} placeholder="ca-pub-XXXXXXXX" />
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Bank Details */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Bank Account</CardTitle>
