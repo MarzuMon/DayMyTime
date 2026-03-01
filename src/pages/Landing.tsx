@@ -210,8 +210,9 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t py-8">
-        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>© 2026 Day My Time</span>
+          <a href="mailto:ceo@daymytime.com" className="hover:text-primary transition-colors">ceo@daymytime.com</a>
           <span>Simple • Visual • Meeting-ready</span>
         </div>
       </footer>
