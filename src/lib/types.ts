@@ -4,6 +4,8 @@ export type ScheduleCategory = 'meeting' | 'class' | 'work' | 'personal' | 'exam
 
 export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly';
 
+export type AlarmTone = 'default' | 'chime' | 'bell' | 'alarm' | 'gentle' | 'urgent' | 'melody' | 'digital' | 'nature' | 'piano' | 'none';
+
 export interface Schedule {
   id: string;
   title: string;
@@ -17,6 +19,7 @@ export interface Schedule {
   isCompleted: boolean;
   createdAt: string;
   imagePath?: string;
+  alarmTone: AlarmTone;
 }
 
 export function detectMeetingPlatform(url: string): MeetingPlatform {

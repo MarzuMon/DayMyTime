@@ -1,0 +1,1 @@
+ALTER TABLE public.schedules ADD COLUMN alarm_tone text NOT NULL DEFAULT 'default';

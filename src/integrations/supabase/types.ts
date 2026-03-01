@@ -64,6 +64,7 @@ export type Database = {
       }
       schedules: {
         Row: {
+          alarm_tone: string
           category: string
           created_at: string
           description: string
@@ -79,6 +80,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          alarm_tone?: string
           category?: string
           created_at?: string
           description?: string
@@ -94,6 +96,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          alarm_tone?: string
           category?: string
           created_at?: string
           description?: string
