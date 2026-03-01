@@ -124,6 +124,21 @@ export default function Author() {
     }));
   };
 
+  const bulkTogglePro = async (userIds: string[], setToPro: boolean) => {
+    const updates = userIds.map(id =>
+      supabase.from('profiles').update({ is_pro: setToPro }).eq('id', id)
+    );
+    const results = await Promise.all(updates);
+    const failures = results.filter(r => r.error).length;
+    if (failures > 0) {
+      toast.error(`Failed to update ${failures} user(s)`);
+    }
+    const succeeded = userIds.filter((_, i) => !results[i].error);
+    toast.success(`${succeeded.length} user(s) ${setToPro ? 'upgraded to Pro' : 'downgraded to Free'}`);
+    setUsers(prev => prev.map(u => succeeded.includes(u.id) ? { ...u, is_pro: setToPro } : u));
+    fetchStats();
+  };
+
   const toggleAd = (id: string) => {
     const updated = ads.map(a => a.id === id ? { ...a, enabled: !a.enabled } : a);
     saveAds(updated);
@@ -363,7 +378,7 @@ export default function Author() {
           </TabsContent>
 
           <TabsContent value="users" className="space-y-4">
-            <UserManagementTab users={users} onTogglePro={toggleUserPro} />
+            <UserManagementTab users={users} onTogglePro={toggleUserPro} onBulkToggle={bulkTogglePro} />
           </TabsContent>
 
           {/* Monetization Tab */}
