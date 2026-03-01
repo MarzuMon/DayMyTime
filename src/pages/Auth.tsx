@@ -82,7 +82,7 @@ export default function Auth() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <CalendarDays className="h-7 w-7 text-primary" />
-            <h1 className="font-display text-2xl font-bold">TimeWise</h1>
+            <h1 className="font-display text-2xl font-bold">Day My Time</h1>
           </div>
           <p className="text-sm text-muted-foreground">
             {isLogin ? 'Welcome back' : 'Create your account'}
