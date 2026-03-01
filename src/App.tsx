@@ -10,6 +10,8 @@ import Author from "./pages/Author";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
+import ProUpgrade from "./pages/ProUpgrade";
+import Teams from "./pages/Teams";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,7 +37,8 @@ const App = () => (
             <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/author" element={<ProtectedRoute><Author /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/pro" element={<ProtectedRoute><ProUpgrade /></ProtectedRoute>} />
+            <Route path="/teams" element={<ProtectedRoute><Teams /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

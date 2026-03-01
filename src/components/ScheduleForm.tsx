@@ -7,9 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { categoryConfig } from '@/lib/types';
-import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, Volume2, LayoutTemplate, Play } from 'lucide-react';
+import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, LayoutTemplate } from 'lucide-react';
 import { useAdminSetting } from '@/hooks/use-admin-settings';
-import { playAlarmTone } from '@/lib/alarmTones';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import AlarmToneSelector from '@/components/AlarmToneSelector';
 
 interface GlobalTemplate {
   id: string;
@@ -19,20 +21,6 @@ interface GlobalTemplate {
   description: string;
 }
 
-const ALARM_TONES = [
-  { value: 'default', label: '🔔 Default' },
-  { value: 'chime', label: '🎵 Chime' },
-  { value: 'bell', label: '🔕 Bell' },
-  { value: 'alarm', label: '⏰ Alarm' },
-  { value: 'gentle', label: '🌊 Gentle' },
-  { value: 'urgent', label: '🚨 Urgent' },
-  { value: 'melody', label: '🎶 Melody' },
-  { value: 'digital', label: '💻 Digital' },
-  { value: 'nature', label: '🌿 Nature' },
-  { value: 'piano', label: '🎹 Piano' },
-  { value: 'none', label: '🔇 Silent' },
-];
-
 interface ScheduleFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -41,6 +29,7 @@ interface ScheduleFormProps {
 }
 
 export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule }: ScheduleFormProps) {
+  const { user } = useAuth();
   const [title, setTitle] = useState(editSchedule?.title ?? '');
   const [description, setDescription] = useState(editSchedule?.description ?? '');
   const [scheduledTime, setScheduledTime] = useState(
@@ -53,8 +42,21 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
   const [category, setCategory] = useState<ScheduleCategory>(editSchedule?.category ?? 'meeting');
   const [repeatType, setRepeatType] = useState<RepeatType>(editSchedule?.repeatType ?? 'none');
   const [alarmTone, setAlarmTone] = useState<AlarmTone>(editSchedule?.alarmTone ?? 'default');
+  const [defaultToneLoaded, setDefaultToneLoaded] = useState(false);
 
   const { value: globalTemplates, loading: templatesLoading } = useAdminSetting<GlobalTemplate[]>('global_templates', []);
+
+  // Load user's default alarm tone for new schedules
+  useEffect(() => {
+    if (!open || editSchedule || defaultToneLoaded || !user) return;
+    supabase.from('profiles').select('default_alarm_tone').eq('id', user.id).single()
+      .then(({ data }) => {
+        if (data?.default_alarm_tone) {
+          setAlarmTone(data.default_alarm_tone as AlarmTone);
+        }
+        setDefaultToneLoaded(true);
+      });
+  }, [open, editSchedule, user, defaultToneLoaded]);
 
   // Reset form when editSchedule changes
   useEffect(() => {
@@ -70,7 +72,11 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       setMeetingLink(editSchedule?.meetingLink ?? '');
       setCategory(editSchedule?.category ?? 'meeting');
       setRepeatType(editSchedule?.repeatType ?? 'none');
-      setAlarmTone(editSchedule?.alarmTone ?? 'default');
+      if (editSchedule) {
+        setAlarmTone(editSchedule.alarmTone ?? 'default');
+      } else {
+        setDefaultToneLoaded(false); // trigger reload of default
+      }
     }
   }, [open, editSchedule]);
 
@@ -244,35 +250,8 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             </div>
           </div>
 
-          {/* Alarm Tone */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-medium">
-              <Volume2 className="h-3.5 w-3.5 text-muted-foreground" /> Alarm Tone
-            </Label>
-            <div className="flex gap-2">
-              <Select value={alarmTone} onValueChange={(v) => { setAlarmTone(v as AlarmTone); playAlarmTone(v); }}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ALARM_TONES.map(tone => (
-                    <SelectItem key={tone.value} value={tone.value}>
-                      {tone.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                onClick={() => playAlarmTone(alarmTone)}
-                title="Preview tone"
-              >
-                <Play className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          {/* Alarm Tone with Waveform */}
+          <AlarmToneSelector value={alarmTone} onChange={setAlarmTone} />
 
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>

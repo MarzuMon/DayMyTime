@@ -6,7 +6,7 @@ import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
 import { Button } from '@/components/ui/button';
-import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun } from 'lucide-react';
+import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users } from 'lucide-react';
 // useUserRole import kept for potential future use
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
 import heroPattern from '@/assets/hero-pattern.png';
@@ -143,6 +143,12 @@ const Index = () => {
               
               <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/teams')}>
+                <Users className="h-4 w-4 mr-1" /> Teams
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/pro')}>
+                <Crown className="h-4 w-4 mr-1" /> Pro
               </Button>
               <Button size="sm" variant="ghost" onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-1" /> Sign out

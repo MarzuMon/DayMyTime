@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, ArrowLeft, Camera, Save, Loader2 } from 'lucide-react';
+import { CalendarDays, ArrowLeft, Camera, Save, Loader2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import AlarmToneSelector from '@/components/AlarmToneSelector';
+import type { AlarmTone } from '@/lib/types';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -15,17 +17,21 @@ export default function Profile() {
 
   const [displayName, setDisplayName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [defaultAlarmTone, setDefaultAlarmTone] = useState<AlarmTone>('default');
+  const [isPro, setIsPro] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('profiles').select('display_name, avatar_url').eq('id', user.id).single()
+    supabase.from('profiles').select('display_name, avatar_url, default_alarm_tone, is_pro').eq('id', user.id).single()
       .then(({ data }) => {
         if (data) {
           setDisplayName(data.display_name || '');
           setAvatarUrl(data.avatar_url);
+          setDefaultAlarmTone((data.default_alarm_tone as AlarmTone) || 'default');
+          setIsPro(data.is_pro);
         }
         setLoading(false);
       });
@@ -52,7 +58,10 @@ export default function Profile() {
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({ display_name: displayName }).eq('id', user.id);
+    const { error } = await supabase.from('profiles').update({
+      display_name: displayName,
+      default_alarm_tone: defaultAlarmTone,
+    }).eq('id', user.id);
     if (error) {
       toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
     } else {
@@ -72,6 +81,11 @@ export default function Profile() {
           </Button>
           <CalendarDays className="h-5 w-5 text-primary" />
           <span className="font-display font-bold">My Profile</span>
+          {isPro && (
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-bold flex items-center gap-1">
+              <Crown className="h-3 w-3" /> PRO
+            </span>
+          )}
         </div>
       </nav>
 
@@ -106,10 +120,24 @@ export default function Profile() {
           <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" />
         </div>
 
+        {/* Default Alarm Tone */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Default Alarm Tone</label>
+          <p className="text-xs text-muted-foreground">This tone will be auto-selected for new schedules.</p>
+          <AlarmToneSelector value={defaultAlarmTone} onChange={setDefaultAlarmTone} showLabel={false} />
+        </div>
+
         <Button onClick={handleSave} disabled={saving} className="w-full">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
           Save Changes
         </Button>
+
+        {/* Pro Upgrade Link */}
+        {!isPro && (
+          <Button variant="outline" className="w-full" onClick={() => navigate('/pro')}>
+            <Crown className="h-4 w-4 mr-2 text-accent" /> Upgrade to Pro
+          </Button>
+        )}
       </main>
     </div>
   );
