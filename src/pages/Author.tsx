@@ -20,11 +20,12 @@ import {
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
   Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee,
-  Crown, TrendingUp, ShieldCheck
+  Crown, TrendingUp, ShieldCheck, MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import UserManagementTab from '@/components/author/UserManagementTab';
 import TemplateManagementTab from '@/components/author/TemplateManagementTab';
+import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 
 interface AdPlacement {
   id: string;
@@ -245,10 +246,11 @@ export default function Author() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="analytics"><BarChart3 className="h-4 w-4 mr-1.5" /> Analytics</TabsTrigger>
             <TabsTrigger value="pro-analytics"><Crown className="h-4 w-4 mr-1.5" /> Pro Stats</TabsTrigger>
             <TabsTrigger value="users"><Users className="h-4 w-4 mr-1.5" /> Users</TabsTrigger>
+            <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-1.5" /> Messages</TabsTrigger>
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
             <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
           </TabsList>
@@ -379,6 +381,10 @@ export default function Author() {
 
           <TabsContent value="users" className="space-y-4">
             <UserManagementTab users={users} onTogglePro={toggleUserPro} onBulkToggle={bulkTogglePro} />
+          </TabsContent>
+
+          <TabsContent value="messages" className="space-y-4">
+            <ContactMessagesTab />
           </TabsContent>
 
           {/* Monetization Tab */}
