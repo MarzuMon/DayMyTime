@@ -6,20 +6,38 @@ import { CalendarDays, Plus, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { ScheduleCategory, categoryConfig } from '@/lib/types';
 
 interface DailySlot {
   id: string;
   title: string;
-  time: string; // HH:mm
+  time: string;
   duration: number;
+  category: ScheduleCategory;
 }
 
-const DEFAULT_SLOTS: DailySlot[] = [];
+const categoryColors: Record<ScheduleCategory, string> = {
+  meeting: 'border-l-blue-500 bg-blue-500/5',
+  class: 'border-l-violet-500 bg-violet-500/5',
+  work: 'border-l-amber-500 bg-amber-500/5',
+  personal: 'border-l-emerald-500 bg-emerald-500/5',
+  exam: 'border-l-rose-500 bg-rose-500/5',
+  other: 'border-l-slate-400 bg-slate-400/5',
+};
+
+const categoryDotColors: Record<ScheduleCategory, string> = {
+  meeting: 'bg-blue-500',
+  class: 'bg-violet-500',
+  work: 'bg-amber-500',
+  personal: 'bg-emerald-500',
+  exam: 'bg-rose-500',
+  other: 'bg-slate-400',
+};
 
 export default function DailyScheduleSection() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [slots, setSlots] = useState<DailySlot[]>(DEFAULT_SLOTS);
+  const [slots, setSlots] = useState<DailySlot[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchSlots = useCallback(async () => {
@@ -54,6 +72,7 @@ export default function DailyScheduleSection() {
       title: '',
       time: '09:00',
       duration: 30,
+      category: 'personal',
     };
     saveSlots([...slots, newSlot]);
   };
@@ -80,7 +99,7 @@ export default function DailyScheduleSection() {
         title: slot.title,
         scheduled_time: scheduledTime,
         duration: slot.duration,
-        category: 'personal',
+        category: slot.category,
         repeat_type: 'none',
       });
     }
@@ -116,7 +135,10 @@ export default function DailyScheduleSection() {
       ) : (
         <div className="space-y-2">
           {slots.sort((a, b) => a.time.localeCompare(b.time)).map(slot => (
-            <div key={slot.id} className="flex items-center gap-2 p-3 rounded-xl border bg-card shadow-card">
+            <div
+              key={slot.id}
+              className={`flex items-center gap-2 p-3 rounded-xl border border-l-4 shadow-card transition-colors ${categoryColors[slot.category]}`}
+            >
               <input
                 type="time"
                 value={slot.time}
@@ -129,6 +151,16 @@ export default function DailyScheduleSection() {
                 placeholder="Task name..."
                 className="flex-1 h-8 text-sm"
               />
+              <select
+                value={slot.category}
+                onChange={e => updateSlot(slot.id, 'category', e.target.value)}
+                className="bg-secondary rounded-md px-2 py-1 text-sm border-0 appearance-none cursor-pointer"
+              >
+                {Object.entries(categoryConfig).map(([key, { label, emoji }]) => (
+                  <option key={key} value={key}>{emoji} {label}</option>
+                ))}
+              </select>
+              <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${categoryDotColors[slot.category]}`} />
               <div className="flex items-center gap-1 flex-shrink-0">
                 <input
                   type="number"
