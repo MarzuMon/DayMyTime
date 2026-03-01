@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
 import TeamTimetable from '@/components/TeamTimetable';
 import DailyScheduleSection from '@/components/DailyScheduleSection';
+import WeeklyTemplateView from '@/components/WeeklyTemplateView';
 
 type ViewMode = 'list' | 'timeline';
 
@@ -237,6 +238,9 @@ const Index = () => {
 
         {/* Daily Schedule Template */}
         <DailyScheduleSection />
+
+        {/* Weekly Template Plan */}
+        <WeeklyTemplateView />
 
         {/* Team Timetable */}
         <TeamTimetable />
