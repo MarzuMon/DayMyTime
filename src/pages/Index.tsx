@@ -7,6 +7,7 @@ import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
 import { Button } from '@/components/ui/button';
 import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun } from 'lucide-react';
+// useUserRole import kept for potential future use
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
 import heroPattern from '@/assets/hero-pattern.png';
 import { useToast } from '@/hooks/use-toast';
@@ -139,11 +140,7 @@ const Index = () => {
               <Button size="sm" variant="ghost" onClick={toggleTheme}>
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              {isAdmin && (
-                <Button size="sm" variant="ghost" onClick={() => navigate('/author')}>
-                  <LayoutList className="h-4 w-4 mr-1" /> Author
-                </Button>
-              )}
+              
               <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
               </Button>

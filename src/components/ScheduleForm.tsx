@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Schedule, ScheduleCategory, detectMeetingPlatform, RepeatType } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { categoryConfig } from '@/lib/types';
-import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw } from 'lucide-react';
+import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, Volume2, LayoutTemplate } from 'lucide-react';
+import { useAdminSetting } from '@/hooks/use-admin-settings';
+
+interface GlobalTemplate {
+  id: string;
+  name: string;
+  category: string;
+  duration: number;
+  description: string;
+}
+
+const ALARM_TONES = [
+  { value: 'default', label: '🔔 Default' },
+  { value: 'chime', label: '🎵 Chime' },
+  { value: 'bell', label: '🔕 Bell' },
+  { value: 'alarm', label: '⏰ Alarm' },
+  { value: 'gentle', label: '🌊 Gentle' },
+  { value: 'urgent', label: '🚨 Urgent' },
+  { value: 'none', label: '🔇 Silent' },
+];
 
 interface ScheduleFormProps {
   open: boolean;
@@ -28,6 +47,36 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
   const [meetingLink, setMeetingLink] = useState(editSchedule?.meetingLink ?? '');
   const [category, setCategory] = useState<ScheduleCategory>(editSchedule?.category ?? 'meeting');
   const [repeatType, setRepeatType] = useState<RepeatType>(editSchedule?.repeatType ?? 'none');
+  const [alarmTone, setAlarmTone] = useState('default');
+
+  const { value: globalTemplates, loading: templatesLoading } = useAdminSetting<GlobalTemplate[]>('global_templates', []);
+
+  // Reset form when editSchedule changes
+  useEffect(() => {
+    if (open) {
+      setTitle(editSchedule?.title ?? '');
+      setDescription(editSchedule?.description ?? '');
+      setScheduledTime(
+        editSchedule?.scheduledTime
+          ? new Date(editSchedule.scheduledTime).toISOString().slice(0, 16)
+          : ''
+      );
+      setDuration(editSchedule?.duration?.toString() ?? '30');
+      setMeetingLink(editSchedule?.meetingLink ?? '');
+      setCategory(editSchedule?.category ?? 'meeting');
+      setRepeatType(editSchedule?.repeatType ?? 'none');
+      setAlarmTone('default');
+    }
+  }, [open, editSchedule]);
+
+  const applyTemplate = (templateId: string) => {
+    const t = globalTemplates.find(t => t.id === templateId);
+    if (!t) return;
+    setTitle(t.name);
+    setDescription(t.description);
+    setDuration(t.duration.toString());
+    setCategory((t.category as ScheduleCategory) || 'other');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,14 +98,6 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
 
     onSave(schedule);
     onOpenChange(false);
-    // Reset
-    setTitle('');
-    setDescription('');
-    setScheduledTime('');
-    setDuration('30');
-    setMeetingLink('');
-    setCategory('meeting');
-    setRepeatType('none');
   };
 
   return (
@@ -68,6 +109,27 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Template Selector */}
+          {!editSchedule && !templatesLoading && globalTemplates.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium">
+                <LayoutTemplate className="h-3.5 w-3.5 text-muted-foreground" /> Use Template
+              </Label>
+              <Select onValueChange={applyTemplate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a template..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {globalTemplates.map(t => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name} ({t.duration} min)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="title" className="flex items-center gap-2 text-sm font-medium">
               <Type className="h-3.5 w-3.5 text-muted-foreground" /> Title
@@ -174,6 +236,25 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Alarm Tone */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <Volume2 className="h-3.5 w-3.5 text-muted-foreground" /> Alarm Tone
+            </Label>
+            <Select value={alarmTone} onValueChange={setAlarmTone}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ALARM_TONES.map(tone => (
+                  <SelectItem key={tone.value} value={tone.value}>
+                    {tone.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex gap-2 pt-2">
