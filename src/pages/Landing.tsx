@@ -52,7 +52,7 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5 text-primary" />
-            <span className="font-display font-bold text-lg">TimeWise</span>
+            <span className="font-display font-bold text-lg">Day My Time</span>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} title="Toggle theme">
@@ -211,7 +211,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="max-w-5xl mx-auto px-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span>© 2026 TimeWise</span>
+          <span>© 2026 Day My Time</span>
           <span>Simple • Visual • Meeting-ready</span>
         </div>
       </footer>
