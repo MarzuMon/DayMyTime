@@ -137,6 +137,9 @@ const Index = () => {
               <Button size="sm" variant="ghost" onClick={toggleTheme}>
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/author')}>
+                <LayoutList className="h-4 w-4 mr-1" /> Author
+              </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
               </Button>
