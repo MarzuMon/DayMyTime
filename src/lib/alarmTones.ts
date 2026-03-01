@@ -1,13 +1,13 @@
 // Web Audio API tone generator for alarm previews
 const audioCtx = () => new (window.AudioContext || (window as any).webkitAudioContext)();
 
-type ToneType = 'default' | 'chime' | 'bell' | 'alarm' | 'gentle' | 'urgent' | 'none';
+type ToneType = 'default' | 'chime' | 'bell' | 'alarm' | 'gentle' | 'urgent' | 'melody' | 'digital' | 'nature' | 'piano' | 'none';
 
 interface ToneConfig {
   frequencies: number[];
   duration: number;
   type: OscillatorType;
-  pattern: 'single' | 'repeat' | 'ascending';
+  pattern: 'single' | 'repeat' | 'ascending' | 'descending' | 'arpeggio';
   gain: number;
 }
 
@@ -18,13 +18,16 @@ const TONE_CONFIGS: Record<ToneType, ToneConfig> = {
   alarm: { frequencies: [800, 600], duration: 0.12, type: 'square', pattern: 'repeat', gain: 0.15 },
   gentle: { frequencies: [396, 528], duration: 0.5, type: 'sine', pattern: 'ascending', gain: 0.15 },
   urgent: { frequencies: [1000, 700, 1000, 700], duration: 0.08, type: 'sawtooth', pattern: 'repeat', gain: 0.12 },
+  melody: { frequencies: [523, 587, 659, 784, 880], duration: 0.2, type: 'sine', pattern: 'arpeggio', gain: 0.25 },
+  digital: { frequencies: [1200, 900, 1200], duration: 0.06, type: 'square', pattern: 'repeat', gain: 0.1 },
+  nature: { frequencies: [320, 400, 480, 520], duration: 0.35, type: 'sine', pattern: 'descending', gain: 0.18 },
+  piano: { frequencies: [262, 330, 392, 523], duration: 0.3, type: 'triangle', pattern: 'arpeggio', gain: 0.22 },
   none: { frequencies: [], duration: 0, type: 'sine', pattern: 'single', gain: 0 },
 };
 
 let currentSource: { stop: () => void } | null = null;
 
 export function playAlarmTone(tone: string): void {
-  // Stop any currently playing tone
   stopAlarmTone();
 
   const config = TONE_CONFIGS[tone as ToneType];
@@ -45,16 +48,29 @@ export function playAlarmTone(tone: string): void {
       osc.frequency.value = freq;
       osc.connect(gainNode);
 
-      const startTime = time + i * (config.duration + 0.05);
+      const gap = config.pattern === 'arpeggio' ? 0.12 : 0.05;
+      const startTime = time + i * (config.duration + gap);
       const endTime = startTime + config.duration;
+
+      // Add vibrato for nature tone
+      if (tone === 'nature') {
+        const vibrato = ctx.createOscillator();
+        const vibratoGain = ctx.createGain();
+        vibrato.frequency.value = 5;
+        vibratoGain.gain.value = 8;
+        vibrato.connect(vibratoGain);
+        vibratoGain.connect(osc.frequency);
+        vibrato.start(startTime);
+        vibrato.stop(endTime);
+      }
 
       osc.start(startTime);
       osc.stop(endTime);
       oscillators.push(osc);
     });
 
-    // Fade out the gain at the end
-    const totalDuration = config.frequencies.length * (config.duration + 0.05);
+    const gap = config.pattern === 'arpeggio' ? 0.12 : 0.05;
+    const totalDuration = config.frequencies.length * (config.duration + gap);
     gainNode.gain.setValueAtTime(config.gain, time + totalDuration - 0.1);
     gainNode.gain.linearRampToValueAtTime(0, time + totalDuration + 0.1);
 
@@ -65,7 +81,6 @@ export function playAlarmTone(tone: string): void {
       }
     };
 
-    // Auto-cleanup
     setTimeout(() => {
       currentSource = null;
       try { ctx.close(); } catch {}

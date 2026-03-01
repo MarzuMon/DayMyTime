@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Schedule, ScheduleCategory, detectMeetingPlatform, RepeatType } from '@/lib/types';
+import { Schedule, ScheduleCategory, detectMeetingPlatform, RepeatType, AlarmTone } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,10 @@ const ALARM_TONES = [
   { value: 'alarm', label: '⏰ Alarm' },
   { value: 'gentle', label: '🌊 Gentle' },
   { value: 'urgent', label: '🚨 Urgent' },
+  { value: 'melody', label: '🎶 Melody' },
+  { value: 'digital', label: '💻 Digital' },
+  { value: 'nature', label: '🌿 Nature' },
+  { value: 'piano', label: '🎹 Piano' },
   { value: 'none', label: '🔇 Silent' },
 ];
 
@@ -48,7 +52,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
   const [meetingLink, setMeetingLink] = useState(editSchedule?.meetingLink ?? '');
   const [category, setCategory] = useState<ScheduleCategory>(editSchedule?.category ?? 'meeting');
   const [repeatType, setRepeatType] = useState<RepeatType>(editSchedule?.repeatType ?? 'none');
-  const [alarmTone, setAlarmTone] = useState('default');
+  const [alarmTone, setAlarmTone] = useState<AlarmTone>(editSchedule?.alarmTone ?? 'default');
 
   const { value: globalTemplates, loading: templatesLoading } = useAdminSetting<GlobalTemplate[]>('global_templates', []);
 
@@ -66,7 +70,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       setMeetingLink(editSchedule?.meetingLink ?? '');
       setCategory(editSchedule?.category ?? 'meeting');
       setRepeatType(editSchedule?.repeatType ?? 'none');
-      setAlarmTone('default');
+      setAlarmTone(editSchedule?.alarmTone ?? 'default');
     }
   }, [open, editSchedule]);
 
@@ -93,6 +97,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       meetingPlatform: meetingLink.trim() ? detectMeetingPlatform(meetingLink.trim()) : undefined,
       category,
       repeatType,
+      alarmTone,
       isCompleted: editSchedule?.isCompleted ?? false,
       createdAt: editSchedule?.createdAt ?? new Date().toISOString(),
     };
@@ -245,7 +250,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
               <Volume2 className="h-3.5 w-3.5 text-muted-foreground" /> Alarm Tone
             </Label>
             <div className="flex gap-2">
-              <Select value={alarmTone} onValueChange={(v) => { setAlarmTone(v); playAlarmTone(v); }}>
+              <Select value={alarmTone} onValueChange={(v) => { setAlarmTone(v as AlarmTone); playAlarmTone(v); }}>
                 <SelectTrigger className="flex-1">
                   <SelectValue />
                 </SelectTrigger>
