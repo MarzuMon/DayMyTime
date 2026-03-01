@@ -14,14 +14,15 @@ import {
   ChartContainer, ChartTooltip, ChartTooltipContent
 } from '@/components/ui/chart';
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, ResponsiveContainer
+  BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 import {
-  ArrowLeft, Sun, Moon, Users, CalendarDays, BarChart3,
+  ArrowLeft, Sun, Moon, Users, BarChart3,
   Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee,
   Crown, TrendingUp, ShieldCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AdPlacement {
   id: string;
@@ -68,7 +69,7 @@ export default function Author() {
   const { value: adsense, save: saveAdsense, loading: adsenseLoading } = useAdminSetting<{ enabled: boolean; publisherId: string }>('adsense', { enabled: false, publisherId: '' });
   const { value: bankDetails, save: saveBankDetails, loading: bankLoading } = useAdminSetting<{ holder: string; account: string; ifsc: string; upi: string }>('bank_details', { holder: '', account: '', ifsc: '', upi: '' });
 
-  const [stats, setStats] = useState({ totalUsers: 0, totalSchedules: 0, proUsers: 0 });
+  const [stats, setStats] = useState({ totalUsers: 0, proUsers: 0 });
   const [users, setUsers] = useState<{ id: string; display_name: string; is_pro: boolean; created_at: string }[]>([]);
   const [signupChartData, setSignupChartData] = useState<{ day: string; count: number }[]>([]);
 
@@ -86,37 +87,39 @@ export default function Author() {
   }, [isAdmin]);
 
   const fetchStats = async () => {
-    const [schedulesRes, profilesRes] = await Promise.all([
-      supabase.from('schedules').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id, is_pro, created_at'),
-    ]);
-    const profiles = profilesRes.data || [];
-    const proCount = profiles.filter(p => p.is_pro).length;
+    const { data: profiles } = await supabase.from('profiles').select('id, is_pro, created_at');
+    const allProfiles = profiles || [];
+    const proCount = allProfiles.filter(p => p.is_pro).length;
 
-    // Build signup chart (last 7 days)
     const days: { day: string; count: number }[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const label = d.toLocaleDateString('en-US', { weekday: 'short' });
-      const count = profiles.filter(p => {
-        const cd = new Date(p.created_at);
-        return cd.toDateString() === d.toDateString();
-      }).length;
+      const count = allProfiles.filter(p => new Date(p.created_at).toDateString() === d.toDateString()).length;
       days.push({ day: label, count });
     }
     setSignupChartData(days);
-
-    setStats({
-      totalUsers: profilesRes.data?.length || 0,
-      totalSchedules: schedulesRes.count || 0,
-      proUsers: proCount,
-    });
+    setStats({ totalUsers: allProfiles.length, proUsers: proCount });
   };
 
   const fetchUsers = async () => {
     const { data } = await supabase.from('profiles').select('id, display_name, is_pro, created_at').order('created_at', { ascending: false }).limit(50);
     if (data) setUsers(data);
+  };
+
+  const toggleUserPro = async (userId: string, currentStatus: boolean) => {
+    const { error } = await supabase.from('profiles').update({ is_pro: !currentStatus }).eq('id', userId);
+    if (error) {
+      toast.error('Failed to update user status');
+      return;
+    }
+    toast.success(`User ${currentStatus ? 'downgraded to Free' : 'upgraded to Pro'}`);
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_pro: !currentStatus } : u));
+    setStats(prev => ({
+      ...prev,
+      proUsers: currentStatus ? prev.proUsers - 1 : prev.proUsers + 1,
+    }));
   };
 
   const toggleAd = (id: string) => {
@@ -153,6 +156,12 @@ export default function Author() {
     free: { label: 'Free Users', color: 'hsl(var(--muted))' },
   };
 
+  // Monetization analytics
+  const monthlyMRR = stats.proUsers * pricing.monthly;
+  const annualARR = stats.proUsers * pricing.yearly;
+  const enabledAdsCount = ads.filter(a => a.enabled).length;
+  const enabledFeaturesCount = proFeatures.filter(f => f.enabled).length;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -177,7 +186,7 @@ export default function Author() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6">
-        {/* Stats Overview */}
+        {/* Stats Overview — removed Total Schedules, added Monetization */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="flex items-center gap-3 pt-6">
@@ -185,15 +194,6 @@ export default function Author() {
               <div>
                 <p className="text-2xl font-bold">{stats.totalUsers}</p>
                 <p className="text-sm text-muted-foreground">Total Users</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center gap-3 pt-6">
-              <CalendarDays className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-2xl font-bold">{stats.totalSchedules}</p>
-                <p className="text-sm text-muted-foreground">Total Schedules</p>
               </div>
             </CardContent>
           </Card>
@@ -215,6 +215,15 @@ export default function Author() {
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <IndianRupee className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">₹{monthlyMRR.toLocaleString('en-IN')}</p>
+                <p className="text-sm text-muted-foreground">Monthly MRR</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Tabs */}
@@ -230,7 +239,6 @@ export default function Author() {
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Signups Bar Chart */}
               <Card>
                 <CardHeader>
                   <CardTitle>Signups (Last 7 Days)</CardTitle>
@@ -249,7 +257,6 @@ export default function Author() {
                 </CardContent>
               </Card>
 
-              {/* Overview Stats */}
               <Card>
                 <CardHeader>
                   <CardTitle>Quick Stats</CardTitle>
@@ -266,14 +273,12 @@ export default function Author() {
                       <p className="text-xl font-bold">{proConversion}%</p>
                     </div>
                     <div className="p-4 rounded-lg bg-secondary">
-                      <p className="text-sm text-muted-foreground">Avg schedules/user</p>
-                      <p className="text-xl font-bold">
-                        {stats.totalUsers > 0 ? (stats.totalSchedules / stats.totalUsers).toFixed(1) : '0'}
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-secondary">
                       <p className="text-sm text-muted-foreground">Free users</p>
                       <p className="text-xl font-bold">{freeUsers}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Active ads</p>
+                      <p className="text-xl font-bold">{enabledAdsCount}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -284,7 +289,6 @@ export default function Author() {
           {/* Pro Analytics Tab */}
           <TabsContent value="pro-analytics" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Pro vs Free Pie Chart */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Crown className="h-4 w-4" /> Pro vs Free Users</CardTitle>
@@ -313,21 +317,28 @@ export default function Author() {
                 </CardContent>
               </Card>
 
-              {/* Pro Revenue Estimate */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Revenue Estimate</CardTitle>
-                  <CardDescription>Based on current pro users & pricing</CardDescription>
+                  <CardTitle className="flex items-center gap-2"><IndianRupee className="h-4 w-4" /> Revenue & Monetization</CardTitle>
+                  <CardDescription>Revenue estimates & monetization overview</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-lg bg-secondary">
                       <p className="text-sm text-muted-foreground">Monthly MRR</p>
-                      <p className="text-xl font-bold">₹{(stats.proUsers * pricing.monthly).toLocaleString('en-IN')}</p>
+                      <p className="text-xl font-bold">₹{monthlyMRR.toLocaleString('en-IN')}</p>
                     </div>
                     <div className="p-4 rounded-lg bg-secondary">
                       <p className="text-sm text-muted-foreground">Annual ARR</p>
-                      <p className="text-xl font-bold">₹{(stats.proUsers * pricing.yearly).toLocaleString('en-IN')}</p>
+                      <p className="text-xl font-bold">₹{annualARR.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Active Ad Placements</p>
+                      <p className="text-xl font-bold">{enabledAdsCount} / {ads.length}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <p className="text-sm text-muted-foreground">Enabled Pro Features</p>
+                      <p className="text-xl font-bold">{enabledFeaturesCount} / {proFeatures.length}</p>
                     </div>
                   </div>
                   <div className="p-4 rounded-lg bg-secondary">
@@ -349,12 +360,12 @@ export default function Author() {
             </div>
           </TabsContent>
 
-          {/* Users Tab */}
+          {/* Users Tab with Pro Toggle */}
           <TabsContent value="users" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>User Management</CardTitle>
-                <CardDescription>Recent users ({users.length})</CardDescription>
+                <CardDescription>Recent users ({users.length}) — toggle Pro status</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -366,9 +377,15 @@ export default function Author() {
                           Joined {new Date(u.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${u.is_pro ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                        {u.is_pro ? 'Pro' : 'Free'}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${u.is_pro ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                          {u.is_pro ? 'Pro' : 'Free'}
+                        </span>
+                        <Switch
+                          checked={u.is_pro}
+                          onCheckedChange={() => toggleUserPro(u.id, u.is_pro)}
+                        />
+                      </div>
                     </div>
                   ))}
                   {users.length === 0 && (
