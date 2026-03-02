@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CalendarDays, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +53,26 @@ export default function Auth() {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get('ref');
+
+  // Track referral after successful signup
+  const trackReferral = async (userId: string) => {
+    if (!refCode) return;
+    try {
+      const { data: codeData } = await supabase
+        .from('referral_codes')
+        .select('id')
+        .eq('code', refCode)
+        .maybeSingle();
+      if (codeData) {
+        await supabase.from('referral_signups').insert({
+          referral_code_id: codeData.id,
+          referred_user_id: userId,
+        });
+      }
+    } catch {}
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,9 +83,20 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
       } else {
+        // Track referral on first login if ref code was stored
+        const storedRef = localStorage.getItem('dmt_ref');
+        if (storedRef) {
+          const { data: { user: loggedUser } } = await supabase.auth.getUser();
+          if (loggedUser) {
+            await trackReferral(loggedUser.id);
+            localStorage.removeItem('dmt_ref');
+          }
+        }
         navigate('/app');
       }
     } else {
+      // Store ref code for after email confirmation
+      if (refCode) localStorage.setItem('dmt_ref', refCode);
       const { error } = await signUp(email, password, displayName);
       if (error) {
         toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
