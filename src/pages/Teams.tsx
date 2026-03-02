@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, Users, Plus, Trash2, UserPlus, Loader2, Mail, Palette, Copy, Check, Eye, Pencil } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Users, Plus, Trash2, UserPlus, Loader2, Mail, Palette, Copy, Check, Eye, Pencil, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -53,6 +53,7 @@ export default function Teams() {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const [editingBrand, setEditingBrand] = useState(false);
   const [brandColor, setBrandColor] = useState('#6366f1');
+  const [generatingLink, setGeneratingLink] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -150,7 +151,29 @@ export default function Teams() {
     const url = `${window.location.origin}/accept-invite?token=${token}`;
     await navigator.clipboard.writeText(url);
     setCopiedLink(token);
+    toast({ title: 'Link copied to clipboard!' });
     setTimeout(() => setCopiedLink(null), 2000);
+  };
+
+  const handleGenerateLink = async () => {
+    if (!selectedTeam || !user) return;
+    setGeneratingLink(true);
+    const { data, error } = await supabase.functions.invoke('generate-invite-link', {
+      body: { teamId: selectedTeam.id },
+    });
+    if (error || data?.error) {
+      toast({ title: 'Failed', description: data?.error || error?.message, variant: 'destructive' });
+    } else {
+      const inviteUrl = `${window.location.origin}/accept-invite?token=${data.token}`;
+      try {
+        await navigator.clipboard.writeText(inviteUrl);
+        toast({ title: 'Invite link generated & copied!', description: 'Share this link with anyone to join your team.' });
+      } catch {
+        toast({ title: 'Invite link generated!', description: inviteUrl });
+      }
+      loadMembers(selectedTeam);
+    }
+    setGeneratingLink(false);
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -336,19 +359,31 @@ export default function Teams() {
                   </div>
                 )}
 
-                {/* Invite Input */}
+                {/* Invite Controls */}
                 {selectedTeam.owner_id === user?.id && (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Member email..."
-                      type="email"
-                      value={inviteEmail}
-                      onChange={e => setInviteEmail(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button size="sm" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
-                      {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4 mr-1" />}
-                      Invite
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Member email..."
+                        type="email"
+                        value={inviteEmail}
+                        onChange={e => setInviteEmail(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button size="sm" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+                        {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4 mr-1" />}
+                        Invite
+                      </Button>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleGenerateLink}
+                      disabled={generatingLink}
+                    >
+                      {generatingLink ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Link2 className="h-4 w-4 mr-1" />}
+                      Generate Invite Link (No Email Required)
                     </Button>
                   </div>
                 )}

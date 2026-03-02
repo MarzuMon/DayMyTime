@@ -52,8 +52,8 @@ export default function Landing() {
       <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
-            <span className="font-display font-bold text-lg">Day My Time</span>
+            <img src="/pwa-512.png" alt="DayMyTime" className="h-7 w-7 rounded-md" />
+            <span className="font-display font-bold text-lg">DayMyTime</span>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} title="Toggle theme">
@@ -215,7 +215,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <span>© 2026 Day My Time</span>
+          <span>© 2026 DayMyTime</span>
           <div className="flex items-center gap-4">
             <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
