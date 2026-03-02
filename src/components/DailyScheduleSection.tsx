@@ -238,7 +238,7 @@ export default function DailyScheduleSection() {
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-display font-semibold text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-          <CalendarDays className="h-4 w-4" /> Daily Schedule Templates
+          <CalendarDays className="h-4 w-4" /> Today Schedules
         </h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={addSlot}>
