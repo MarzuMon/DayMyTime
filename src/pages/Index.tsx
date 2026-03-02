@@ -184,7 +184,7 @@ const Index = () => {
         {/* Filters + View Toggle */}
         <div>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 flex-wrap flex-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto flex-1 scrollbar-hide">
               <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <button
                 onClick={() => setFilterCategory('all')}
