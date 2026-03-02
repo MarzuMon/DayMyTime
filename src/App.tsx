@@ -15,6 +15,7 @@ import Teams from "./pages/Teams";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Contact from "./pages/Contact";
+import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/accept-invite" element={<AcceptInvite />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
