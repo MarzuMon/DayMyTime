@@ -11,18 +11,56 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { teamId, email, invitedBy } = await req.json()
-
-    if (!teamId || !email || !invitedBy) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
-        status: 400,
+    // Validate JWT
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+
+    // Create anon client to verify the user's JWT
+    const anonClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    })
+    const { data: { user }, error: userError } = await anonClient.auth.getUser()
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const userId = user.id
+    const { teamId, email } = await req.json()
+
+    if (!teamId || !email) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const supabase = createClient(supabaseUrl, serviceRoleKey)
+
+    // Verify caller is the team owner
+    const { data: team } = await supabase
+      .from('teams')
+      .select('owner_id, name')
+      .eq('id', teamId)
+      .single()
+
+    if (!team || team.owner_id !== userId) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
     // Check if invitation already exists
     const { data: existing } = await supabase
@@ -44,33 +82,29 @@ Deno.serve(async (req) => {
       await supabase.from('team_invitations').delete().eq('id', existing.id)
     }
 
-    // Get team name for the email
-    const { data: team } = await supabase.from('teams').select('name').eq('id', teamId).single()
-
     // Get inviter name
-    const { data: inviter } = await supabase.from('profiles').select('display_name').eq('id', invitedBy).single()
+    const { data: inviter } = await supabase.from('profiles').select('display_name').eq('id', userId).single()
 
-    // Create invitation
+    // Create invitation using authenticated user ID as invited_by
     const { data: invitation, error: inviteError } = await supabase
       .from('team_invitations')
-      .insert({ team_id: teamId, email, invited_by: invitedBy })
+      .insert({ team_id: teamId, email, invited_by: userId })
       .select()
       .single()
 
     if (inviteError) {
-      return new Response(JSON.stringify({ error: inviteError.message }), {
+      return new Response(JSON.stringify({ error: 'Failed to create invitation' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // For now, return success with the token (email sending can be added with Resend later)
     return new Response(JSON.stringify({ 
       success: true, 
       invitation: {
         id: invitation.id,
         token: invitation.token,
-        team_name: team?.name || 'Unknown Team',
+        team_name: team.name || 'Unknown Team',
         inviter_name: inviter?.display_name || 'Someone',
       }
     }), {
@@ -78,7 +112,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: 'Internal error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
