@@ -104,17 +104,8 @@ export default function Teams() {
 
   const handleInvite = async () => {
     if (!selectedTeam || !inviteEmail.trim()) return;
-    setInviting(true);
-    
-    // Find user by email - we need to look up via auth, but we'll search profiles
-    // Since we can't query auth.users, we'll use a workaround
-    const { data: profiles } = await supabase.from('profiles').select('id, display_name');
-    
-    // For now, show a message that the user needs to share their user ID
-    // In production, you'd use an edge function to look up by email
-    toast({ title: 'Invite sent', description: `Invitation will be sent to ${inviteEmail.trim()}` });
+    toast({ title: 'Coming Soon', description: 'Team invitations via email are not yet available. Please share the app link directly.', variant: 'default' });
     setInviteEmail('');
-    setInviting(false);
   };
 
   const handleRemoveMember = async (memberId: string) => {
