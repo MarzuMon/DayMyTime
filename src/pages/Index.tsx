@@ -147,9 +147,6 @@ const Index = () => {
               <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => navigate('/teams')}>
-                <Users className="h-4 w-4 mr-1" /> Teams
-              </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/pro')}>
                 <Crown className="h-4 w-4 mr-1" /> Pro
               </Button>
@@ -234,6 +231,15 @@ const Index = () => {
 
         {/* Daily Schedule */}
         <DailyScheduleSection />
+
+        {/* Teams shortcut */}
+        <div
+          onClick={() => navigate('/teams')}
+          className="flex items-center gap-2 p-3 rounded-lg bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors"
+        >
+          <Users className="h-5 w-5 text-primary" />
+          <span className="font-medium text-sm text-foreground">Teams</span>
+        </div>
 
         {filtered.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
