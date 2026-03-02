@@ -20,12 +20,14 @@ import {
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
   Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee,
-  Crown, TrendingUp, ShieldCheck, MessageSquare
+  Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift
 } from 'lucide-react';
 import { toast } from 'sonner';
 import UserManagementTab from '@/components/author/UserManagementTab';
 import TemplateManagementTab from '@/components/author/TemplateManagementTab';
 import ContactMessagesTab from '@/components/author/ContactMessagesTab';
+import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
+import PromotionManagementTab from '@/components/author/PromotionManagementTab';
 
 interface AdPlacement {
   id: string;
@@ -246,11 +248,13 @@ export default function Author() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="flex flex-wrap w-full gap-1">
             <TabsTrigger value="analytics"><BarChart3 className="h-4 w-4 mr-1.5" /> Analytics</TabsTrigger>
             <TabsTrigger value="pro-analytics"><Crown className="h-4 w-4 mr-1.5" /> Pro Stats</TabsTrigger>
             <TabsTrigger value="users"><Users className="h-4 w-4 mr-1.5" /> Users</TabsTrigger>
             <TabsTrigger value="messages"><MessageSquare className="h-4 w-4 mr-1.5" /> Messages</TabsTrigger>
+            <TabsTrigger value="referrals"><Trophy className="h-4 w-4 mr-1.5" /> Referrals</TabsTrigger>
+            <TabsTrigger value="promotions"><Gift className="h-4 w-4 mr-1.5" /> Promos</TabsTrigger>
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
             <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
           </TabsList>
@@ -484,6 +488,14 @@ export default function Author() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="referrals" className="space-y-4">
+            <ReferralLeaderboardTab />
+          </TabsContent>
+
+          <TabsContent value="promotions" className="space-y-4">
+            <PromotionManagementTab />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">
