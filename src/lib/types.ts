@@ -31,12 +31,12 @@ export function detectMeetingPlatform(url: string): MeetingPlatform {
 }
 
 export const categoryConfig: Record<ScheduleCategory, { label: string; emoji: string }> = {
+  personal: { label: 'Personal', emoji: '🏠' },
   meeting: { label: 'Meeting', emoji: '🤝' },
   class: { label: 'Class', emoji: '📚' },
   work: { label: 'Work', emoji: '💼' },
   exam: { label: 'Exam', emoji: '📝' },
   other: { label: 'Other', emoji: '📌' },
-  personal: { label: 'Personal', emoji: '🏠' },
 };
 
 export const platformConfig: Record<MeetingPlatform, { label: string; colorClass: string }> = {
