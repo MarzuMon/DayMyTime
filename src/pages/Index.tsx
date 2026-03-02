@@ -17,7 +17,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
 import TeamTimetable from '@/components/TeamTimetable';
 import DailyScheduleSection from '@/components/DailyScheduleSection';
-import WeeklyTemplateView from '@/components/WeeklyTemplateView';
+import WeeklyPlanView from '@/components/WeeklyPlanView';
 import AdBanner from '@/components/AdBanner';
 import ReferralSection from '@/components/ReferralSection';
 import InstallPrompt from '@/components/InstallPrompt';
@@ -229,11 +229,14 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Weekly Template Plan */}
-        <WeeklyTemplateView />
+        {/* Weekly Plan */}
+        <WeeklyPlanView />
 
         {/* Daily Schedule */}
         <DailyScheduleSection />
+
+        {/* Team Timetable - right after today's schedules */}
+        <TeamTimetable />
 
         {filtered.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
@@ -261,8 +264,6 @@ const Index = () => {
         {/* Ad Banner for free users */}
         <AdBanner />
 
-        {/* Team Timetable */}
-        <TeamTimetable />
       </main>
 
       {/* PWA Install Prompt */}

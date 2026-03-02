@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, Users, Plus, Trash2, UserPlus, Crown, Loader2, Mail, Palette, Copy, Check } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Users, Plus, Trash2, UserPlus, Loader2, Mail, Palette, Copy, Check, Eye, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -38,7 +38,7 @@ export default function Teams() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [isPro, setIsPro] = useState(false);
+  
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState('');
@@ -61,8 +61,6 @@ export default function Teams() {
 
   const loadData = async () => {
     if (!user) return;
-    const { data: profile } = await supabase.from('profiles').select('is_pro').eq('id', user.id).single();
-    setIsPro(profile?.is_pro ?? false);
 
     const { data: ownedTeams } = await supabase.from('teams').select('*').eq('owner_id', user.id);
     const { data: memberEntries } = await supabase.from('team_members').select('team_id').eq('user_id', user.id);
@@ -161,6 +159,13 @@ export default function Teams() {
     toast({ title: 'Member removed' });
   };
 
+  const handleToggleMemberRole = async (memberId: string, currentRole: string) => {
+    const newRole = currentRole === 'editor' ? 'viewer' : 'editor';
+    await supabase.from('team_members').update({ role: newRole }).eq('id', memberId);
+    if (selectedTeam) loadMembers(selectedTeam);
+    toast({ title: `Member set to ${newRole}` });
+  };
+
   const handleDeleteTeam = async (teamId: string) => {
     await supabase.from('team_members').delete().eq('team_id', teamId);
     await supabase.from('team_invitations').delete().eq('team_id', teamId);
@@ -190,26 +195,10 @@ export default function Teams() {
           </Button>
           <CalendarDays className="h-5 w-5 text-primary" />
           <span className="font-display font-bold">Team Workspaces</span>
-          {isPro && (
-            <span className="ml-auto px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-bold flex items-center gap-1">
-              <Crown className="h-3 w-3" /> PRO
-            </span>
-          )}
         </div>
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 py-10 space-y-6">
-        {!isPro ? (
-          <div className="text-center py-16 space-y-4">
-            <Crown className="h-16 w-16 text-accent/40 mx-auto" />
-            <h2 className="font-display text-xl font-bold">Pro Feature</h2>
-            <p className="text-muted-foreground text-sm">Team workspaces are available for Pro members.</p>
-            <Button onClick={() => navigate('/pro')}>
-              <Crown className="h-4 w-4 mr-2" /> Upgrade to Pro
-            </Button>
-          </div>
-        ) : (
-          <>
             <div className="flex items-center justify-between">
               <h2 className="font-display font-semibold">Your Teams</h2>
               <Button size="sm" onClick={() => setCreateOpen(true)}>
@@ -303,9 +292,24 @@ export default function Teams() {
                         <p className="text-[10px] text-muted-foreground uppercase">{m.role}</p>
                       </div>
                       {selectedTeam.owner_id === user?.id && m.user_id !== user?.id && (
-                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => handleRemoveMember(m.id)}>
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => handleToggleMemberRole(m.id, m.role)}
+                            title={m.role === 'editor' ? 'Switch to view-only' : 'Allow editing'}
+                          >
+                            {m.role === 'editor' ? (
+                              <><Pencil className="h-3 w-3 mr-1" /> Editor</>
+                            ) : (
+                              <><Eye className="h-3 w-3 mr-1" /> Viewer</>
+                            )}
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => handleRemoveMember(m.id)}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -350,8 +354,6 @@ export default function Teams() {
                 )}
               </div>
             )}
-          </>
-        )}
       </main>
 
       {/* Create Team Dialog */}
