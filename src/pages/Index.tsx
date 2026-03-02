@@ -229,6 +229,12 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Weekly Template Plan */}
+        <WeeklyTemplateView />
+
+        {/* Daily Schedule */}
+        <DailyScheduleSection />
+
         {filtered.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
             <CalendarDays className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
@@ -248,12 +254,6 @@ const Index = () => {
             {renderSection('Completed', completedSchedules)}
           </>
         )}
-
-        {/* Weekly Template Plan */}
-        <WeeklyTemplateView />
-
-        {/* Daily Schedule */}
-        <DailyScheduleSection />
 
         {/* Referral Section */}
         <ReferralSection />
