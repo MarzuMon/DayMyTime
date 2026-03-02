@@ -47,7 +47,7 @@ export default function ProUpgrade() {
     try {
       // Invoke edge function to create Razorpay order
       const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
-        body: { plan: plan.id, amount: plan.price * 100 }, // paise
+        body: { plan: plan.id },
       });
 
       if (error) throw error;
@@ -66,9 +66,6 @@ export default function ProUpgrade() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              plan: plan.id,
-              amount: plan.price,
-              months: plan.months,
             },
           });
           if (verifyError) {
