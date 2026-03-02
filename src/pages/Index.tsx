@@ -18,6 +18,9 @@ import { useUserRole } from '@/hooks/use-user-role';
 import TeamTimetable from '@/components/TeamTimetable';
 import DailyScheduleSection from '@/components/DailyScheduleSection';
 import WeeklyTemplateView from '@/components/WeeklyTemplateView';
+import AdBanner from '@/components/AdBanner';
+import ReferralSection from '@/components/ReferralSection';
+import InstallPrompt from '@/components/InstallPrompt';
 
 type ViewMode = 'list' | 'timeline';
 
@@ -252,9 +255,18 @@ const Index = () => {
           </>
         )}
 
+        {/* Referral Section */}
+        <ReferralSection />
+
+        {/* Ad Banner for free users */}
+        <AdBanner />
+
         {/* Team Timetable */}
         <TeamTimetable />
       </main>
+
+      {/* PWA Install Prompt */}
+      <InstallPrompt />
 
       {/* FAB */}
       <button
