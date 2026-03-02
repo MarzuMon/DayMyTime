@@ -79,6 +79,12 @@ export default function Author() {
   const [signupChartData, setSignupChartData] = useState<{ day: string; count: number }[]>([]);
 
   useEffect(() => {
+    if (!roleLoading && !isAdmin) {
+      navigate('/app', { replace: true });
+    }
+  }, [isAdmin, roleLoading, navigate]);
+
+  useEffect(() => {
     if (isAdmin) {
       fetchStats();
       fetchUsers();

@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { useUserRole } from "@/hooks/use-user-role";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Author from "./pages/Author";
@@ -17,7 +16,6 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-import Forbidden from "./pages/Forbidden";
 
 const queryClient = new QueryClient();
 
@@ -25,18 +23,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading...</div>;
   if (!user) return <Navigate to="/auth" replace />;
-  return <>{children}</>;
-}
-
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
-
-  if (loading || roleLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading...</div>;
-  }
-  if (!user) return <Navigate to="/auth" replace />;
-  if (!isAdmin) return <Navigate to="/forbidden" replace />;
   return <>{children}</>;
 }
 
@@ -52,14 +38,13 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/author" element={<AdminRoute><Author /></AdminRoute>} />
+            <Route path="/author" element={<ProtectedRoute><Author /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/pro" element={<ProtectedRoute><ProUpgrade /></ProtectedRoute>} />
             <Route path="/teams" element={<ProtectedRoute><Teams /></ProtectedRoute>} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/forbidden" element={<Forbidden />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
