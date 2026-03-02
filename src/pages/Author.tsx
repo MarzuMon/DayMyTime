@@ -20,7 +20,7 @@ import {
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
   Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee,
-  Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift
+  Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound
 } from 'lucide-react';
 import { toast } from 'sonner';
 import UserManagementTab from '@/components/author/UserManagementTab';
@@ -28,6 +28,7 @@ import TemplateManagementTab from '@/components/author/TemplateManagementTab';
 import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
 import PromotionManagementTab from '@/components/author/PromotionManagementTab';
+import TeamManagementTab from '@/components/author/TeamManagementTab';
 
 interface AdPlacement {
   id: string;
@@ -74,7 +75,7 @@ export default function Author() {
   const { value: adsense, save: saveAdsense, loading: adsenseLoading } = useAdminSetting<{ enabled: boolean; publisherId: string }>('adsense', { enabled: false, publisherId: '' });
   const { value: bankDetails, save: saveBankDetails, loading: bankLoading } = useAdminSetting<{ holder: string; account: string; ifsc: string; upi: string }>('bank_details', { holder: '', account: '', ifsc: '', upi: '' });
 
-  const [stats, setStats] = useState({ totalUsers: 0, proUsers: 0 });
+  const [stats, setStats] = useState({ totalUsers: 0, proUsers: 0, totalTeams: 0, totalTeamMembers: 0 });
   const [users, setUsers] = useState<{ id: string; display_name: string; is_pro: boolean; created_at: string }[]>([]);
   const [signupChartData, setSignupChartData] = useState<{ day: string; count: number }[]>([]);
 
@@ -105,7 +106,12 @@ export default function Author() {
       days.push({ day: label, count });
     }
     setSignupChartData(days);
-    setStats({ totalUsers: allProfiles.length, proUsers: proCount });
+
+    // Team stats
+    const { count: teamCount } = await supabase.from('teams').select('*', { count: 'exact', head: true });
+    const { count: memberCount } = await supabase.from('team_members').select('*', { count: 'exact', head: true });
+
+    setStats({ totalUsers: allProfiles.length, proUsers: proCount, totalTeams: teamCount || 0, totalTeamMembers: memberCount || 0 });
   };
 
   const fetchUsers = async () => {
@@ -207,7 +213,7 @@ export default function Author() {
 
       <main className="max-w-5xl mx-auto px-4 py-6">
         {/* Stats Overview — removed Total Schedules, added Monetization */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
           <Card>
             <CardContent className="flex items-center gap-3 pt-6">
               <Users className="h-8 w-8 text-primary" />
@@ -244,6 +250,15 @@ export default function Author() {
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <UsersRound className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">{stats.totalTeams}</p>
+                <p className="text-sm text-muted-foreground">Teams ({stats.totalTeamMembers} members)</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Tabs */}
@@ -256,6 +271,7 @@ export default function Author() {
             <TabsTrigger value="referrals"><Trophy className="h-4 w-4 mr-1.5" /> Referrals</TabsTrigger>
             <TabsTrigger value="promotions"><Gift className="h-4 w-4 mr-1.5" /> Promos</TabsTrigger>
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
+            <TabsTrigger value="teams"><UsersRound className="h-4 w-4 mr-1.5" /> Teams</TabsTrigger>
             <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
           </TabsList>
 
@@ -496,6 +512,10 @@ export default function Author() {
 
           <TabsContent value="promotions" className="space-y-4">
             <PromotionManagementTab />
+          </TabsContent>
+
+          <TabsContent value="teams" className="space-y-4">
+            <TeamManagementTab />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">
