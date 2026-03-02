@@ -181,9 +181,6 @@ const Index = () => {
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
-        {/* Referral Section */}
-        <ReferralSection />
-
         {/* Filters + View Toggle */}
         <div>
           <div className="flex items-center justify-between gap-2 mb-2">
@@ -258,8 +255,8 @@ const Index = () => {
         {/* Daily Schedule */}
         <DailyScheduleSection />
 
-
-
+        {/* Referral Section */}
+        <ReferralSection />
 
         {/* Ad Banner for free users */}
         <AdBanner />
