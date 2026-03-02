@@ -89,6 +89,42 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          reward_days: number
+          target_signups: number
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          reward_days?: number
+          target_signups?: number
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          reward_days?: number
+          target_signups?: number
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           code: string
