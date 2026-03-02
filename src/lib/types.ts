@@ -34,9 +34,9 @@ export const categoryConfig: Record<ScheduleCategory, { label: string; emoji: st
   meeting: { label: 'Meeting', emoji: '🤝' },
   class: { label: 'Class', emoji: '📚' },
   work: { label: 'Work', emoji: '💼' },
-  personal: { label: 'Personal', emoji: '🏠' },
   exam: { label: 'Exam', emoji: '📝' },
   other: { label: 'Other', emoji: '📌' },
+  personal: { label: 'Personal', emoji: '🏠' },
 };
 
 export const platformConfig: Record<MeetingPlatform, { label: string; colorClass: string }> = {
