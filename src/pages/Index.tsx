@@ -181,16 +181,10 @@ const Index = () => {
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
-        {/* Weekly Template Plan */}
-        <WeeklyTemplateView />
-
-        {/* Daily Schedule Template */}
-        <DailyScheduleSection />
-
         {/* Filters + View Toggle */}
         <div>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 flex-1">
+            <div className="flex items-center gap-2 flex-wrap flex-1">
               <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <button
                 onClick={() => setFilterCategory('all')}
@@ -254,6 +248,12 @@ const Index = () => {
             {renderSection('Completed', completedSchedules)}
           </>
         )}
+
+        {/* Weekly Template Plan */}
+        <WeeklyTemplateView />
+
+        {/* Daily Schedule */}
+        <DailyScheduleSection />
 
         {/* Referral Section */}
         <ReferralSection />
