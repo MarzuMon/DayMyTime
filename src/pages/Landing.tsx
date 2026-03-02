@@ -3,6 +3,7 @@ import { CalendarDays, Clock, Bell, Video, Zap, Shield, Moon, Sun, Check, X } fr
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { motion } from 'framer-motion';
+import PromotionsBanner from '@/components/PromotionsBanner';
 
 const features = [
   { icon: CalendarDays, title: 'Visual Scheduler', desc: 'See your day as a beautiful timeline or structured list.' },
@@ -131,6 +132,9 @@ export default function Landing() {
           ))}
         </motion.div>
       </section>
+
+      {/* Promotions Banner */}
+      <PromotionsBanner />
 
       {/* Pricing */}
       <section id="pricing" className="bg-secondary/30 py-20">
