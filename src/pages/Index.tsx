@@ -6,7 +6,7 @@ import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
 import { Button } from '@/components/ui/button';
-import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users } from 'lucide-react';
+import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users, ChevronRight } from 'lucide-react';
 // useUserRole import kept for potential future use
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
 import heroPattern from '@/assets/hero-pattern.png';
@@ -232,13 +232,19 @@ const Index = () => {
         {/* Daily Schedule */}
         <DailyScheduleSection />
 
-        {/* Teams shortcut */}
+        {/* Team Schedule shortcut */}
         <div
           onClick={() => navigate('/teams')}
-          className="flex items-center gap-2 p-3 rounded-lg bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors"
+          className="flex items-center gap-3 p-4 rounded-xl border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 cursor-pointer transition-all group shadow-sm"
         >
-          <Users className="h-5 w-5 text-primary" />
-          <span className="font-medium text-sm text-foreground">Teams</span>
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+            <Users className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <span className="font-display font-semibold text-sm uppercase tracking-wider text-foreground">Team Schedule</span>
+            <p className="text-xs text-muted-foreground">View & manage team timetables</p>
+          </div>
+          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
         </div>
 
         {filtered.length === 0 ? (
