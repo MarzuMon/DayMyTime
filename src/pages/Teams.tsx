@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, Users, Plus, Trash2, UserPlus, Crown, Loader2, Mail } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Users, Plus, Trash2, UserPlus, Crown, Loader2, Mail, Palette, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,6 +14,8 @@ interface Team {
   description: string;
   owner_id: string;
   created_at: string;
+  brand_color: string;
+  logo_url: string | null;
 }
 
 interface TeamMember {
@@ -22,7 +24,13 @@ interface TeamMember {
   role: string;
   display_name: string;
   avatar_url: string | null;
-  email?: string;
+}
+
+interface Invitation {
+  id: string;
+  email: string;
+  status: string;
+  created_at: string;
 }
 
 export default function Teams() {
@@ -35,11 +43,16 @@ export default function Teams() {
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [newColor, setNewColor] = useState('#6366f1');
   const [creating, setCreating] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviting, setInviting] = useState(false);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const [editingBrand, setEditingBrand] = useState(false);
+  const [brandColor, setBrandColor] = useState('#6366f1');
 
   useEffect(() => {
     if (!user) return;
@@ -51,20 +64,17 @@ export default function Teams() {
     const { data: profile } = await supabase.from('profiles').select('is_pro').eq('id', user.id).single();
     setIsPro(profile?.is_pro ?? false);
 
-    // Fetch teams where user is owner
     const { data: ownedTeams } = await supabase.from('teams').select('*').eq('owner_id', user.id);
-    
-    // Fetch teams where user is member
     const { data: memberEntries } = await supabase.from('team_members').select('team_id').eq('user_id', user.id);
     const memberTeamIds = memberEntries?.map(m => m.team_id) || [];
-    
+
     let memberTeams: Team[] = [];
     if (memberTeamIds.length > 0) {
       const { data } = await supabase.from('teams').select('*').in('id', memberTeamIds);
-      memberTeams = data || [];
+      memberTeams = (data || []) as Team[];
     }
 
-    const allTeams = [...(ownedTeams || []), ...memberTeams];
+    const allTeams = [...((ownedTeams || []) as Team[]), ...memberTeams];
     const unique = Array.from(new Map(allTeams.map(t => [t.id, t])).values());
     setTeams(unique);
     setLoading(false);
@@ -73,16 +83,21 @@ export default function Teams() {
   const handleCreate = async () => {
     if (!user || !newName.trim()) return;
     setCreating(true);
-    const { data, error } = await supabase.from('teams').insert({ name: newName.trim(), description: newDesc.trim(), owner_id: user.id }).select().single();
+    const { data, error } = await supabase.from('teams').insert({
+      name: newName.trim(),
+      description: newDesc.trim(),
+      owner_id: user.id,
+      brand_color: newColor,
+    }).select().single();
     if (error) {
       toast({ title: 'Failed', description: error.message, variant: 'destructive' });
     } else if (data) {
-      // Add owner as member
       await supabase.from('team_members').insert({ team_id: data.id, user_id: user.id, role: 'owner' });
       toast({ title: 'Team created!' });
       setCreateOpen(false);
       setNewName('');
       setNewDesc('');
+      setNewColor('#6366f1');
       loadData();
     }
     setCreating(false);
@@ -90,6 +105,7 @@ export default function Teams() {
 
   const loadMembers = async (team: Team) => {
     setSelectedTeam(team);
+    setBrandColor(team.brand_color || '#6366f1');
     const { data: mems } = await supabase.from('team_members').select('id, user_id, role').eq('team_id', team.id);
     if (!mems) { setMembers([]); return; }
     const userIds = mems.map(m => m.user_id);
@@ -100,12 +116,43 @@ export default function Teams() {
       display_name: profileMap.get(m.user_id)?.display_name || 'Unknown',
       avatar_url: profileMap.get(m.user_id)?.avatar_url || null,
     })));
+
+    // Load invitations
+    const { data: invites } = await supabase.from('team_invitations').select('id, email, status, created_at').eq('team_id', team.id).order('created_at', { ascending: false });
+    setInvitations((invites || []) as Invitation[]);
   };
 
   const handleInvite = async () => {
-    if (!selectedTeam || !inviteEmail.trim()) return;
-    toast({ title: 'Coming Soon', description: 'Team invitations via email are not yet available. Please share the app link directly.', variant: 'default' });
-    setInviteEmail('');
+    if (!selectedTeam || !inviteEmail.trim() || !user) return;
+    setInviting(true);
+
+    const { data, error } = await supabase.functions.invoke('send-team-invite', {
+      body: { teamId: selectedTeam.id, email: inviteEmail.trim(), invitedBy: user.id },
+    });
+
+    if (error || data?.error) {
+      toast({ title: 'Failed', description: data?.error || error?.message, variant: 'destructive' });
+    } else {
+      const inviteUrl = `${window.location.origin}/accept-invite?token=${data.invitation.token}`;
+      toast({ title: 'Invitation created!', description: `Share the invite link with ${inviteEmail}` });
+      
+      // Copy link to clipboard
+      try {
+        await navigator.clipboard.writeText(inviteUrl);
+        toast({ title: 'Link copied!', description: 'Invite link copied to clipboard' });
+      } catch {}
+
+      setInviteEmail('');
+      loadMembers(selectedTeam);
+    }
+    setInviting(false);
+  };
+
+  const handleCopyLink = async (token: string) => {
+    const url = `${window.location.origin}/accept-invite?token=${token}`;
+    await navigator.clipboard.writeText(url);
+    setCopiedLink(token);
+    setTimeout(() => setCopiedLink(null), 2000);
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -116,10 +163,20 @@ export default function Teams() {
 
   const handleDeleteTeam = async (teamId: string) => {
     await supabase.from('team_members').delete().eq('team_id', teamId);
+    await supabase.from('team_invitations').delete().eq('team_id', teamId);
     await supabase.from('teams').delete().eq('id', teamId);
     setSelectedTeam(null);
     loadData();
     toast({ title: 'Team deleted' });
+  };
+
+  const handleSaveBrand = async () => {
+    if (!selectedTeam) return;
+    await supabase.from('teams').update({ brand_color: brandColor }).eq('id', selectedTeam.id);
+    setSelectedTeam({ ...selectedTeam, brand_color: brandColor });
+    setEditingBrand(false);
+    toast({ title: 'Team branding updated!' });
+    loadData();
   };
 
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading...</div>;
@@ -176,9 +233,17 @@ export default function Teams() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-display font-semibold">{team.name}</p>
-                        {team.description && <p className="text-xs text-muted-foreground mt-0.5">{team.description}</p>}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                          style={{ backgroundColor: team.brand_color || '#6366f1' }}
+                        >
+                          {team.name[0]?.toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-display font-semibold">{team.name}</p>
+                          {team.description && <p className="text-xs text-muted-foreground mt-0.5">{team.description}</p>}
+                        </div>
                       </div>
                       {team.owner_id === user?.id && (
                         <Button size="icon" variant="ghost" className="text-destructive h-8 w-8" onClick={(e) => { e.stopPropagation(); handleDeleteTeam(team.id); }}>
@@ -191,12 +256,38 @@ export default function Teams() {
               </div>
             )}
 
-            {/* Team Members Panel */}
+            {/* Team Members & Details Panel */}
             {selectedTeam && (
               <div className="space-y-4 p-4 rounded-xl border bg-card">
-                <h3 className="font-display font-semibold text-sm flex items-center gap-2">
-                  <Users className="h-4 w-4" /> {selectedTeam.name} — Members
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-display font-semibold text-sm flex items-center gap-2">
+                    <Users className="h-4 w-4" /> {selectedTeam.name} — Members
+                  </h3>
+                  {selectedTeam.owner_id === user?.id && (
+                    <Button size="sm" variant="ghost" onClick={() => setEditingBrand(!editingBrand)}>
+                      <Palette className="h-3.5 w-3.5 mr-1" /> Brand
+                    </Button>
+                  )}
+                </div>
+
+                {/* Brand Editor */}
+                {editingBrand && selectedTeam.owner_id === user?.id && (
+                  <div className="p-3 rounded-lg bg-secondary/50 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <label className="text-xs font-medium">Team Color</label>
+                      <input
+                        type="color"
+                        value={brandColor}
+                        onChange={e => setBrandColor(e.target.value)}
+                        className="h-8 w-12 rounded cursor-pointer border-0"
+                      />
+                      <span className="text-xs text-muted-foreground font-mono">{brandColor}</span>
+                    </div>
+                    <Button size="sm" onClick={handleSaveBrand}>Save Branding</Button>
+                  </div>
+                )}
+
+                {/* Members List */}
                 <div className="space-y-2">
                   {members.map(m => (
                     <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50">
@@ -220,10 +311,33 @@ export default function Teams() {
                   ))}
                 </div>
 
+                {/* Pending Invitations */}
+                {invitations.filter(i => i.status === 'pending').length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending Invitations</p>
+                    {invitations.filter(i => i.status === 'pending').map(inv => (
+                      <div key={inv.id} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/30">
+                        <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <p className="text-sm flex-1 truncate">{inv.email}</p>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => handleCopyLink(inv.id)}
+                        >
+                          {copiedLink === inv.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Invite Input */}
                 {selectedTeam.owner_id === user?.id && (
                   <div className="flex gap-2">
                     <Input
                       placeholder="Member email..."
+                      type="email"
                       value={inviteEmail}
                       onChange={e => setInviteEmail(e.target.value)}
                       className="flex-1"
@@ -249,6 +363,21 @@ export default function Teams() {
           <div className="space-y-4">
             <Input placeholder="Team name" value={newName} onChange={e => setNewName(e.target.value)} />
             <Input placeholder="Description (optional)" value={newDesc} onChange={e => setNewDesc(e.target.value)} />
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium">Brand Color</label>
+              <input
+                type="color"
+                value={newColor}
+                onChange={e => setNewColor(e.target.value)}
+                className="h-8 w-12 rounded cursor-pointer border-0"
+              />
+              <div
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                style={{ backgroundColor: newColor }}
+              >
+                {newName[0]?.toUpperCase() || 'T'}
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => setCreateOpen(false)}>Cancel</Button>
               <Button className="flex-1" onClick={handleCreate} disabled={creating || !newName.trim()}>

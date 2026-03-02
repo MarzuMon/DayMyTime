@@ -63,6 +63,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          custom_tones: Json | null
           default_alarm_tone: string
           display_name: string
           id: string
@@ -72,6 +73,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          custom_tones?: Json | null
           default_alarm_tone?: string
           display_name?: string
           id: string
@@ -81,6 +83,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          custom_tones?: Json | null
           default_alarm_tone?: string
           display_name?: string
           id?: string
@@ -268,6 +271,47 @@ export type Database = {
         }
         Relationships: []
       }
+      team_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          status: string
+          team_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          status?: string
+          team_id: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          status?: string
+          team_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           id: string
@@ -302,23 +346,29 @@ export type Database = {
       }
       teams: {
         Row: {
+          brand_color: string | null
           created_at: string
           description: string
           id: string
+          logo_url: string | null
           name: string
           owner_id: string
         }
         Insert: {
+          brand_color?: string | null
           created_at?: string
           description?: string
           id?: string
+          logo_url?: string | null
           name: string
           owner_id: string
         }
         Update: {
+          brand_color?: string | null
           created_at?: string
           description?: string
           id?: string
+          logo_url?: string | null
           name?: string
           owner_id?: string
         }
