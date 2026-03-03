@@ -75,15 +75,11 @@ export default function DailyScheduleSection() {
   const now = new Date();
   const currentHour = now.getHours();
 
-  // Build hourly slots from earliest schedule to latest, or 6 AM to 10 PM
-  const scheduleHours = schedules.map(s => new Date(s.scheduled_time).getHours());
-  const minHour = schedules.length > 0 ? Math.min(...scheduleHours, currentHour) : 6;
-  const maxHour = schedules.length > 0 ? Math.max(...scheduleHours, currentHour) + 1 : 22;
-  const startHour = Math.max(0, Math.min(minHour, 6));
-  const endHour = Math.min(24, Math.max(maxHour, 22));
+  // Only show hours that have schedules + current hour
+  const scheduleHoursSet = new Set(schedules.map(s => new Date(s.scheduled_time).getHours()));
+  scheduleHoursSet.add(currentHour);
 
-  const hourSlots: number[] = [];
-  for (let h = startHour; h < endHour; h++) hourSlots.push(h);
+  const hourSlots: number[] = Array.from(scheduleHoursSet).sort((a, b) => a - b);
 
   const getSchedulesForHour = (hour: number) =>
     schedules.filter(s => new Date(s.scheduled_time).getHours() === hour);

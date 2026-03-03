@@ -31,6 +31,7 @@ interface Invitation {
   email: string;
   status: string;
   created_at: string;
+  token: string;
 }
 
 export default function Teams() {
@@ -117,7 +118,7 @@ export default function Teams() {
     })));
 
     // Load invitations
-    const { data: invites } = await supabase.from('team_invitations').select('id, email, status, created_at').eq('team_id', team.id).order('created_at', { ascending: false });
+    const { data: invites } = await supabase.from('team_invitations').select('id, email, status, created_at, token').eq('team_id', team.id).order('created_at', { ascending: false });
     setInvitations((invites || []) as Invitation[]);
   };
 
@@ -350,9 +351,9 @@ export default function Teams() {
                           size="icon"
                           variant="ghost"
                           className="h-7 w-7"
-                          onClick={() => handleCopyLink(inv.id)}
+                          onClick={() => handleCopyLink(inv.token)}
                         >
-                          {copiedLink === inv.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                          {copiedLink === inv.token ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                         </Button>
                       </div>
                     ))}
