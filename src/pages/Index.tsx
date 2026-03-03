@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
-import TeamTimetable from '@/components/TeamTimetable';
+
 import DailyScheduleSection from '@/components/DailyScheduleSection';
 import WeeklyPlanView from '@/components/WeeklyPlanView';
 import AdBanner from '@/components/AdBanner';
@@ -142,8 +142,9 @@ const Index = () => {
         <div className="relative max-w-2xl mx-auto px-4 py-10 text-center">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-8 w-8 rounded-md" />
-              <h1 className="font-display text-3xl font-bold tracking-tight">DayMyTime</h1>
+              <img src="/images/daymytime-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-md" />
+              <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-7 hidden sm:block" />
+              <h1 className="font-display text-3xl font-bold tracking-tight sm:hidden">DayMyTime</h1>
             </div>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" onClick={toggleTheme}>
@@ -280,8 +281,7 @@ const Index = () => {
           </>
         )}
 
-        {/* Team Timetable - after schedule sections */}
-        <TeamTimetable />
+        {/* Team Timetable removed from dashboard - teams page only */}
 
         {/* Referral Section */}
         <ReferralSection />

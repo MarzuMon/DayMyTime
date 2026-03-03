@@ -52,8 +52,8 @@ export default function Landing() {
       <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-7 w-7 rounded-md" />
-            <span className="font-display font-bold text-lg">DayMyTime</span>
+            <img src="/images/daymytime-icon.png" alt="DayMyTime" className="h-7 w-7 rounded-md" />
+            <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-6 hidden sm:block" />
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} title="Toggle theme">
