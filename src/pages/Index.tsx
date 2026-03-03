@@ -5,6 +5,7 @@ import { scheduleAllNotifications, requestNotificationPermission, getNotificatio
 import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users, ChevronRight } from 'lucide-react';
 // useUserRole import kept for potential future use
@@ -21,6 +22,7 @@ import WeeklyPlanView from '@/components/WeeklyPlanView';
 import AdBanner from '@/components/AdBanner';
 import ReferralSection from '@/components/ReferralSection';
 import InstallPrompt from '@/components/InstallPrompt';
+import BottomNav from '@/components/BottomNav';
 
 type ViewMode = 'list' | 'timeline';
 
@@ -36,6 +38,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { isAdmin } = useUserRole();
+  const [teamMemberCount, setTeamMemberCount] = useState(0);
 
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
@@ -48,6 +51,9 @@ const Index = () => {
       setNotifPermission(getNotificationPermission());
       scheduleAllNotifications(s, refreshSchedules);
     });
+    // Fetch team member count
+    supabase.from('team_members').select('id', { count: 'exact', head: true })
+      .then(({ count }) => setTeamMemberCount(count ?? 0));
   }, [refreshSchedules]);
 
   const handleEnableNotifications = async () => {
@@ -241,7 +247,14 @@ const Index = () => {
             <Users className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1">
-            <span className="font-display font-semibold text-sm uppercase tracking-wider text-foreground">Team Schedule</span>
+            <div className="flex items-center gap-2">
+              <span className="font-display font-semibold text-sm uppercase tracking-wider text-foreground">Team Schedule</span>
+              {teamMemberCount > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                  {teamMemberCount}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">View & manage team timetables</p>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
@@ -281,14 +294,17 @@ const Index = () => {
       {/* PWA Install Prompt */}
       <InstallPrompt />
 
-      {/* FAB */}
+      {/* FAB - positioned above bottom nav */}
       <button
         onClick={() => { setEditingSchedule(null); setFormOpen(true); }}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform md:hidden"
+        className="fixed bottom-20 right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform md:hidden z-50"
         aria-label="Add schedule"
       >
         <Plus className="h-6 w-6" />
       </button>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
 
       <ScheduleForm
         open={formOpen}
