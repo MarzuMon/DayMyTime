@@ -53,7 +53,15 @@ export default function AlarmToneSelector({ value, onChange, showLabel = true }:
     if (!user) return;
     const { data: profile } = await supabase.from('profiles').select('custom_tones').eq('id', user.id).single();
     if (profile?.custom_tones && Array.isArray(profile.custom_tones)) {
-      setCustomTones(profile.custom_tones as unknown as CustomTone[]);
+      const tones = profile.custom_tones as unknown as CustomTone[];
+      // Refresh signed URLs for all custom tones
+      const refreshed = await Promise.all(
+        tones.map(async (t) => {
+          const { data } = await supabase.storage.from('custom-tones').createSignedUrl(t.path, 86400);
+          return { ...t, url: data?.signedUrl || t.url };
+        })
+      );
+      setCustomTones(refreshed);
     }
   };
 
@@ -82,9 +90,14 @@ export default function AlarmToneSelector({ value, onChange, showLabel = true }:
       return;
     }
 
-    const { data: urlData } = supabase.storage.from('custom-tones').getPublicUrl(path);
+    const { data: urlData } = await supabase.storage.from('custom-tones').createSignedUrl(path, 86400);
+    if (!urlData?.signedUrl) {
+      toast({ title: 'Failed to get URL', variant: 'destructive' });
+      setUploading(false);
+      return;
+    }
     const toneName = file.name.replace(/\.[^/.]+$/, '').slice(0, 20);
-    const newTone: CustomTone = { name: toneName, path, url: urlData.publicUrl };
+    const newTone: CustomTone = { name: toneName, path, url: urlData.signedUrl };
     const updated = [...customTones, newTone];
 
     await supabase.from('profiles').update({ custom_tones: updated as any }).eq('id', user.id);
