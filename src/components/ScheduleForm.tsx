@@ -32,9 +32,19 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
   const { user } = useAuth();
   const [title, setTitle] = useState(editSchedule?.title ?? '');
   const [description, setDescription] = useState(editSchedule?.description ?? '');
+  const formatLocalDateTime = (isoString: string) => {
+    const d = new Date(isoString);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const [scheduledTime, setScheduledTime] = useState(
     editSchedule?.scheduledTime
-      ? new Date(editSchedule.scheduledTime).toISOString().slice(0, 16)
+      ? formatLocalDateTime(editSchedule.scheduledTime)
       : ''
   );
   const [duration, setDuration] = useState(editSchedule?.duration?.toString() ?? '30');
@@ -65,7 +75,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       setDescription(editSchedule?.description ?? '');
       setScheduledTime(
         editSchedule?.scheduledTime
-          ? new Date(editSchedule.scheduledTime).toISOString().slice(0, 16)
+          ? formatLocalDateTime(editSchedule.scheduledTime)
           : ''
       );
       setDuration(editSchedule?.duration?.toString() ?? '30');
@@ -114,7 +124,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
             {editSchedule ? 'Edit Schedule' : 'New Schedule'}

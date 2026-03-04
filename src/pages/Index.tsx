@@ -146,18 +146,27 @@ const Index = () => {
               <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-7 hidden sm:block" />
               <h1 className="font-display text-3xl font-bold tracking-tight sm:hidden">DayMyTime</h1>
             </div>
-            <div className="flex items-center gap-1">
-              <Button size="sm" variant="ghost" onClick={toggleTheme}>
+            <div className="flex items-center gap-1 flex-wrap justify-end">
+              <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8">
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
               
-              <Button size="sm" variant="ghost" onClick={() => navigate('/profile')}>
+              <Button size="icon" variant="ghost" onClick={() => navigate('/profile')} className="h-8 w-8 sm:hidden">
+                <UserCircle className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/profile')} className="hidden sm:flex">
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => navigate('/pro')}>
+              <Button size="icon" variant="ghost" onClick={() => navigate('/pro')} className="h-8 w-8 sm:hidden">
+                <Crown className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/pro')} className="hidden sm:flex">
                 <Crown className="h-4 w-4 mr-1" /> Pro
               </Button>
-              <Button size="sm" variant="ghost" onClick={signOut}>
+              <Button size="icon" variant="ghost" onClick={signOut} className="h-8 w-8 sm:hidden">
+                <LogOut className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={signOut} className="hidden sm:flex">
                 <LogOut className="h-4 w-4 mr-1" /> Sign out
               </Button>
             </div>
