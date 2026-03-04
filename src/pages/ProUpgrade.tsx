@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import PromotionsBanner from '@/components/PromotionsBanner';
 
 const PLANS = [
   { id: 'monthly', label: 'Monthly', price: 199, period: '/month', badge: null, months: 1 },
@@ -160,6 +161,9 @@ export default function ProUpgrade() {
             <p className="text-xs text-center text-muted-foreground">
               Auto-renews. Cancel anytime. Reverts to free if not renewed.
             </p>
+
+            {/* Promotions */}
+            <PromotionsBanner />
           </>
         )}
       </main>

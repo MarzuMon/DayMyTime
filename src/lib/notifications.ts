@@ -1,5 +1,6 @@
 import { Schedule, platformConfig } from './types';
 import { toggleComplete } from './scheduleStore';
+import { playAlarmTone, stopAlarmTone } from './alarmTones';
 
 let scheduledTimers: Map<string, number> = new Map();
 
@@ -55,6 +56,15 @@ export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () =>
 function showNotification(schedule: Schedule, onUpdate?: () => void) {
   if (Notification.permission !== 'granted') return;
 
+  // Play alarm tone
+  try {
+    playAlarmTone(schedule.alarmTone || 'default');
+    // Stop alarm after 10 seconds
+    setTimeout(() => stopAlarmTone(), 10000);
+  } catch (e) {
+    console.warn('Could not play alarm tone:', e);
+  }
+
   const catEmoji = schedule.category === 'meeting' ? '🤝' : 
     schedule.category === 'class' ? '📚' : 
     schedule.category === 'work' ? '💼' : '📌';
@@ -65,12 +75,13 @@ function showNotification(schedule: Schedule, onUpdate?: () => void) {
 
   const notification = new Notification(`${catEmoji} ${schedule.title}`, {
     body,
-    icon: '/favicon.ico',
+    icon: '/favicon.png',
     tag: schedule.id,
     requireInteraction: true,
   });
 
   notification.onclick = () => {
+    stopAlarmTone();
     window.focus();
     if (schedule.meetingLink) {
       window.open(schedule.meetingLink, '_blank');

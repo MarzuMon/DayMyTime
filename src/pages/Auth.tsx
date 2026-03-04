@@ -55,6 +55,7 @@ export default function Auth() {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get('ref');
+  const redirectTo = searchParams.get('redirect');
 
   // Track referral after successful signup
   const trackReferral = async (userId: string) => {
@@ -92,7 +93,7 @@ export default function Auth() {
             localStorage.removeItem('dmt_ref');
           }
         }
-        navigate('/app');
+        navigate(redirectTo || '/app');
       }
     } else {
       // Store ref code for after email confirmation
