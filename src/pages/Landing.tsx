@@ -53,7 +53,7 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             
-            <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-9 hidden sm:block" />
+            <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-18 hidden sm:block" />
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} title="Toggle theme">
