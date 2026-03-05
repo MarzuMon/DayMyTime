@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { Schedule, categoryConfig, ScheduleCategory } from '@/lib/types';
 import { getSchedules, addSchedule, updateSchedule, deleteSchedule, toggleComplete } from '@/lib/scheduleStore';
 import { scheduleAllNotifications, requestNotificationPermission, getNotificationPermission } from '@/lib/notifications';
@@ -8,21 +8,20 @@ import TimelineView from '@/components/TimelineView';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users, ChevronRight } from 'lucide-react';
-// useUserRole import kept for potential future use
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
-import heroPattern from '@/assets/hero-pattern.png';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
+import SEOHead from '@/components/SEOHead';
 
-import DailyScheduleSection from '@/components/DailyScheduleSection';
-import WeeklyPlanView from '@/components/WeeklyPlanView';
-import AdBanner from '@/components/AdBanner';
-import ReferralSection from '@/components/ReferralSection';
-import InstallPrompt from '@/components/InstallPrompt';
-import BottomNav from '@/components/BottomNav';
+const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
+const WeeklyPlanView = lazy(() => import('@/components/WeeklyPlanView'));
+const AdBanner = lazy(() => import('@/components/AdBanner'));
+const ReferralSection = lazy(() => import('@/components/ReferralSection'));
+const InstallPrompt = lazy(() => import('@/components/InstallPrompt'));
+const BottomNav = lazy(() => import('@/components/BottomNav'));
 
 type ViewMode = 'list' | 'timeline';
 
@@ -51,7 +50,6 @@ const Index = () => {
       setNotifPermission(getNotificationPermission());
       scheduleAllNotifications(s, refreshSchedules);
     });
-    // Fetch team member count
     supabase.from('team_members').select('id', { count: 'exact', head: true })
       .then(({ count }) => setTeamMemberCount(count ?? 0));
   }, [refreshSchedules]);
@@ -68,12 +66,7 @@ const Index = () => {
   };
 
   const handleSave = async (schedule: Schedule) => {
-    let updated: Schedule[];
-    if (editingSchedule) {
-      updated = await updateSchedule(schedule);
-    } else {
-      updated = await addSchedule(schedule);
-    }
+    const updated = editingSchedule ? await updateSchedule(schedule) : await addSchedule(schedule);
     setSchedules(updated);
     setEditingSchedule(null);
     scheduleAllNotifications(updated, refreshSchedules);
@@ -115,66 +108,58 @@ const Index = () => {
   const renderSection = (title: string, items: Schedule[]) => {
     if (items.length === 0) return null;
     return (
-      <div className="space-y-3">
+      <section className="space-y-3" aria-label={`${title} schedules`}>
         <h2 className="font-display font-semibold text-sm uppercase tracking-wider text-muted-foreground">
           {title} <span className="text-primary">({items.length})</span>
         </h2>
         <div className="space-y-2">
           {items.map(s => (
-            <ScheduleCard
-              key={s.id}
-              schedule={s}
-              onToggleComplete={handleToggle}
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-            />
+            <ScheduleCard key={s.id} schedule={s} onToggleComplete={handleToggle} onDelete={handleDelete} onEdit={handleEdit} />
           ))}
         </div>
-      </div>
+      </section>
     );
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Header */}
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
+      <SEOHead title="Dashboard – DayMyTime" description="Manage your schedules, meetings, and daily tasks." />
+
+      {/* Header */}
       <header className="relative overflow-hidden border-b bg-card">
-        <img src={heroPattern} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
-        <div className="relative max-w-2xl mx-auto px-4 py-10 text-center">
+        <div className="relative max-w-2xl mx-auto px-4 py-6 sm:py-10 text-center">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <img src="/images/daymytime-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-md" />
-              <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-7 hidden sm:block" />
-              <h1 className="font-display text-3xl font-bold tracking-tight sm:hidden">DayMyTime</h1>
+              <img src="/images/daymytime-icon.png" alt="" className="h-8 w-8 rounded-md" width="32" height="32" />
+              <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-7 hidden sm:block" width="125" height="28" loading="lazy" />
+              <h1 className="font-display text-xl font-bold tracking-tight sm:hidden">DayMyTime</h1>
             </div>
-            <div className="flex items-center gap-1 flex-wrap justify-end">
-              <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8">
+            <nav className="flex items-center gap-1 flex-wrap justify-end" aria-label="App navigation">
+              <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              
-              <Button size="icon" variant="ghost" onClick={() => navigate('/profile')} className="h-8 w-8 sm:hidden">
+              <Button size="icon" variant="ghost" onClick={() => navigate('/profile')} className="h-8 w-8 sm:hidden" aria-label="Profile">
                 <UserCircle className="h-4 w-4" />
               </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/profile')} className="hidden sm:flex">
                 <UserCircle className="h-4 w-4 mr-1" /> Profile
               </Button>
-              <Button size="icon" variant="ghost" onClick={() => navigate('/pro')} className="h-8 w-8 sm:hidden">
+              <Button size="icon" variant="ghost" onClick={() => navigate('/pro')} className="h-8 w-8 sm:hidden" aria-label="Upgrade to Pro">
                 <Crown className="h-4 w-4" />
               </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/pro')} className="hidden sm:flex">
                 <Crown className="h-4 w-4 mr-1" /> Pro
               </Button>
-              <Button size="icon" variant="ghost" onClick={signOut} className="h-8 w-8 sm:hidden">
+              <Button size="icon" variant="ghost" onClick={signOut} className="h-8 w-8 sm:hidden" aria-label="Sign out">
                 <LogOut className="h-4 w-4" />
               </Button>
               <Button size="sm" variant="ghost" onClick={signOut} className="hidden sm:flex">
                 <LogOut className="h-4 w-4 mr-1" /> Sign out
               </Button>
-            </div>
+            </nav>
           </div>
-          <p className="text-muted-foreground text-sm">
-            Your smart visual scheduler. Simple, fast, meeting-ready.
-          </p>
-          <div className="flex items-center justify-center gap-3 mt-5">
+          <p className="text-muted-foreground text-sm">Your smart visual scheduler</p>
+          <div className="flex items-center justify-center gap-3 mt-4 sm:mt-5">
             <Button size="lg" onClick={() => { setEditingSchedule(null); setFormOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" /> Add Schedule
             </Button>
@@ -184,7 +169,7 @@ const Index = () => {
               </Button>
             )}
             {notifPermission === 'granted' && (
-              <span className="flex items-center gap-1 text-xs text-success">
+              <span className="flex items-center gap-1 text-xs text-success" role="status">
                 <Bell className="h-3.5 w-3.5" /> Alerts on
               </span>
             )}
@@ -193,65 +178,75 @@ const Index = () => {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
+      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 sm:space-y-8">
         {/* Filters + View Toggle */}
-        <div>
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto flex-1 scrollbar-hide">
-              <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto flex-1 scrollbar-hide" role="tablist" aria-label="Category filter">
+            <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+            <button
+              onClick={() => setFilterCategory('all')}
+              role="tab"
+              aria-selected={filterCategory === 'all'}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+                filterCategory === 'all'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+              }`}
+            >
+              All
+            </button>
+            {Object.entries(categoryConfig).map(([key, { label, emoji }]) => (
               <button
-                onClick={() => setFilterCategory('all')}
+                key={key}
+                onClick={() => setFilterCategory(key as ScheduleCategory)}
+                role="tab"
+                aria-selected={filterCategory === key}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
-                  filterCategory === 'all'
+                  filterCategory === key
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                 }`}
               >
-                All
+                {emoji} {label}
               </button>
-              {Object.entries(categoryConfig).map(([key, { label, emoji }]) => (
-                <button
-                  key={key}
-                  onClick={() => setFilterCategory(key as ScheduleCategory)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
-                    filterCategory === key
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                >
-                  {emoji} {label}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-1 border rounded-lg p-0.5 bg-secondary flex-shrink-0">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                title="List view"
-              >
-                <LayoutList className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('timeline')}
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'timeline' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                title="Timeline view"
-              >
-                <Clock className="h-4 w-4" />
-              </button>
-            </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-1 border rounded-lg p-0.5 bg-secondary flex-shrink-0" role="tablist" aria-label="View mode">
+            <button
+              onClick={() => setViewMode('list')}
+              role="tab"
+              aria-selected={viewMode === 'list'}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              aria-label="List view"
+            >
+              <LayoutList className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('timeline')}
+              role="tab"
+              aria-selected={viewMode === 'timeline'}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === 'timeline' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              aria-label="Timeline view"
+            >
+              <Clock className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
         {/* Weekly Plan */}
-        <WeeklyPlanView />
+        <Suspense fallback={null}><WeeklyPlanView /></Suspense>
 
         {/* Daily Schedule */}
-        <DailyScheduleSection />
+        <Suspense fallback={null}><DailyScheduleSection /></Suspense>
 
         {/* Team Schedule shortcut */}
         <div
           onClick={() => navigate('/teams')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => e.key === 'Enter' && navigate('/teams')}
           className="flex items-center gap-3 p-4 rounded-xl border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 cursor-pointer transition-all group shadow-sm"
+          aria-label="Go to Team Schedule"
         >
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
             <Users className="h-5 w-5 text-primary" />
@@ -271,7 +266,7 @@ const Index = () => {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="text-center py-20 animate-fade-in">
+          <div className="text-center py-16 sm:py-20 animate-fade-in">
             <CalendarDays className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
             <h2 className="font-display text-lg font-semibold text-muted-foreground">No schedules yet</h2>
             <p className="text-sm text-muted-foreground mt-1">Tap "Add Schedule" to get started</p>
@@ -290,37 +285,26 @@ const Index = () => {
           </>
         )}
 
-        {/* Team Timetable removed from dashboard - teams page only */}
-
-        {/* Referral Section */}
-        <ReferralSection />
-
-        {/* Ad Banner for free users */}
-        <AdBanner />
-
+        <Suspense fallback={null}><ReferralSection /></Suspense>
+        <Suspense fallback={null}><AdBanner /></Suspense>
       </main>
 
-      {/* PWA Install Prompt */}
-      <InstallPrompt />
+      <Suspense fallback={null}><InstallPrompt /></Suspense>
 
-      {/* FAB - positioned above bottom nav */}
+      {/* FAB */}
       <button
         onClick={() => { setEditingSchedule(null); setFormOpen(true); }}
-        className="fixed bottom-20 right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform md:hidden z-50"
+        className="fixed bottom-20 right-4 sm:right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 active:scale-95 transition-transform md:hidden z-50"
         aria-label="Add schedule"
       >
         <Plus className="h-6 w-6" />
       </button>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
+      <Suspense fallback={null}><BottomNav /></Suspense>
 
       <ScheduleForm
         open={formOpen}
-        onOpenChange={(open) => {
-          setFormOpen(open);
-          if (!open) setEditingSchedule(null);
-        }}
+        onOpenChange={(open) => { setFormOpen(open); if (!open) setEditingSchedule(null); }}
         onSave={handleSave}
         editSchedule={editingSchedule}
       />

@@ -12,7 +12,12 @@ export default function BottomNav() {
   const { pathname } = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur md:hidden safe-area-bottom">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur md:hidden"
+      role="navigation"
+      aria-label="Bottom navigation"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
       <div className="flex items-center justify-around h-14">
         {tabs.map(({ path, icon: Icon, label }) => {
           const active = pathname === path;
@@ -20,11 +25,13 @@ export default function BottomNav() {
             <button
               key={path}
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1.5 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-4 py-1.5 transition-colors min-w-[64px] ${
                 active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
+              aria-label={label}
+              aria-current={active ? 'page' : undefined}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-5 w-5" aria-hidden="true" />
               <span className="text-[10px] font-medium">{label}</span>
             </button>
           );

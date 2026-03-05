@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CalendarDays, Crown, Check, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import PromotionsBanner from '@/components/PromotionsBanner';
+import SEOHead from '@/components/SEOHead';
+
+const PromotionsBanner = lazy(() => import('@/components/PromotionsBanner'));
 
 const PLANS = [
   { id: 'monthly', label: 'Monthly', price: 199, period: '/month', badge: null, months: 1 },
@@ -46,7 +48,6 @@ export default function ProUpgrade() {
     const plan = PLANS.find(p => p.id === selectedPlan)!;
 
     try {
-      // Invoke edge function to create Razorpay order
       const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
         body: { plan: plan.id },
       });
@@ -57,11 +58,10 @@ export default function ProUpgrade() {
         key: data.key_id,
         amount: data.amount,
         currency: 'INR',
-        name: 'Day My Time Pro',
+        name: 'DayMyTime Pro',
         description: `${plan.label} Pro Plan`,
         order_id: data.order_id,
         handler: async (response: any) => {
-          // Verify payment via edge function
           const { error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
             body: {
               razorpay_order_id: response.razorpay_order_id,
@@ -92,38 +92,43 @@ export default function ProUpgrade() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40">
+      <SEOHead
+        title="Upgrade to Pro – DayMyTime"
+        description="Unlock unlimited schedules, team workspaces, custom alarm tones, and ad-free experience with DayMyTime Pro."
+        canonical="https://daymytime.com/pro"
+      />
+      <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40" role="navigation">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Button size="icon" variant="ghost" onClick={() => navigate('/app')}>
+          <Button size="icon" variant="ghost" onClick={() => navigate('/app')} aria-label="Back to app">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <CalendarDays className="h-5 w-5 text-primary" />
+          <CalendarDays className="h-5 w-5 text-primary" aria-hidden="true" />
           <span className="font-display font-bold">Upgrade to Pro</span>
         </div>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-4 py-10 space-y-8">
+      <main className="max-w-2xl mx-auto px-4 py-8 sm:py-10 space-y-8">
         {isPro ? (
           <div className="text-center py-10 space-y-4">
             <Crown className="h-16 w-16 text-accent mx-auto" />
-            <h2 className="font-display text-2xl font-bold">You're a Pro member!</h2>
+            <h1 className="font-display text-2xl font-bold">You're a Pro member!</h1>
             <p className="text-muted-foreground">Enjoy all premium features.</p>
             <Button variant="outline" onClick={() => navigate('/app')}>Back to App</Button>
           </div>
         ) : (
           <>
             <div className="text-center space-y-2">
-              <Sparkles className="h-10 w-10 text-accent mx-auto" />
-              <h2 className="font-display text-2xl font-bold">Unlock Pro Features</h2>
-              <p className="text-muted-foreground text-sm">Get the most out of Day My Time</p>
+              <Sparkles className="h-10 w-10 text-accent mx-auto" aria-hidden="true" />
+              <h1 className="font-display text-2xl font-bold">Unlock Pro Features</h1>
+              <p className="text-muted-foreground text-sm">Get the most out of DayMyTime</p>
             </div>
 
-            {/* Plan Selection */}
             <div className="grid grid-cols-2 gap-3">
               {PLANS.map(plan => (
                 <button
                   key={plan.id}
                   onClick={() => setSelectedPlan(plan.id)}
+                  aria-pressed={selectedPlan === plan.id}
                   className={`relative p-4 rounded-xl border-2 text-left transition-all ${
                     selectedPlan === plan.id
                       ? 'border-primary bg-primary/5 shadow-elevated'
@@ -142,12 +147,11 @@ export default function ProUpgrade() {
               ))}
             </div>
 
-            {/* Features */}
             <div className="space-y-3 p-4 rounded-xl bg-card border">
               <p className="font-display font-semibold text-sm">Everything in Pro:</p>
               {PRO_FEATURES.map(f => (
                 <div key={f} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                  <Check className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
                   <span>{f}</span>
                 </div>
               ))}
@@ -162,8 +166,9 @@ export default function ProUpgrade() {
               Auto-renews. Cancel anytime. Reverts to free if not renewed.
             </p>
 
-            {/* Promotions */}
-            <PromotionsBanner />
+            <Suspense fallback={null}>
+              <PromotionsBanner />
+            </Suspense>
           </>
         )}
       </main>

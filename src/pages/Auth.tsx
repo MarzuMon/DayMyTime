@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CalendarDays, Mail, Lock, User } from 'lucide-react';
+import { CalendarDays, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import SEOHead from '@/components/SEOHead';
 
 function ForgotPassword({ email: parentEmail }: { email: string }) {
   const email = parentEmail;
@@ -14,7 +16,10 @@ function ForgotPassword({ email: parentEmail }: { email: string }) {
   const { toast } = useToast();
 
   const handleReset = async () => {
-    if (!email) return;
+    if (!email) {
+      toast({ title: 'Enter your email first', variant: 'destructive' });
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -36,7 +41,7 @@ function ForgotPassword({ email: parentEmail }: { email: string }) {
         type="button"
         onClick={handleReset}
         disabled={loading}
-        className="text-xs text-primary hover:underline"
+        className="text-xs text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
       >
         Forgot password?
       </button>
@@ -57,7 +62,6 @@ export default function Auth() {
   const refCode = searchParams.get('ref');
   const redirectTo = searchParams.get('redirect');
 
-  // Track referral after successful signup
   const trackReferral = async (userId: string) => {
     if (!refCode) return;
     try {
@@ -77,6 +81,7 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !password.trim()) return;
     setLoading(true);
 
     if (isLogin) {
@@ -84,7 +89,6 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
       } else {
-        // Track referral on first login if ref code was stored
         const storedRef = localStorage.getItem('dmt_ref');
         if (storedRef) {
           const { data: { user: loggedUser } } = await supabase.auth.getUser();
@@ -96,7 +100,6 @@ export default function Auth() {
         navigate(redirectTo || '/app');
       }
     } else {
-      // Store ref code for after email confirmation
       if (refCode) localStorage.setItem('dmt_ref', refCode);
       const { error } = await signUp(email, password, displayName);
       if (error) {
@@ -110,67 +113,85 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <SEOHead
+        title={isLogin ? 'Sign In – DayMyTime' : 'Sign Up – DayMyTime'}
+        description="Sign in or create a free DayMyTime account to manage your schedules, meetings, and alerts."
+        canonical="https://daymytime.com/auth"
+      />
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <CalendarDays className="h-7 w-7 text-primary" />
-            <h1 className="font-display text-2xl font-bold">Day My Time</h1>
+            <CalendarDays className="h-7 w-7 text-primary" aria-hidden="true" />
+            <h1 className="font-display text-2xl font-bold">DayMyTime</h1>
           </div>
           <p className="text-sm text-muted-foreground">
             {isLogin ? 'Welcome back' : 'Create your account'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {!isLogin && (
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Display name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="pl-9"
-                required={!isLogin}
-              />
+            <div className="space-y-1.5">
+              <Label htmlFor="displayName" className="sr-only">Display name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="displayName"
+                  placeholder="Display name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="pl-9"
+                  required={!isLogin}
+                  autoComplete="name"
+                />
+              </div>
             </div>
           )}
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-9"
-              required
-            />
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="sr-only">Email</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-9"
+                required
+                autoComplete="email"
+              />
+            </div>
           </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-9"
-              required
-              minLength={6}
-            />
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className="sr-only">Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-9"
+                required
+                minLength={6}
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+              />
+            </div>
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Sign Up'}
           </Button>
         </form>
 
-        {isLogin && (
-          <ForgotPassword email={email} />
-        )}
+        {isLogin && <ForgotPassword email={email} />}
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-primary font-medium hover:underline"
+            className="text-primary font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           >
             {isLogin ? 'Sign up' : 'Sign in'}
           </button>
@@ -178,9 +199,9 @@ export default function Auth() {
 
         <button
           onClick={() => navigate('/')}
-          className="block mx-auto mt-4 text-xs text-muted-foreground hover:underline"
+          className="flex items-center justify-center gap-1 mx-auto mt-4 text-xs text-muted-foreground hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
         >
-          ← Back to home
+          <ArrowLeft className="h-3 w-3" /> Back to home
         </button>
       </div>
     </div>
