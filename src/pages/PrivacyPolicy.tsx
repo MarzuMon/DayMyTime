@@ -1,17 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEOHead from '@/components/SEOHead';
 
 export default function PrivacyPolicy() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40">
+      <SEOHead
+        title="Privacy Policy – DayMyTime"
+        description="Learn how DayMyTime handles your data, privacy, and security."
+        canonical="https://daymytime.com/privacy"
+      />
+      <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40" role="navigation">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <CalendarDays className="h-5 w-5 text-primary" />
-            <span className="font-display font-bold text-lg">Day My Time</span>
+            <CalendarDays className="h-5 w-5 text-primary" aria-hidden="true" />
+            <span className="font-display font-bold text-lg">DayMyTime</span>
           </div>
           <Button size="sm" variant="ghost" onClick={() => navigate(-1 as any)}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Back
@@ -19,12 +25,12 @@ export default function PrivacyPolicy() {
         </div>
       </nav>
 
-      <article className="max-w-3xl mx-auto px-4 py-16 prose prose-sm dark:prose-invert">
-        <h1 className="font-display text-3xl font-bold mb-2">Privacy Policy</h1>
+      <article className="max-w-3xl mx-auto px-4 py-12 sm:py-16 prose prose-sm dark:prose-invert">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold mb-2">Privacy Policy</h1>
         <p className="text-muted-foreground mb-8">Last updated: March 1, 2026</p>
 
         <h2>1. Information We Collect</h2>
-        <p>When you use Day My Time, we collect information you provide directly:</p>
+        <p>When you use DayMyTime, we collect information you provide directly:</p>
         <ul>
           <li><strong>Account data:</strong> Email address and display name when you sign up.</li>
           <li><strong>Schedule data:</strong> Titles, descriptions, times, meeting links, and alarm preferences you create.</li>
@@ -33,7 +39,7 @@ export default function PrivacyPolicy() {
 
         <h2>2. How We Use Your Information</h2>
         <ul>
-          <li>To provide, maintain, and improve the Day My Time service.</li>
+          <li>To provide, maintain, and improve the DayMyTime service.</li>
           <li>To send you notifications about your schedules.</li>
           <li>To process payments for Pro subscriptions.</li>
           <li>To respond to your support inquiries.</li>

@@ -24,22 +24,23 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
   const dateLabel = isToday(time) ? 'Today' : isTomorrow(time) ? 'Tomorrow' : format(time, 'MMM d');
 
   return (
-    <div
+    <article
       className={cn(
         'group relative rounded-lg border bg-card p-4 shadow-card transition-all hover:shadow-elevated animate-slide-up',
         schedule.isCompleted && 'opacity-60',
         past && 'border-destructive/30'
       )}
+      aria-label={`Schedule: ${schedule.title}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm">{catConfig.emoji}</span>
+            <span className="text-sm" aria-hidden="true">{catConfig.emoji}</span>
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               {catConfig.label}
             </span>
             {past && (
-              <span className="text-xs font-medium text-destructive">Overdue</span>
+              <span className="text-xs font-medium text-destructive" role="status">Overdue</span>
             )}
           </div>
 
@@ -56,10 +57,10 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {dateLabel}, {format(time, 'h:mm a')}
+              <Clock className="h-3 w-3" aria-hidden="true" />
+              <time dateTime={time.toISOString()}>{dateLabel}, {format(time, 'h:mm a')}</time>
             </span>
             <span className="flex items-center gap-1">
               {schedule.duration} min
@@ -81,20 +82,21 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
                 platform.colorClass
               )}
             >
-              <Video className="h-3.5 w-3.5" />
+              <Video className="h-3.5 w-3.5" aria-hidden="true" />
               Join {platform.label}
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLink className="h-3 w-3" aria-hidden="true" />
             </a>
           )}
         </div>
 
-        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Actions - always visible on mobile, hover on desktop */}
+        <div className="flex flex-col gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <Button
             size="icon"
             variant="ghost"
             className="h-7 w-7"
             onClick={() => onToggleComplete(schedule.id)}
-            title={schedule.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+            aria-label={schedule.isCompleted ? 'Mark incomplete' : 'Mark complete'}
           >
             <Check className={cn('h-4 w-4', schedule.isCompleted && 'text-success')} />
           </Button>
@@ -103,6 +105,7 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
             variant="ghost"
             className="h-7 w-7"
             onClick={() => onEdit(schedule)}
+            aria-label="Edit schedule"
           >
             <Pencil className="h-3.5 w-3.5" />
           </Button>
@@ -112,6 +115,7 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
                 size="icon"
                 variant="ghost"
                 className="h-7 w-7 text-destructive hover:text-destructive"
+                aria-label="Delete schedule"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -136,6 +140,6 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
           </AlertDialog>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
