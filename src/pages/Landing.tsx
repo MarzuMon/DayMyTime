@@ -143,6 +143,27 @@ export default function Landing() {
             </div>
             <span className="ml-2">Trusted by students & professionals</span>
           </motion.div>
+
+          {/* Refer & Earn Promo */}
+          <motion.div
+            variants={fadeUp} custom={5}
+            className="mt-8 max-w-md mx-auto rounded-xl border border-primary/20 bg-card/60 backdrop-blur-sm p-4 sm:p-5 shadow-card"
+          >
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Zap className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-left min-w-0">
+                <p className="font-display font-semibold text-sm">Refer &amp; Earn Pro</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Share your referral link. When 20 friends sign up, you get <span className="text-primary font-semibold">1 month free Pro!</span>
+                </p>
+                <Button size="sm" variant="outline" className="mt-3 h-8 text-xs" onClick={() => navigate('/auth')}>
+                  Sign In to Get Your Link <ArrowRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </section>
 
