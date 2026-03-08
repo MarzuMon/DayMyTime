@@ -20,6 +20,8 @@ export interface Schedule {
   createdAt: string;
   imagePath?: string;
   alarmTone: AlarmTone;
+  teamId?: string;
+  repeatDays?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
 }
 
 export function detectMeetingPlatform(url: string): MeetingPlatform {
