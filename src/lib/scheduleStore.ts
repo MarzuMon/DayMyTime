@@ -17,6 +17,8 @@ function rowToSchedule(row: any): Schedule {
     createdAt: row.created_at,
     imagePath: row.image_path || undefined,
     alarmTone: row.alarm_tone || 'default',
+    teamId: row.team_id || undefined,
+    repeatDays: row.repeat_days || undefined,
   };
 }
 
