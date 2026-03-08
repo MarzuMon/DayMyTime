@@ -84,7 +84,7 @@ export async function updateSchedule(updated: Schedule): Promise<Schedule[]> {
 
 export async function deleteSchedule(id: string): Promise<Schedule[]> {
   const { error } = await supabase.from('schedules').delete().eq('id', id);
-  if (error) console.error('Error deleting schedule:', error);
+  if (error) console.error('Schedule delete failed');
   return getSchedules();
 }
 
