@@ -23,9 +23,11 @@ export default function TeamTimetable() {
   const [formOpen, setFormOpen] = useState(false);
 
   const fetchTeam = async () => {
+    // Fetch schedules assigned to teams (category = 'team' with team_id set)
+    // plus general upcoming schedules
     const { data } = await supabase
       .from('schedules')
-      .select('id, title, scheduled_time, duration, category, user_id')
+      .select('id, title, scheduled_time, duration, category, user_id, team_id')
       .gte('scheduled_time', new Date().toISOString())
       .order('scheduled_time', { ascending: true })
       .limit(20);
