@@ -304,6 +304,32 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             </div>
           </div>
 
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" /> Image (optional)
+            </Label>
+            {imagePreview ? (
+              <div className="relative inline-block">
+                <img src={imagePreview} alt="Preview" className="h-24 w-auto rounded-lg border object-cover" />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="cursor-pointer"
+              />
+            )}
+          </div>
+
           {/* Alarm Tone with Waveform */}
           <AlarmToneSelector value={alarmTone} onChange={setAlarmTone} />
 
@@ -311,8 +337,8 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              {editSchedule ? 'Update' : 'Add Schedule'}
+            <Button type="submit" className="flex-1" disabled={uploading}>
+              {uploading ? 'Uploading...' : editSchedule ? 'Update' : 'Add Schedule'}
             </Button>
           </div>
         </form>
