@@ -7,9 +7,16 @@ let scheduledTimers: Map<string, number> = new Map();
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) return false;
   if (Notification.permission === 'granted') return true;
+  new Notification("Meeting Reminder",{
+body:"Your meeting starts now"
+})
   const result = await Notification.requestPermission();
   return result === 'granted';
-}
+  
+
+
+
+
 
 export function getNotificationPermission(): NotificationPermission | 'unsupported' {
   if (!('Notification' in window)) return 'unsupported';
