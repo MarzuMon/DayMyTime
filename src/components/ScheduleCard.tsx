@@ -1,6 +1,7 @@
 import { type Schedule, categoryConfig, platformConfig } from '@/lib/types';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
-import { Clock, ExternalLink, Check, Trash2, Pencil, Video } from 'lucide-react';
+import { Clock, ExternalLink, Check, Trash2, Pencil, Video, ImageIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
