@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { format, subDays, isToday } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { ArrowLeft, CalendarDays, CheckCircle2, Clock, Flame, TrendingUp, BarChart3, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
