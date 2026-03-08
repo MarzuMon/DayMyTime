@@ -6,9 +6,6 @@ import AddSchedule from "./pages/AddSchedule"
 
 
 
-
-export default App
-
 export default function App() {
   return (
     <BrowserRouter>
