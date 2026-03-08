@@ -24,6 +24,7 @@ const AdBanner = lazy(() => import('@/components/AdBanner'));
 const ReferralSection = lazy(() => import('@/components/ReferralSection'));
 const InstallPrompt = lazy(() => import('@/components/InstallPrompt'));
 const BottomNav = lazy(() => import('@/components/BottomNav'));
+const PromoPopup = lazy(() => import('@/components/PromoPopup'));
 
 type ViewMode = 'list' | 'timeline';
 
