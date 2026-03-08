@@ -237,7 +237,7 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
                               )}
                               <button
                                 onClick={() => onEdit?.(toSchedule(s))}
-                                className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                                className="text-muted-foreground hover:text-primary transition-opacity"
                                 aria-label="Edit schedule"
                               >
                                 <Pencil className="h-3.5 w-3.5" />
