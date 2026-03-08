@@ -74,6 +74,8 @@ export async function updateSchedule(updated: Schedule): Promise<Schedule[]> {
     is_completed: updated.isCompleted,
     image_path: updated.imagePath || null,
     alarm_tone: updated.alarmTone || 'default',
+    team_id: updated.teamId || null,
+    repeat_days: updated.repeatDays || null,
   }).eq('id', updated.id);
 
   if (error) console.error('Error updating schedule:', error);
