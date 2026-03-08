@@ -166,6 +166,34 @@ export default function Landing() {
             <div className="hidden sm:block w-px h-4 bg-border" />
             <span className="text-sm text-muted-foreground">Trusted by <strong className="text-foreground">10,000+</strong> students & professionals</span>
           </motion.div>
+
+          {/* Referral Promo Card */}
+          <motion.div
+            variants={fadeUp}
+            custom={5}
+            className="mt-10 max-w-lg mx-auto w-full"
+          >
+            <div
+              onClick={() => navigate('/auth')}
+              className="relative rounded-2xl border border-primary/20 glass p-5 sm:p-6 cursor-pointer group hover:border-primary/40 transition-all duration-300 overflow-hidden"
+            >
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
+              <div className="relative flex items-start gap-4">
+                <div className="h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shrink-0 shadow-glow">
+                  <Gift className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-display font-bold text-sm sm:text-base mb-1">🚀 Refer & Earn Pro</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-3">
+                    Share your referral link. When 20 friends sign up, you get <strong className="text-foreground">1 month free Pro!</strong>
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow group-hover:opacity-90 transition-opacity">
+                    Sign In Now <ArrowRight className="h-3 w-3" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </section>
 
