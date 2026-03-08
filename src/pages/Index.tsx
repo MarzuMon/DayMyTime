@@ -149,6 +149,8 @@ const Index = () => {
     );
   };
 
+  if (isLoading) return <DashboardSkeleton />;
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SEOHead title="Dashboard – DayMyTime" description="Manage your schedules, meetings, and daily tasks." />
