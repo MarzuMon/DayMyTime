@@ -184,12 +184,13 @@ export default function WeeklyPlanView({ onEdit }: WeeklyPlanViewProps) {
                     return (
                       <div
                         key={s.id}
-                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate ${
+                        onClick={() => onEdit?.(toSchedule(s))}
+                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all group/item ${
                           s.is_completed
                             ? 'bg-muted text-muted-foreground line-through'
                             : 'bg-primary/10 text-primary'
                         }`}
-                        title={`${s.title} - ${format(new Date(s.scheduled_time), 'h:mm a')}`}
+                        title={`${s.title} - ${format(new Date(s.scheduled_time), 'h:mm a')} (click to edit)`}
                       >
                         {cat?.emoji} {s.title}
                       </div>
