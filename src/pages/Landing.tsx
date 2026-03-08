@@ -350,7 +350,7 @@ export default function Landing() {
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {screenshots.map(({ title, desc, icon: Icon }, i) => (
+            {screenshots.map(({ title, desc, image }, i) => (
               <motion.div
                 key={title}
                 initial={{ opacity: 0, y: 24 }}
@@ -359,10 +359,13 @@ export default function Landing() {
                 transition={{ delay: i * 0.1, duration: 0.5 }}
                 className="group rounded-2xl border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300"
               >
-                <div className="aspect-[4/3] bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 flex items-center justify-center">
-                  <div className="h-16 w-16 rounded-2xl glass border border-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Icon className="h-8 w-8 text-primary" />
-                  </div>
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={image}
+                    alt={`${title} screenshot`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
                 </div>
                 <div className="p-4">
                   <h3 className="font-display font-semibold text-sm mb-1">{title}</h3>
