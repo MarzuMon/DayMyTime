@@ -1,5 +1,4 @@
-import { Schedule, platformConfig } from "./types";
-import { toggleComplete } from "./scheduleStore";
+import { Schedule } from "./types";
 import { playAlarmTone, stopAlarmTone } from "./alarmTones";
 
 let scheduledTimers: Map<string, number> = new Map();
