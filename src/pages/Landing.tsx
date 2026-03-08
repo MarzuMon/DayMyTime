@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star, Sparkles, Users, BarChart3, Gift } from 'lucide-react';
+import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star, Sparkles, Users, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { motion } from 'framer-motion';
@@ -88,13 +88,8 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50" role="navigation" aria-label="Main navigation">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl sm:hidden" />
-            <img
-              src={theme === 'dark' ? '/images/logo_N-full.png' : '/images/logo_D-full.png'}
-              alt="DayMyTime"
-              className="hidden sm:block h-9 w-auto object-contain"
-            />
-            <span className="font-display font-bold text-lg tracking-tight sm:hidden">DayMyTime</span>
+            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" />
+            <span className="font-display font-bold text-lg tracking-tight">DayMyTime</span>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="rounded-xl">
@@ -165,34 +160,6 @@ export default function Landing() {
             </div>
             <div className="hidden sm:block w-px h-4 bg-border" />
             <span className="text-sm text-muted-foreground">Trusted by <strong className="text-foreground">10,000+</strong> students & professionals</span>
-          </motion.div>
-
-          {/* Referral Promo Card */}
-          <motion.div
-            variants={fadeUp}
-            custom={5}
-            className="mt-10 max-w-lg mx-auto w-full"
-          >
-            <div
-              onClick={() => navigate('/auth')}
-              className="relative rounded-2xl border border-primary/20 glass p-5 sm:p-6 cursor-pointer group hover:border-primary/40 transition-all duration-300 overflow-hidden"
-            >
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
-              <div className="relative flex items-start gap-4">
-                <div className="h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shrink-0 shadow-glow">
-                  <Gift className="h-5 w-5 text-primary-foreground" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-display font-bold text-sm sm:text-base mb-1">🚀 Refer & Earn Pro</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-3">
-                    Share your referral link. When 20 friends sign up, you get <strong className="text-foreground">1 month free Pro!</strong>
-                  </p>
-                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow group-hover:opacity-90 transition-opacity">
-                    Sign In Now <ArrowRight className="h-3 w-3" />
-                  </span>
-                </div>
-              </div>
-            </div>
           </motion.div>
         </motion.div>
       </section>
