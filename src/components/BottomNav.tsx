@@ -1,8 +1,9 @@
-import { Home, UserCircle, Crown, BarChart3 } from 'lucide-react';
+import { Home, UserCircle, Crown, BarChart3, FileText } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const tabs = [
   { path: '/app', icon: Home, label: 'Home' },
+  { path: '/reports', icon: FileText, label: 'Reports' },
   { path: '/analytics', icon: BarChart3, label: 'Analytics' },
   { path: '/profile', icon: UserCircle, label: 'Profile' },
   { path: '/pro', icon: Crown, label: 'Pro' },
