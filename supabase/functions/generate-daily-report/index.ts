@@ -31,15 +31,10 @@ Deno.serve(async (req) => {
       .gte("scheduled_time", dayStart)
       .lte("scheduled_time", dayEnd);
 
+    // Reset all completed schedules and advance repeating schedule dates to today
+    await resetAndAdvanceSchedules(supabase, now);
+
     if (!userSchedules || userSchedules.length === 0) {
-      // Still reset completed schedules even if no yesterday schedules
-      const { error: resetError } = await supabase
-        .from("schedules")
-        .update({ is_completed: false })
-        .eq("is_completed", true);
-
-      if (resetError) console.error("Reset error:", resetError);
-
       return new Response(JSON.stringify({ message: "No schedules to report", reset: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
