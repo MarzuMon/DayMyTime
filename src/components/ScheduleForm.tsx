@@ -333,7 +333,22 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
           {/* Custom Day Picker */}
           {repeatType === 'custom' && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Repeat on</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Repeat on</Label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (repeatDays.length === 7) {
+                      setRepeatDays([]);
+                    } else {
+                      setRepeatDays([0, 1, 2, 3, 4, 5, 6]);
+                    }
+                  }}
+                  className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+                >
+                  {repeatDays.length === 7 ? 'Clear all' : 'Every day'}
+                </button>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
                   <label
@@ -356,6 +371,31 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
                     {day}
                   </label>
                 ))}
+              </div>
+              {/* Quick presets */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRepeatDays([1, 2, 3, 4, 5])}
+                  className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
+                    repeatDays.length === 5 && [1,2,3,4,5].every(d => repeatDays.includes(d))
+                      ? 'bg-primary/10 border-primary text-primary'
+                      : 'border-border text-muted-foreground hover:border-primary/40'
+                  }`}
+                >
+                  Weekdays
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRepeatDays([0, 6])}
+                  className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${
+                    repeatDays.length === 2 && repeatDays.includes(0) && repeatDays.includes(6)
+                      ? 'bg-primary/10 border-primary text-primary'
+                      : 'border-border text-muted-foreground hover:border-primary/40'
+                  }`}
+                >
+                  Weekends
+                </button>
               </div>
             </div>
           )}
