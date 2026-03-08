@@ -256,6 +256,22 @@ export default function Auth() {
                 />
               </div>
             </div>
+
+            {isLogin && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                />
+                <Label htmlFor="rememberMe" className="text-xs text-muted-foreground cursor-pointer">
+                  Remember me
+                </Label>
+              </div>
+            )}
+
             <Button type="submit" className="w-full h-11 rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 transition-opacity" disabled={loading}>
               {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
             </Button>
