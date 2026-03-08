@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, startOfWeek, endOfWeek, addDays, getDay } from 'date-fns';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { categoryConfig, ScheduleCategory } from '@/lib/types';
+import { categoryConfig, ScheduleCategory, Schedule } from '@/lib/types';
 
 interface WeekSchedule {
   id: string;
@@ -15,11 +15,42 @@ interface WeekSchedule {
   is_completed: boolean;
   repeat_days: number[] | null;
   repeat_type: string;
+  description: string;
+  meeting_link: string | null;
+  meeting_platform: string | null;
+  image_path: string | null;
+  alarm_tone: string;
+  team_id: string | null;
+  created_at: string;
+}
+
+interface WeeklyPlanViewProps {
+  onEdit?: (schedule: Schedule) => void;
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export default function WeeklyPlanView() {
+function toSchedule(s: WeekSchedule): Schedule {
+  return {
+    id: s.id,
+    title: s.title,
+    description: s.description || '',
+    scheduledTime: s.scheduled_time,
+    duration: s.duration,
+    meetingLink: s.meeting_link || undefined,
+    meetingPlatform: (s.meeting_platform as any) || undefined,
+    category: s.category as ScheduleCategory,
+    repeatType: (s.repeat_type as any) || 'none',
+    isCompleted: s.is_completed,
+    createdAt: s.created_at,
+    imagePath: s.image_path || undefined,
+    alarmTone: (s.alarm_tone as any) || 'default',
+    teamId: s.team_id || undefined,
+    repeatDays: s.repeat_days || undefined,
+  };
+}
+
+export default function WeeklyPlanView({ onEdit }: WeeklyPlanViewProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<WeekSchedule[]>([]);
   const [_loading, setLoading] = useState(true);
@@ -34,7 +65,7 @@ export default function WeeklyPlanView() {
     setLoading(true);
     const { data } = await supabase
       .from('schedules')
-      .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type')
+      .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type, description, meeting_link, meeting_platform, image_path, alarm_tone, team_id, created_at')
       .eq('user_id', user.id)
       .order('scheduled_time', { ascending: true });
 
@@ -153,12 +184,13 @@ export default function WeeklyPlanView() {
                     return (
                       <div
                         key={s.id}
-                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate ${
+                        onClick={() => onEdit?.(toSchedule(s))}
+                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all group/item ${
                           s.is_completed
                             ? 'bg-muted text-muted-foreground line-through'
                             : 'bg-primary/10 text-primary'
                         }`}
-                        title={`${s.title} - ${format(new Date(s.scheduled_time), 'h:mm a')}`}
+                        title={`${s.title} - ${format(new Date(s.scheduled_time), 'h:mm a')} (click to edit)`}
                       >
                         {cat?.emoji} {s.title}
                       </div>

@@ -290,7 +290,9 @@ const Index = () => {
         </div>
 
         {/* Weekly Plan */}
-        <Suspense fallback={null}><WeeklyPlanView /></Suspense>
+        <Suspense fallback={null}>
+          <WeeklyPlanView onEdit={(schedule) => { setEditingSchedule(schedule); setFormOpen(true); }} />
+        </Suspense>
 
         {/* Daily Schedule */}
         <Suspense fallback={null}>
