@@ -53,6 +53,9 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
   const [repeatType, setRepeatType] = useState<RepeatType>(editSchedule?.repeatType ?? 'none');
   const [alarmTone, setAlarmTone] = useState<AlarmTone>(editSchedule?.alarmTone ?? 'default');
   const [defaultToneLoaded, setDefaultToneLoaded] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(editSchedule?.imagePath ? getPublicUrl(editSchedule.imagePath) : null);
+  const [uploading, setUploading] = useState(false);
 
   const { value: globalTemplates, loading: templatesLoading } = useAdminSetting<GlobalTemplate[]>('global_templates', []);
 
