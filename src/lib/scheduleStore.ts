@@ -29,7 +29,7 @@ export async function getSchedules(): Promise<Schedule[]> {
     .order('scheduled_time', { ascending: true });
 
   if (error) {
-    console.error('Error fetching schedules:', error);
+    console.error('Schedule fetch failed');
     return [];
   }
   return (data || []).map(rowToSchedule);
