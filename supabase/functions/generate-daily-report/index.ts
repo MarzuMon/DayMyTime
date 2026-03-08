@@ -117,11 +117,23 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Delete completed schedules from yesterday (cleanup)
+    // Reset repeating schedules (daily/custom) back to incomplete instead of deleting
+    const { error: resetError } = await supabase
+      .from("schedules")
+      .update({ is_completed: false })
+      .eq("is_completed", true)
+      .in("repeat_type", ["daily", "custom"]);
+
+    if (resetError) {
+      console.error("Reset repeating error:", resetError);
+    }
+
+    // Delete completed non-repeating schedules from yesterday
     const { error: deleteError } = await supabase
       .from("schedules")
       .delete()
       .eq("is_completed", true)
+      .in("repeat_type", ["none", "weekly", "monthly"])
       .gte("scheduled_time", dayStart)
       .lte("scheduled_time", dayEnd);
 
