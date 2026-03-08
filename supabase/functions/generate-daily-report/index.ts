@@ -5,6 +5,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function resetAndAdvanceSchedules(supabase: any, now: Date) {
+  // 1. Reset all completed schedules to incomplete
+  const { error: resetError } = await supabase
+    .from("schedules")
+    .update({ is_completed: false })
+    .eq("is_completed", true);
+
+  if (resetError) console.error("Reset error:", resetError);
+
+  // 2. Advance repeating schedules' scheduled_time to today (keep same time-of-day)
+  const todayDateStr = now.toISOString().split("T")[0];
+
+  const { data: repeatingSchedules } = await supabase
+    .from("schedules")
+    .select("id, scheduled_time")
+    .in("repeat_type", ["daily", "custom"]);
+
+  if (repeatingSchedules && repeatingSchedules.length > 0) {
+    for (const s of repeatingSchedules) {
+      const oldTime = s.scheduled_time.split("T")[1]; // keeps timezone offset
+      const newScheduledTime = `${todayDateStr}T${oldTime}`;
+
+      await supabase
+        .from("schedules")
+        .update({ scheduled_time: newScheduledTime })
+        .eq("id", s.id);
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
