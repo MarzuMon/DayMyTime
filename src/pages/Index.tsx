@@ -7,13 +7,14 @@ import ScheduleForm from '@/components/ScheduleForm';
 import TimelineView from '@/components/TimelineView';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users, ChevronRight } from 'lucide-react';
+import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users, ChevronRight, Target, CheckCircle2, Timer } from 'lucide-react';
 import { isToday, isTomorrow, isAfter, startOfToday, addDays } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
+import { motion } from 'framer-motion';
 import SEOHead from '@/components/SEOHead';
 
 const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
@@ -33,11 +34,12 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default');
   const { toast } = useToast();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { isAdmin } = useUserRole();
   const [teamMemberCount, setTeamMemberCount] = useState(0);
+  const [displayName, setDisplayName] = useState('');
 
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
@@ -53,6 +55,12 @@ const Index = () => {
     supabase.from('team_members').select('id', { count: 'exact', head: true })
       .then(({ count }) => setTeamMemberCount(count ?? 0));
   }, [refreshSchedules]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+      .then(({ data }) => setDisplayName(data?.display_name || ''));
+  }, [user]);
 
   const handleEnableNotifications = async () => {
     const granted = await requestNotificationPermission();
@@ -105,12 +113,25 @@ const Index = () => {
   });
   const completedSchedules = filtered.filter(s => s.isCompleted);
 
+  // Quick stats
+  const todayTotal = schedules.filter(s => isToday(new Date(s.scheduledTime))).length;
+  const todayDone = schedules.filter(s => isToday(new Date(s.scheduledTime)) && s.isCompleted).length;
+  const todayRemaining = todayTotal - todayDone;
+  const focusMinutes = schedules.filter(s => s.isCompleted && isToday(new Date(s.scheduledTime))).reduce((sum, s) => sum + (s.duration || 0), 0);
+
+  const greeting = (() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  })();
+
   const renderSection = (title: string, items: Schedule[]) => {
     if (items.length === 0) return null;
     return (
       <section className="space-y-3" aria-label={`${title} schedules`}>
-        <h2 className="font-display font-semibold text-sm uppercase tracking-wider text-muted-foreground">
-          {title} <span className="text-primary">({items.length})</span>
+        <h2 className="font-display font-semibold text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          {title} <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">{items.length}</span>
         </h2>
         <div className="space-y-2">
           {items.map(s => (
@@ -122,54 +143,82 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SEOHead title="Dashboard – DayMyTime" description="Manage your schedules, meetings, and daily tasks." />
 
       {/* Header */}
-      <header className="relative overflow-hidden border-b bg-card">
-        <div className="relative max-w-2xl mx-auto px-4 py-6 sm:py-10 text-center">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <img src="/images/daymytime-icon.png" alt="" className="h-8 w-8 rounded-md" width="32" height="32" />
-              <img src="/images/daymytime-logo.png" alt="DayMyTime" className="h-7 hidden sm:block" width="125" height="28" loading="lazy" />
-              <h1 className="font-display text-xl font-bold tracking-tight sm:hidden">DayMyTime</h1>
+      <header className="relative overflow-hidden border-b">
+        <div className="absolute inset-0 gradient-hero" />
+        <div className="relative max-w-2xl mx-auto px-4 py-5 sm:py-7">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
+                <CalendarDays className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div className="hidden sm:block">
+                <span className="font-display font-bold text-base">DayMyTime</span>
+              </div>
             </div>
-            <nav className="flex items-center gap-1 flex-wrap justify-end" aria-label="App navigation">
-              <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            <nav className="flex items-center gap-1" aria-label="App navigation">
+              <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8 rounded-xl" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              <Button size="icon" variant="ghost" onClick={() => navigate('/profile')} className="h-8 w-8 sm:hidden" aria-label="Profile">
+              {isAdmin && (
+                <Button size="icon" variant="ghost" onClick={() => navigate('/author')} className="h-8 w-8 rounded-xl" aria-label="Admin">
+                  <Crown className="h-4 w-4 text-accent" />
+                </Button>
+              )}
+              <Button size="icon" variant="ghost" onClick={() => navigate('/profile')} className="h-8 w-8 rounded-xl" aria-label="Profile">
                 <UserCircle className="h-4 w-4" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => navigate('/profile')} className="hidden sm:flex">
-                <UserCircle className="h-4 w-4 mr-1" /> Profile
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => navigate('/pro')} className="h-8 w-8 sm:hidden" aria-label="Upgrade to Pro">
-                <Crown className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => navigate('/pro')} className="hidden sm:flex">
-                <Crown className="h-4 w-4 mr-1" /> Pro
-              </Button>
-              <Button size="icon" variant="ghost" onClick={signOut} className="h-8 w-8 sm:hidden" aria-label="Sign out">
+              <Button size="icon" variant="ghost" onClick={signOut} className="h-8 w-8 rounded-xl" aria-label="Sign out">
                 <LogOut className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={signOut} className="hidden sm:flex">
-                <LogOut className="h-4 w-4 mr-1" /> Sign out
               </Button>
             </nav>
           </div>
-          <p className="text-muted-foreground text-sm">Your smart visual scheduler</p>
-          <div className="flex items-center justify-center gap-3 mt-4 sm:mt-5">
-            <Button size="lg" onClick={() => { setEditingSchedule(null); setFormOpen(true); }}>
-              <Plus className="h-4 w-4 mr-2" /> Add Schedule
+
+          {/* Greeting */}
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">
+              {greeting}{displayName ? `, ${displayName}` : ''} 👋
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Here's your schedule overview</p>
+          </motion.div>
+
+          {/* Stats Grid */}
+          <motion.div
+            className="grid grid-cols-4 gap-2 mt-4"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            {[
+              { icon: CalendarDays, label: 'Today', value: todayTotal, color: 'text-primary' },
+              { icon: Target, label: 'Remaining', value: todayRemaining, color: 'text-accent' },
+              { icon: CheckCircle2, label: 'Done', value: todayDone, color: 'text-success' },
+              { icon: Timer, label: 'Focus', value: `${Math.round(focusMinutes / 60)}h`, color: 'text-primary' },
+            ].map(({ icon: Icon, label, value, color }) => (
+              <div key={label} className="rounded-xl glass p-3 text-center">
+                <Icon className={`h-4 w-4 mx-auto mb-1 ${color}`} />
+                <p className="font-display font-bold text-lg leading-none">{value}</p>
+                <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">{label}</p>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 mt-4">
+            <Button onClick={() => { setEditingSchedule(null); setFormOpen(true); }} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 h-10">
+              <Plus className="h-4 w-4 mr-1.5" /> Add Schedule
             </Button>
             {notifPermission !== 'granted' && notifPermission !== 'unsupported' && (
-              <Button size="lg" variant="outline" onClick={handleEnableNotifications}>
-                <Bell className="h-4 w-4 mr-2" /> Enable Alerts
+              <Button variant="outline" onClick={handleEnableNotifications} className="rounded-xl h-10">
+                <Bell className="h-4 w-4 mr-1.5" /> Enable Alerts
               </Button>
             )}
             {notifPermission === 'granted' && (
-              <span className="flex items-center gap-1 text-xs text-success" role="status">
+              <span className="flex items-center gap-1.5 text-xs text-success font-medium" role="status">
                 <Bell className="h-3.5 w-3.5" /> Alerts on
               </span>
             )}
@@ -178,7 +227,7 @@ const Index = () => {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 sm:space-y-8">
+      <main className="max-w-2xl mx-auto px-4 py-5 space-y-5 sm:space-y-6">
         {/* Filters + View Toggle */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 overflow-x-auto flex-1 scrollbar-hide" role="tablist" aria-label="Category filter">
@@ -187,9 +236,9 @@ const Index = () => {
               onClick={() => setFilterCategory('all')}
               role="tab"
               aria-selected={filterCategory === 'all'}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex-shrink-0 ${
                 filterCategory === 'all'
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'gradient-primary text-primary-foreground shadow-glow'
                   : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
               }`}
             >
@@ -201,9 +250,9 @@ const Index = () => {
                 onClick={() => setFilterCategory(key as ScheduleCategory)}
                 role="tab"
                 aria-selected={filterCategory === key}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex-shrink-0 ${
                   filterCategory === key
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'gradient-primary text-primary-foreground shadow-glow'
                     : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                 }`}
               >
@@ -211,12 +260,12 @@ const Index = () => {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-1 border rounded-lg p-0.5 bg-secondary flex-shrink-0" role="tablist" aria-label="View mode">
+          <div className="flex items-center gap-1 border rounded-xl p-0.5 bg-secondary flex-shrink-0" role="tablist" aria-label="View mode">
             <button
               onClick={() => setViewMode('list')}
               role="tab"
               aria-selected={viewMode === 'list'}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-card shadow-card' : 'text-muted-foreground hover:text-foreground'}`}
               aria-label="List view"
             >
               <LayoutList className="h-4 w-4" />
@@ -225,7 +274,7 @@ const Index = () => {
               onClick={() => setViewMode('timeline')}
               role="tab"
               aria-selected={viewMode === 'timeline'}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'timeline' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'timeline' ? 'bg-card shadow-card' : 'text-muted-foreground hover:text-foreground'}`}
               aria-label="Timeline view"
             >
               <Clock className="h-4 w-4" />
@@ -245,32 +294,42 @@ const Index = () => {
           role="button"
           tabIndex={0}
           onKeyDown={e => e.key === 'Enter' && navigate('/teams')}
-          className="flex items-center gap-3 p-4 rounded-xl border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 cursor-pointer transition-all group shadow-sm"
+          className="flex items-center gap-3 p-4 rounded-2xl border bg-card hover:shadow-elevated cursor-pointer transition-all group"
           aria-label="Go to Team Schedule"
         >
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-            <Users className="h-5 w-5 text-primary" />
+          <div className="h-11 w-11 rounded-xl bg-meeting-teams/10 flex items-center justify-center group-hover:bg-meeting-teams/20 transition-colors">
+            <Users className="h-5 w-5 text-meeting-teams" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-display font-semibold text-sm uppercase tracking-wider text-foreground">Team Schedule</span>
+              <span className="font-display font-semibold text-sm">Team Schedule</span>
               {teamMemberCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                <span className="px-1.5 py-0.5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold">
                   {teamMemberCount}
                 </span>
               )}
             </div>
             <p className="text-xs text-muted-foreground">View & manage team timetables</p>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
         </div>
 
         {filtered.length === 0 ? (
-          <div className="text-center py-16 sm:py-20 animate-fade-in">
-            <CalendarDays className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
+          <motion.div
+            className="text-center py-16 sm:py-20"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4">
+              <CalendarDays className="h-8 w-8 text-muted-foreground/40" />
+            </div>
             <h2 className="font-display text-lg font-semibold text-muted-foreground">No schedules yet</h2>
-            <p className="text-sm text-muted-foreground mt-1">Tap "Add Schedule" to get started</p>
-          </div>
+            <p className="text-sm text-muted-foreground mt-1 mb-4">Tap "Add Schedule" to get started</p>
+            <Button onClick={() => { setEditingSchedule(null); setFormOpen(true); }} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90">
+              <Plus className="h-4 w-4 mr-1.5" /> Create your first schedule
+            </Button>
+          </motion.div>
         ) : viewMode === 'timeline' ? (
           <div className="space-y-6">
             <TimelineView schedules={filtered} selectedDate={new Date()} onEdit={handleEdit} />
@@ -294,7 +353,7 @@ const Index = () => {
       {/* FAB */}
       <button
         onClick={() => { setEditingSchedule(null); setFormOpen(true); }}
-        className="fixed bottom-20 right-4 sm:right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 active:scale-95 transition-transform md:hidden z-50"
+        className="fixed bottom-20 right-4 sm:right-6 h-14 w-14 rounded-2xl gradient-primary text-primary-foreground shadow-glow flex items-center justify-center hover:scale-105 active:scale-95 transition-transform md:hidden z-50"
         aria-label="Add schedule"
       >
         <Plus className="h-6 w-6" />
