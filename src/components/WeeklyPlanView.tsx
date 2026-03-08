@@ -13,6 +13,8 @@ interface WeekSchedule {
   duration: number;
   category: string;
   is_completed: boolean;
+  repeat_days: number[] | null;
+  repeat_type: string;
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -32,13 +34,20 @@ export default function WeeklyPlanView() {
     setLoading(true);
     const { data } = await supabase
       .from('schedules')
-      .select('id, title, scheduled_time, duration, category, is_completed')
+      .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type')
       .eq('user_id', user.id)
-      .gte('scheduled_time', weekStart.toISOString())
-      .lte('scheduled_time', weekEnd.toISOString())
       .order('scheduled_time', { ascending: true });
 
-    setSchedules((data || []) as WeekSchedule[]);
+    // Filter: schedules in this week OR with repeat_days/daily repeat
+    const filtered = (data || []).filter((s: any) => {
+      const sDate = new Date(s.scheduled_time);
+      const inWeek = sDate >= weekStart && sDate <= weekEnd;
+      const hasRepeatDays = s.repeat_type === 'custom' && Array.isArray(s.repeat_days) && s.repeat_days.length > 0;
+      const isDaily = s.repeat_type === 'daily';
+      return inWeek || hasRepeatDays || isDaily;
+    });
+
+    setSchedules(filtered as WeekSchedule[]);
     setLoading(false);
   }, [user, weekOffset]);
 
@@ -57,12 +66,38 @@ export default function WeeklyPlanView() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchSchedules]);
 
-  // Group schedules by day of week
+  // Group schedules by day of week, including repeat_days schedules
   const byDay: Record<number, WeekSchedule[]> = {};
   for (let i = 0; i < 7; i++) byDay[i] = [];
+  const seen = new Set<string>(); // avoid duplicates per day
   schedules.forEach(s => {
     const day = getDay(new Date(s.scheduled_time));
-    byDay[day]?.push(s);
+    const sDate = new Date(s.scheduled_time);
+    const inWeek = sDate >= weekStart && sDate <= weekEnd;
+
+    // Daily repeat: show on all days
+    if (s.repeat_type === 'daily') {
+      for (let d = 0; d < 7; d++) {
+        const key = `${s.id}-${d}`;
+        if (!seen.has(key)) { seen.add(key); byDay[d].push(s); }
+      }
+      return;
+    }
+
+    // Custom repeat days
+    if (s.repeat_type === 'custom' && Array.isArray(s.repeat_days)) {
+      s.repeat_days.forEach((d: number) => {
+        const key = `${s.id}-${d}`;
+        if (!seen.has(key)) { seen.add(key); byDay[d]?.push(s); }
+      });
+      return;
+    }
+
+    // Regular schedule in this week
+    if (inWeek) {
+      const key = `${s.id}-${day}`;
+      if (!seen.has(key)) { seen.add(key); byDay[day]?.push(s); }
+    }
   });
 
   const today = getDay(now);

@@ -1,8 +1,8 @@
 export type MeetingPlatform = 'zoom' | 'meet' | 'teams' | 'other';
 
-export type ScheduleCategory = 'meeting' | 'class' | 'work' | 'personal' | 'exam' | 'other';
+export type ScheduleCategory = 'meeting' | 'class' | 'work' | 'personal' | 'exam' | 'team' | 'other';
 
-export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly';
+export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'custom';
 
 export type AlarmTone = 'default' | 'chime' | 'bell' | 'alarm' | 'gentle' | 'urgent' | 'melody' | 'digital' | 'nature' | 'piano' | 'none';
 
@@ -20,6 +20,8 @@ export interface Schedule {
   createdAt: string;
   imagePath?: string;
   alarmTone: AlarmTone;
+  teamId?: string;
+  repeatDays?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
 }
 
 export function detectMeetingPlatform(url: string): MeetingPlatform {
@@ -36,6 +38,7 @@ export const categoryConfig: Record<ScheduleCategory, { label: string; emoji: st
   class: { label: 'Class', emoji: '📚' },
   work: { label: 'Work', emoji: '💼' },
   exam: { label: 'Exam', emoji: '📝' },
+  team: { label: 'Team', emoji: '👥' },
   other: { label: 'Other', emoji: '📌' },
 };
 

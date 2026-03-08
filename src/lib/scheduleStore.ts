@@ -17,6 +17,8 @@ function rowToSchedule(row: any): Schedule {
     createdAt: row.created_at,
     imagePath: row.image_path || undefined,
     alarmTone: row.alarm_tone || 'default',
+    teamId: row.team_id || undefined,
+    repeatDays: row.repeat_days || undefined,
   };
 }
 
@@ -51,6 +53,8 @@ export async function addSchedule(schedule: Schedule): Promise<Schedule[]> {
     is_completed: schedule.isCompleted,
     image_path: schedule.imagePath || null,
     alarm_tone: schedule.alarmTone || 'default',
+    team_id: schedule.teamId || null,
+    repeat_days: schedule.repeatDays || null,
   });
 
   if (error) console.error('Error adding schedule:', error);
@@ -70,6 +74,8 @@ export async function updateSchedule(updated: Schedule): Promise<Schedule[]> {
     is_completed: updated.isCompleted,
     image_path: updated.imagePath || null,
     alarm_tone: updated.alarmTone || 'default',
+    team_id: updated.teamId || null,
+    repeat_days: updated.repeatDays || null,
   }).eq('id', updated.id);
 
   if (error) console.error('Error updating schedule:', error);

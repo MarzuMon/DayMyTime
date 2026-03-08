@@ -21,6 +21,7 @@ const categoryColors: Record<string, string> = {
   work: 'border-l-amber-500 bg-amber-500/5',
   personal: 'border-l-emerald-500 bg-emerald-500/5',
   exam: 'border-l-rose-500 bg-rose-500/5',
+  team: 'border-l-indigo-500 bg-indigo-500/5',
   other: 'border-l-slate-400 bg-slate-400/5',
 };
 
@@ -30,6 +31,7 @@ const categoryDotColors: Record<string, string> = {
   work: 'bg-amber-500',
   personal: 'bg-emerald-500',
   exam: 'bg-rose-500',
+  team: 'bg-indigo-500',
   other: 'bg-slate-400',
 };
 
