@@ -70,7 +70,7 @@ const Index = () => {
     const granted = await requestNotificationPermission();
     setNotifPermission(granted ? 'granted' : 'denied');
     if (granted) {
-      scheduleAllNotifications(schedules, refreshSchedules);
+      scheduleAllNotifications(schedules, refreshSchedules, isPro);
       toast({ title: '🔔 Notifications enabled', description: "You'll get alerts when schedules are due." });
     } else {
       toast({ title: 'Notifications blocked', description: 'Enable them in browser settings.', variant: 'destructive' });
