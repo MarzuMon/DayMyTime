@@ -26,29 +26,28 @@ export default function AcceptInvite() {
   }, [token]);
 
   const loadInvitation = async () => {
+    // Use security definer function to look up invitation by token
     const { data, error } = await supabase
-      .from('team_invitations')
-      .select('*')
-      .eq('token', token!)
-      .eq('status', 'pending')
-      .maybeSingle();
+      .rpc('get_invitation_by_token', { invite_token: token! });
 
-    if (error || !data) {
+    const invitation = Array.isArray(data) ? data[0] : data;
+
+    if (error || !invitation) {
       setStatus('error');
       return;
     }
 
-    if (new Date(data.expires_at) < new Date()) {
+    if (new Date(invitation.expires_at) < new Date()) {
       setStatus('expired');
       return;
     }
 
-    setInvitation(data);
+    setInvitation(invitation);
 
     // Get team name and inviter
     const [teamRes, inviterRes] = await Promise.all([
-      supabase.from('teams').select('name').eq('id', data.team_id).single(),
-      supabase.from('profiles').select('display_name').eq('id', data.invited_by).single(),
+      supabase.from('teams').select('name').eq('id', invitation.team_id).single(),
+      supabase.from('profiles').select('display_name').eq('id', invitation.invited_by).single(),
     ]);
 
     setTeamName(teamRes.data?.name || 'Unknown Team');
