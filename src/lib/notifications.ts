@@ -12,10 +12,7 @@ body:"Your meeting starts now"
 })
   const result = await Notification.requestPermission();
   return result === 'granted';
-  
-
-
-
+}
 
 
 export function getNotificationPermission(): NotificationPermission | 'unsupported' {
