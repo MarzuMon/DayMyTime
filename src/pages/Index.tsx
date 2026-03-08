@@ -364,6 +364,7 @@ const Index = () => {
       </main>
 
       <Suspense fallback={null}><InstallPrompt /></Suspense>
+      <Suspense fallback={null}><PromoPopup isPro={isPro} /></Suspense>
 
       {/* FAB */}
       <button
