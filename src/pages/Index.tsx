@@ -293,7 +293,12 @@ const Index = () => {
         <Suspense fallback={null}><WeeklyPlanView /></Suspense>
 
         {/* Daily Schedule */}
-        <Suspense fallback={null}><DailyScheduleSection /></Suspense>
+        <Suspense fallback={null}>
+          <DailyScheduleSection
+            onToggleComplete={handleToggle}
+            onEdit={(schedule) => { setEditingSchedule(schedule); setFormOpen(true); }}
+          />
+        </Suspense>
 
         {/* Team Schedule shortcut */}
         <div

@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import { CalendarDays, Clock, CheckCircle2, ExternalLink } from 'lucide-react';
-import { ScheduleCategory, categoryConfig } from '@/lib/types';
+import { CalendarDays, Clock, CheckCircle2, ExternalLink, Circle, Pencil } from 'lucide-react';
+import { Schedule, ScheduleCategory, categoryConfig } from '@/lib/types';
 
 interface TodaySchedule {
   id: string;
@@ -13,6 +13,19 @@ interface TodaySchedule {
   category: string;
   is_completed: boolean;
   meeting_link: string | null;
+  description: string;
+  meeting_platform: string | null;
+  repeat_type: string;
+  image_path: string | null;
+  alarm_tone: string;
+  team_id: string | null;
+  repeat_days: number[] | null;
+  created_at: string;
+}
+
+interface DailyScheduleSectionProps {
+  onToggleComplete?: (id: string) => void;
+  onEdit?: (schedule: Schedule) => void;
 }
 
 const categoryColors: Record<string, string> = {
@@ -35,7 +48,27 @@ const categoryDotColors: Record<string, string> = {
   other: 'bg-slate-400',
 };
 
-export default function DailyScheduleSection() {
+function toSchedule(s: TodaySchedule): Schedule {
+  return {
+    id: s.id,
+    title: s.title,
+    description: s.description || '',
+    scheduledTime: s.scheduled_time,
+    duration: s.duration,
+    meetingLink: s.meeting_link || undefined,
+    meetingPlatform: (s.meeting_platform as any) || undefined,
+    category: s.category as ScheduleCategory,
+    repeatType: (s.repeat_type as any) || 'none',
+    isCompleted: s.is_completed,
+    createdAt: s.created_at,
+    imagePath: s.image_path || undefined,
+    alarmTone: (s.alarm_tone as any) || 'default',
+    teamId: s.team_id || undefined,
+    repeatDays: s.repeat_days || undefined,
+  };
+}
+
+export default function DailyScheduleSection({ onToggleComplete, onEdit }: DailyScheduleSectionProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<TodaySchedule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +82,7 @@ export default function DailyScheduleSection() {
 
     const { data } = await supabase
       .from('schedules')
-      .select('id, title, scheduled_time, duration, category, is_completed, meeting_link')
+      .select('id, title, scheduled_time, duration, category, is_completed, meeting_link, description, meeting_platform, repeat_type, image_path, alarm_tone, team_id, repeat_days, created_at')
       .eq('user_id', user.id)
       .gte('scheduled_time', todayStart.toISOString())
       .lte('scheduled_time', todayEnd.toISOString())
@@ -77,7 +110,6 @@ export default function DailyScheduleSection() {
   const now = new Date();
   const currentHour = now.getHours();
 
-  // Only show hours that have schedules + current hour
   const scheduleHoursSet = new Set(schedules.map(s => new Date(s.scheduled_time).getHours()));
   scheduleHoursSet.add(currentHour);
 
@@ -116,7 +148,6 @@ export default function DailyScheduleSection() {
         </div>
       ) : (
         <div className="space-y-0">
-          {/* Hourly Time Grid */}
           <div className="rounded-xl border bg-card overflow-hidden">
             {hourSlots.map(hour => {
               const hourSchedules = getSchedulesForHour(hour);
@@ -135,7 +166,6 @@ export default function DailyScheduleSection() {
                     isCurrentHour ? 'bg-primary/5 ring-1 ring-inset ring-primary/20' : isPastHour ? 'opacity-50' : ''
                   }`}
                 >
-                  {/* Time column */}
                   <div className={`w-16 flex-shrink-0 py-2 px-2 text-right border-r ${
                     isCurrentHour ? 'text-primary font-bold' : 'text-muted-foreground'
                   }`}>
@@ -145,7 +175,6 @@ export default function DailyScheduleSection() {
                     )}
                   </div>
 
-                  {/* Schedule items column */}
                   <div className="flex-1 py-1.5 px-2 space-y-1">
                     {hourSchedules.length === 0 ? (
                       <div className="h-full" />
@@ -156,19 +185,25 @@ export default function DailyScheduleSection() {
                         return (
                           <div
                             key={s.id}
-                            className={`flex items-center gap-2 p-2 rounded-lg border-l-3 transition-all ${
+                            className={`flex items-center gap-2 p-2 rounded-lg border-l-3 transition-all group ${
                               s.is_completed 
                                 ? 'bg-secondary/30 opacity-60 border-l-muted-foreground' 
                                 : `${categoryColors[s.category] || categoryColors.other} ${status === 'soon' ? 'ring-1 ring-primary/30' : ''}`
                             }`}
                           >
-                            {s.is_completed ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                            ) : (
-                              <span className={`h-2 w-2 rounded-full flex-shrink-0 ${categoryDotColors[s.category] || categoryDotColors.other} ${
-                                status === 'soon' ? 'animate-pulse' : ''
-                              }`} />
-                            )}
+                            {/* Toggle complete button */}
+                            <button
+                              onClick={() => onToggleComplete?.(s.id)}
+                              className="flex-shrink-0 hover:scale-110 transition-transform"
+                              aria-label={s.is_completed ? 'Mark incomplete' : 'Mark complete'}
+                            >
+                              {s.is_completed ? (
+                                <CheckCircle2 className="h-4 w-4 text-primary" />
+                              ) : (
+                                <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                              )}
+                            </button>
+
                             <div className="flex-1 min-w-0">
                               <p className={`text-xs font-medium truncate ${s.is_completed ? 'line-through' : ''}`}>{s.title}</p>
                               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -182,11 +217,22 @@ export default function DailyScheduleSection() {
                                 )}
                               </div>
                             </div>
-                            {s.meeting_link && !s.is_completed && (
-                              <a href={s.meeting_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 flex-shrink-0">
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
-                            )}
+
+                            {/* Action buttons */}
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              {s.meeting_link && !s.is_completed && (
+                                <a href={s.meeting_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                </a>
+                              )}
+                              <button
+                                onClick={() => onEdit?.(toSchedule(s))}
+                                className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                                aria-label="Edit schedule"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
                         );
                       })
@@ -197,7 +243,6 @@ export default function DailyScheduleSection() {
             })}
           </div>
 
-          {/* Summary bar */}
           <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
             <span>{active.length} remaining · {completed.length} done</span>
             <span>{schedules.length} total today</span>
