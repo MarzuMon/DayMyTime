@@ -167,6 +167,8 @@ export default function ProUpgrade() {
               Auto-renews. Cancel anytime. Reverts to free if not renewed.
             </p>
 
+            <ReferralPromoCard />
+
             <Suspense fallback={null}>
               <PromotionsBanner />
             </Suspense>

@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { motion } from 'framer-motion';
 import SEOHead from '@/components/SEOHead';
+import ReferralPromoCard from '@/components/ReferralPromoCard';
 
 function ForgotPassword({ email: parentEmail }: { email: string }) {
   const email = parentEmail;
