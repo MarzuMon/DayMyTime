@@ -110,6 +110,8 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       setMeetingLink(editSchedule?.meetingLink ?? '');
       setCategory(editSchedule?.category ?? 'meeting');
       setRepeatType(editSchedule?.repeatType ?? 'none');
+      setTeamId(editSchedule?.teamId ?? '');
+      setRepeatDays(editSchedule?.repeatDays ?? []);
       if (editSchedule) {
         setAlarmTone(editSchedule.alarmTone ?? 'default');
         setImagePreview(editSchedule.imagePath ? getPublicUrl(editSchedule.imagePath) : null);
