@@ -454,6 +454,25 @@ export type Database = {
     }
     Functions: {
       check_subscription_expiry: { Args: never; Returns: undefined }
+      get_invitation_by_token: {
+        Args: { invite_token: string }
+        Returns: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          status: string
+          team_id: string
+          token: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "team_invitations"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
