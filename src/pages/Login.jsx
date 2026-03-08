@@ -1,30 +1,28 @@
+import { useState } from "react";
+import { supabase } from "../lib/supabase";
+
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  async function login() {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) alert(error.message);
+  }
+
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div>
+      <h2>Login</h2>
 
-      <div className="p-10 border rounded">
+      <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
 
-        <h2 className="text-2xl mb-4">
-          Login
-        </h2>
+      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
 
-        <input
-          className="border p-2 w-full"
-          placeholder="Email"
-        />
-
-        <input
-          className="border p-2 w-full mt-3"
-          type="password"
-          placeholder="Password"
-        />
-
-        <button className="mt-4 bg-blue-600 text-white px-4 py-2 w-full">
-          Login
-        </button>
-
-      </div>
-
+      <button onClick={login}>Login</button>
     </div>
   );
 }
