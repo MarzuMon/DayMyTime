@@ -329,7 +329,9 @@ export default function Auth() {
             Continue with Apple
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <ReferralPromoCard compact />
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
             {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               onClick={() => setIsLogin(!isLogin)}
