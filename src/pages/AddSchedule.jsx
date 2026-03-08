@@ -5,7 +5,16 @@ export default function AddSchedule() {
   const [title, setTitle] = useState("");
   const [time, setTime] = useState("");
   const [meeting, setMeeting] = useState("");
+  async function uploadImage(file) {
+    const { data, error } = await supabase.storage.from("schedule-images").upload(`images/${file.name}`, file);
 
+    if (error) {
+      console.log(error);
+      return null;
+    }
+
+    return data.path;
+  }
   async function save() {
     await supabase.from("schedules").insert([
       {
