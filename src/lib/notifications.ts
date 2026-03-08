@@ -3,7 +3,9 @@ import { toggleComplete } from "./scheduleStore";
 import { playAlarmTone, stopAlarmTone } from "./alarmTones";
 
 let scheduledTimers: Map<string, number> = new Map();
+let preReminderTimers: Map<string, number> = new Map();
 const SNOOZE_MINUTES = 5;
+const PRE_REMINDER_MINUTES = 10;
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!("Notification" in window)) return false;
@@ -17,7 +19,7 @@ export function getNotificationPermission(): NotificationPermission | "unsupport
   return Notification.permission;
 }
 
-export function scheduleNotification(schedule: Schedule, onUpdate?: () => void) {
+export function scheduleNotification(schedule: Schedule, onUpdate?: () => void, isPro?: boolean) {
   cancelNotification(schedule.id);
 
   const time = new Date(schedule.scheduledTime).getTime();
@@ -25,6 +27,18 @@ export function scheduleNotification(schedule: Schedule, onUpdate?: () => void) 
   const delay = time - now;
 
   if (delay <= 0 || schedule.isCompleted) return;
+
+  // Schedule 10-minute pre-reminder for Pro users
+  if (isPro) {
+    const preDelay = delay - PRE_REMINDER_MINUTES * 60 * 1000;
+    if (preDelay > 0) {
+      const preTimer = window.setTimeout(() => {
+        showPreReminder(schedule);
+        preReminderTimers.delete(schedule.id);
+      }, preDelay);
+      preReminderTimers.set(schedule.id, preTimer);
+    }
+  }
 
   const timer = window.setTimeout(() => {
     showNotification(schedule, onUpdate);
@@ -40,16 +54,51 @@ export function cancelNotification(id: string) {
     clearTimeout(timer);
     scheduledTimers.delete(id);
   }
+  const preTimer = preReminderTimers.get(id);
+  if (preTimer) {
+    clearTimeout(preTimer);
+    preReminderTimers.delete(id);
+  }
 }
 
 export function cancelAllNotifications() {
   scheduledTimers.forEach((timer) => clearTimeout(timer));
   scheduledTimers.clear();
+  preReminderTimers.forEach((timer) => clearTimeout(timer));
+  preReminderTimers.clear();
 }
 
-export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () => void) {
+export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () => void, isPro?: boolean) {
   cancelAllNotifications();
-  schedules.filter((s) => !s.isCompleted).forEach((s) => scheduleNotification(s, onUpdate));
+  schedules.filter((s) => !s.isCompleted).forEach((s) => scheduleNotification(s, onUpdate, isPro));
+}
+
+function showPreReminder(schedule: Schedule) {
+  if (Notification.permission !== "granted") return;
+
+  const catEmoji =
+    schedule.category === "meeting" ? "🤝"
+      : schedule.category === "class" ? "📚"
+        : schedule.category === "work" ? "💼"
+          : "📌";
+
+  const body = schedule.meetingLink
+    ? `Starting in ${PRE_REMINDER_MINUTES} minutes\n🔗 ${schedule.description || "Get ready!"}`
+    : `Starting in ${PRE_REMINDER_MINUTES} minutes\n${schedule.description || "Get ready!"}`;
+
+  const notification = new Notification(`⏰ ${catEmoji} ${schedule.title} — Soon!`, {
+    body,
+    icon: "/favicon.ico",
+    tag: `${schedule.id}-pre`,
+  });
+
+  notification.onclick = () => {
+    window.focus();
+    if (schedule.meetingLink) {
+      window.open(schedule.meetingLink, "_blank");
+    }
+    notification.close();
+  };
 }
 
 function snoozeSchedule(schedule: Schedule, onUpdate?: () => void) {

@@ -40,6 +40,7 @@ const Index = () => {
   const { isAdmin } = useUserRole();
   const [teamMemberCount, setTeamMemberCount] = useState(0);
   const [displayName, setDisplayName] = useState('');
+  const [isPro, setIsPro] = useState(false);
 
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
@@ -50,7 +51,7 @@ const Index = () => {
   useEffect(() => {
     refreshSchedules().then(s => {
       setNotifPermission(getNotificationPermission());
-      scheduleAllNotifications(s, refreshSchedules);
+      scheduleAllNotifications(s, refreshSchedules, isPro);
     });
     supabase.from('team_members').select('id', { count: 'exact', head: true })
       .then(({ count }) => setTeamMemberCount(count ?? 0));
@@ -58,15 +59,18 @@ const Index = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
-      .then(({ data }) => setDisplayName(data?.display_name || ''));
+    supabase.from('profiles').select('display_name, is_pro').eq('id', user.id).maybeSingle()
+      .then(({ data }) => {
+        setDisplayName(data?.display_name || '');
+        setIsPro(data?.is_pro || false);
+      });
   }, [user]);
 
   const handleEnableNotifications = async () => {
     const granted = await requestNotificationPermission();
     setNotifPermission(granted ? 'granted' : 'denied');
     if (granted) {
-      scheduleAllNotifications(schedules, refreshSchedules);
+      scheduleAllNotifications(schedules, refreshSchedules, isPro);
       toast({ title: '🔔 Notifications enabled', description: "You'll get alerts when schedules are due." });
     } else {
       toast({ title: 'Notifications blocked', description: 'Enable them in browser settings.', variant: 'destructive' });
@@ -77,19 +81,19 @@ const Index = () => {
     const updated = editingSchedule ? await updateSchedule(schedule) : await addSchedule(schedule);
     setSchedules(updated);
     setEditingSchedule(null);
-    scheduleAllNotifications(updated, refreshSchedules);
+    scheduleAllNotifications(updated, refreshSchedules, isPro);
   };
 
   const handleDelete = async (id: string) => {
     const updated = await deleteSchedule(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules);
+    scheduleAllNotifications(updated, refreshSchedules, isPro);
   };
 
   const handleToggle = async (id: string) => {
     const updated = await toggleComplete(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules);
+    scheduleAllNotifications(updated, refreshSchedules, isPro);
   };
 
   const handleEdit = (schedule: Schedule) => {
