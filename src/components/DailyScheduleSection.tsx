@@ -79,16 +79,24 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit }: Daily
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
+    const todayDayOfWeek = todayStart.getDay(); // 0=Sun, 6=Sat
 
     const { data } = await supabase
       .from('schedules')
       .select('id, title, scheduled_time, duration, category, is_completed, meeting_link, description, meeting_platform, repeat_type, image_path, alarm_tone, team_id, repeat_days, created_at')
       .eq('user_id', user.id)
-      .gte('scheduled_time', todayStart.toISOString())
-      .lte('scheduled_time', todayEnd.toISOString())
       .order('scheduled_time', { ascending: true });
 
-    setSchedules((data || []) as TodaySchedule[]);
+    // Filter: schedules for today OR daily repeats OR custom repeat matching today's day
+    const filtered = (data || []).filter((s: any) => {
+      const sDate = new Date(s.scheduled_time);
+      const inToday = sDate >= todayStart && sDate <= todayEnd;
+      const isDaily = s.repeat_type === 'daily';
+      const hasRepeatToday = s.repeat_type === 'custom' && Array.isArray(s.repeat_days) && s.repeat_days.includes(todayDayOfWeek);
+      return inToday || isDaily || hasRepeatToday;
+    });
+
+    setSchedules(filtered as TodaySchedule[]);
     setLoading(false);
   }, [user]);
 
