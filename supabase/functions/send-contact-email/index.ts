@@ -1,9 +1,21 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-};
+const ALLOWED_ORIGINS = [
+  'https://daymytime.lovable.app',
+  'https://daymytime.com',
+  'https://www.daymytime.com',
+]
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || ''
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app')
+    ? origin
+    : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  }
+}
 
 function escapeHtml(str: string): string {
   return str
@@ -15,12 +27,13 @@ function escapeHtml(str: string): string {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Validate JWT - require authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -44,9 +57,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const userId = claimsData.claims.sub;
-
-    // Rate limiting: check recent contact messages by this user (max 5 per hour)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count } = await supabase
       .from('contact_messages')
@@ -63,23 +73,19 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { name, email, message } = body;
 
-    // Input validation
     if (!name || typeof name !== 'string' || name.trim().length === 0 || name.length > 100) {
       return new Response(JSON.stringify({ error: 'Invalid name' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     if (!email || typeof email !== 'string' || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return new Response(JSON.stringify({ error: 'Invalid email' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     if (!message || typeof message !== 'string' || message.trim().length < 10 || message.length > 2000) {
       return new Response(JSON.stringify({ error: 'Invalid message' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -87,12 +93,10 @@ Deno.serve(async (req) => {
     if (!resendApiKey) {
       console.error('Email service configuration error');
       return new Response(JSON.stringify({ error: 'Service temporarily unavailable' }), {
-        status: 503,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Sanitize all user inputs for HTML context
     const safeName = escapeHtml(name.trim());
     const safeEmail = escapeHtml(email.trim());
     const safeMessage = escapeHtml(message.trim());
@@ -131,13 +135,10 @@ Deno.serve(async (req) => {
       }),
     });
 
-    const emailData = await emailRes.json();
-
     if (!emailRes.ok) {
       console.error('Email delivery failed');
       return new Response(JSON.stringify({ error: 'Failed to send email' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -147,8 +148,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error('Contact form error');
     return new Response(JSON.stringify({ error: 'Internal error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

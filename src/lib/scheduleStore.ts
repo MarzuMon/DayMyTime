@@ -29,7 +29,7 @@ export async function getSchedules(): Promise<Schedule[]> {
     .order('scheduled_time', { ascending: true });
 
   if (error) {
-    console.error('Error fetching schedules:', error);
+    console.error('Schedule fetch failed');
     return [];
   }
   return (data || []).map(rowToSchedule);
@@ -57,7 +57,7 @@ export async function addSchedule(schedule: Schedule): Promise<Schedule[]> {
     repeat_days: schedule.repeatDays || null,
   });
 
-  if (error) console.error('Error adding schedule:', error);
+  if (error) console.error('Schedule add failed');
   return getSchedules();
 }
 
@@ -78,13 +78,13 @@ export async function updateSchedule(updated: Schedule): Promise<Schedule[]> {
     repeat_days: updated.repeatDays || null,
   }).eq('id', updated.id);
 
-  if (error) console.error('Error updating schedule:', error);
+  if (error) console.error('Schedule update failed');
   return getSchedules();
 }
 
 export async function deleteSchedule(id: string): Promise<Schedule[]> {
   const { error } = await supabase.from('schedules').delete().eq('id', id);
-  if (error) console.error('Error deleting schedule:', error);
+  if (error) console.error('Schedule delete failed');
   return getSchedules();
 }
 

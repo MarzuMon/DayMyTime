@@ -1,8 +1,20 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+const ALLOWED_ORIGINS = [
+  'https://daymytime.lovable.app',
+  'https://daymytime.com',
+  'https://www.daymytime.com',
+]
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || ''
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app')
+    ? origin
+    : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  }
 }
 
 async function verifySignature(orderId: string, paymentId: string, signature: string, secret: string): Promise<boolean> {
@@ -22,6 +34,8 @@ async function verifySignature(orderId: string, paymentId: string, signature: st
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -65,7 +79,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Verify Razorpay signature
     const isValid = await verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature, razorpayKeySecret)
     if (!isValid) {
       return new Response(JSON.stringify({ error: 'Invalid payment signature' }), {
@@ -73,10 +86,8 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Use service role for atomic updates
     const serviceClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
-    // Check order belongs to this user and hasn't been processed (prevent replay)
     const { data: subscription, error: subError } = await serviceClient
       .from('subscriptions')
       .select('*')
@@ -91,7 +102,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Atomically update subscription and profile
     const { error: updateError } = await serviceClient
       .from('subscriptions')
       .update({
@@ -102,28 +112,26 @@ Deno.serve(async (req) => {
       .eq('id', subscription.id)
 
     if (updateError) {
-      console.error('Subscription update error:', updateError)
+      console.error('Subscription update failed')
       return new Response(JSON.stringify({ error: 'Failed to update subscription' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Upgrade user to Pro
     const { error: profileError } = await serviceClient
       .from('profiles')
       .update({ is_pro: true })
       .eq('id', userId)
 
     if (profileError) {
-      console.error('Profile update error:', profileError)
-      // Subscription was updated, log the issue but don't fail
+      console.error('Profile upgrade failed')
     }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    console.error('Error:', err)
+    console.error('Payment verification error')
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
