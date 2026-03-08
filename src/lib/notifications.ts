@@ -3,7 +3,9 @@ import { toggleComplete } from "./scheduleStore";
 import { playAlarmTone, stopAlarmTone } from "./alarmTones";
 
 let scheduledTimers: Map<string, number> = new Map();
+let preReminderTimers: Map<string, number> = new Map();
 const SNOOZE_MINUTES = 5;
+const PRE_REMINDER_MINUTES = 10;
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!("Notification" in window)) return false;
@@ -17,7 +19,7 @@ export function getNotificationPermission(): NotificationPermission | "unsupport
   return Notification.permission;
 }
 
-export function scheduleNotification(schedule: Schedule, onUpdate?: () => void) {
+export function scheduleNotification(schedule: Schedule, onUpdate?: () => void, isPro?: boolean) {
   cancelNotification(schedule.id);
 
   const time = new Date(schedule.scheduledTime).getTime();
@@ -25,6 +27,18 @@ export function scheduleNotification(schedule: Schedule, onUpdate?: () => void) 
   const delay = time - now;
 
   if (delay <= 0 || schedule.isCompleted) return;
+
+  // Schedule 10-minute pre-reminder for Pro users
+  if (isPro) {
+    const preDelay = delay - PRE_REMINDER_MINUTES * 60 * 1000;
+    if (preDelay > 0) {
+      const preTimer = window.setTimeout(() => {
+        showPreReminder(schedule);
+        preReminderTimers.delete(schedule.id);
+      }, preDelay);
+      preReminderTimers.set(schedule.id, preTimer);
+    }
+  }
 
   const timer = window.setTimeout(() => {
     showNotification(schedule, onUpdate);
