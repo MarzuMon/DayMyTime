@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star, Sparkles, Users, BarChart3, ChevronDown, Play, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { lazy, Suspense, useState } from 'react';
 import SEOHead from '@/components/SEOHead';
 
