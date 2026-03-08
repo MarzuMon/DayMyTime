@@ -245,7 +245,7 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <button
-                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                                    className="text-muted-foreground hover:text-destructive transition-opacity"
                                     aria-label="Delete schedule"
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
