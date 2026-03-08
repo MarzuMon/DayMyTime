@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { categoryConfig } from '@/lib/types';
-import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, LayoutTemplate } from 'lucide-react';
+import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, LayoutTemplate, ImagePlus, X } from 'lucide-react';
 import { useAdminSetting } from '@/hooks/use-admin-settings';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +26,10 @@ interface ScheduleFormProps {
   onOpenChange: (open: boolean) => void;
   onSave: (schedule: Schedule) => void;
   editSchedule?: Schedule | null;
+}
+
+function getPublicUrl(path: string) {
+  return supabase.storage.from('schedule-images').getPublicUrl(path).data.publicUrl;
 }
 
 export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule }: ScheduleFormProps) {
@@ -53,6 +57,9 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
   const [repeatType, setRepeatType] = useState<RepeatType>(editSchedule?.repeatType ?? 'none');
   const [alarmTone, setAlarmTone] = useState<AlarmTone>(editSchedule?.alarmTone ?? 'default');
   const [defaultToneLoaded, setDefaultToneLoaded] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(editSchedule?.imagePath ? getPublicUrl(editSchedule.imagePath) : null);
+  const [uploading, setUploading] = useState(false);
 
   const { value: globalTemplates, loading: templatesLoading } = useAdminSetting<GlobalTemplate[]>('global_templates', []);
 
@@ -84,9 +91,12 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       setRepeatType(editSchedule?.repeatType ?? 'none');
       if (editSchedule) {
         setAlarmTone(editSchedule.alarmTone ?? 'default');
+        setImagePreview(editSchedule.imagePath ? getPublicUrl(editSchedule.imagePath) : null);
       } else {
-        setDefaultToneLoaded(false); // trigger reload of default
+        setDefaultToneLoaded(false);
+        setImagePreview(null);
       }
+      setImageFile(null);
     }
   }, [open, editSchedule]);
 
@@ -99,9 +109,41 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
     setCategory((t.category as ScheduleCategory) || 'other');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be under 5MB');
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !scheduledTime) return;
+    if (!title.trim() || !scheduledTime || !user) return;
+
+    setUploading(true);
+    let imagePath = editSchedule?.imagePath || undefined;
+
+    // Upload new image if selected
+    if (imageFile) {
+      const ext = imageFile.name.split('.').pop();
+      const filePath = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('schedule-images').upload(filePath, imageFile);
+      if (!error) {
+        imagePath = filePath;
+      }
+    } else if (!imagePreview && editSchedule?.imagePath) {
+      // Image was removed
+      imagePath = undefined;
+    }
 
     const schedule: Schedule = {
       id: editSchedule?.id ?? crypto.randomUUID(),
@@ -114,10 +156,12 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       category,
       repeatType,
       alarmTone,
+      imagePath,
       isCompleted: editSchedule?.isCompleted ?? false,
       createdAt: editSchedule?.createdAt ?? new Date().toISOString(),
     };
 
+    setUploading(false);
     onSave(schedule);
     onOpenChange(false);
   };
@@ -260,6 +304,32 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             </div>
           </div>
 
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" /> Image (optional)
+            </Label>
+            {imagePreview ? (
+              <div className="relative inline-block">
+                <img src={imagePreview} alt="Preview" className="h-24 w-auto rounded-lg border object-cover" />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="cursor-pointer"
+              />
+            )}
+          </div>
+
           {/* Alarm Tone with Waveform */}
           <AlarmToneSelector value={alarmTone} onChange={setAlarmTone} />
 
@@ -267,8 +337,8 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              {editSchedule ? 'Update' : 'Add Schedule'}
+            <Button type="submit" className="flex-1" disabled={uploading}>
+              {uploading ? 'Uploading...' : editSchedule ? 'Update' : 'Add Schedule'}
             </Button>
           </div>
         </form>

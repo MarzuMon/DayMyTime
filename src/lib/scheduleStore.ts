@@ -68,6 +68,7 @@ export async function updateSchedule(updated: Schedule): Promise<Schedule[]> {
     category: updated.category,
     repeat_type: updated.repeatType,
     is_completed: updated.isCompleted,
+    image_path: updated.imagePath || null,
     alarm_tone: updated.alarmTone || 'default',
   }).eq('id', updated.id);
 

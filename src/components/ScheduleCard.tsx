@@ -1,6 +1,7 @@
 import { type Schedule, categoryConfig, platformConfig } from '@/lib/types';
 import { format, isPast, isToday, isTomorrow } from 'date-fns';
-import { Clock, ExternalLink, Check, Trash2, Pencil, Video } from 'lucide-react';
+import { Clock, ExternalLink, Check, Trash2, Pencil, Video, ImageIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -20,6 +21,9 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
   const past = isPast(time) && !schedule.isCompleted;
   const catConfig = categoryConfig[schedule.category];
   const platform = schedule.meetingPlatform ? platformConfig[schedule.meetingPlatform] : null;
+  const imageUrl = schedule.imagePath
+    ? supabase.storage.from('schedule-images').getPublicUrl(schedule.imagePath).data.publicUrl
+    : null;
 
   const dateLabel = isToday(time) ? 'Today' : isTomorrow(time) ? 'Tomorrow' : format(time, 'MMM d');
 
@@ -86,6 +90,10 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
               Join {platform.label}
               <ExternalLink className="h-3 w-3" aria-hidden="true" />
             </a>
+          )}
+
+          {imageUrl && (
+            <img src={imageUrl} alt={schedule.title} className="mt-3 h-20 w-auto rounded-md border object-cover" loading="lazy" />
           )}
         </div>
 
