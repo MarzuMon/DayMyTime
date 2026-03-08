@@ -24,10 +24,10 @@ const howItWorks = [
 ];
 
 const screenshots = [
-  { title: 'Dashboard', desc: 'Your daily overview with stats, schedules, and quick actions.', icon: LayoutDashboard },
-  { title: 'Task Planner', desc: 'Create and manage tasks with categories, duration, and repeats.', icon: ListChecks },
-  { title: 'Meeting Alerts', desc: 'Smart notifications with one-tap join for video meetings.', icon: BellRing },
-  { title: 'Mobile View', desc: 'Fully responsive design optimized for on-the-go scheduling.', icon: Smartphone },
+  { title: 'Dashboard', desc: 'Your daily overview with stats, schedules, and quick actions.', image: '/images/screenshot-dashboard.jpg' },
+  { title: 'Task Planner', desc: 'Create and manage tasks with categories, duration, and repeats.', image: '/images/screenshot-planner.jpg' },
+  { title: 'Meeting Alerts', desc: 'Smart notifications with one-tap join for video meetings.', image: '/images/screenshot-alerts.jpg' },
+  { title: 'Mobile View', desc: 'Fully responsive design optimized for on-the-go scheduling.', image: '/images/screenshot-mobile.jpg' },
 ];
 
 const testimonials = [
