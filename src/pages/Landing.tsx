@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star, Sparkles, Users, BarChart3, ChevronDown, Play, Smartphone, LayoutDashboard, BellRing, ListChecks } from 'lucide-react';
+import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star, Sparkles, Users, BarChart3, ChevronDown, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { motion, AnimatePresence } from 'framer-motion';
