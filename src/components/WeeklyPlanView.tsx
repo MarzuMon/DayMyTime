@@ -13,6 +13,8 @@ interface WeekSchedule {
   duration: number;
   category: string;
   is_completed: boolean;
+  repeat_days: number[] | null;
+  repeat_type: string;
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
