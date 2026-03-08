@@ -1,20 +1,30 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const ALLOWED_ORIGINS = [
+  'https://daymytime.lovable.app',
+  'https://daymytime.com',
+  'https://www.daymytime.com',
+]
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || ''
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app')
+    ? origin
+    : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
+}
 
 async function resetAndAdvanceSchedules(supabase: any, now: Date) {
-  // 1. Reset all completed schedules to incomplete
   const { error: resetError } = await supabase
     .from("schedules")
     .update({ is_completed: false })
     .eq("is_completed", true);
 
-  if (resetError) console.error("Reset error:", resetError);
+  if (resetError) console.error("Schedule reset failed");
 
-  // 2. Advance repeating schedules' scheduled_time to today (keep same time-of-day)
   const todayDateStr = now.toISOString().split("T")[0];
 
   const { data: repeatingSchedules } = await supabase
@@ -24,7 +34,7 @@ async function resetAndAdvanceSchedules(supabase: any, now: Date) {
 
   if (repeatingSchedules && repeatingSchedules.length > 0) {
     for (const s of repeatingSchedules) {
-      const oldTime = s.scheduled_time.split("T")[1]; // keeps timezone offset
+      const oldTime = s.scheduled_time.split("T")[1];
       const newScheduledTime = `${todayDateStr}T${oldTime}`;
 
       await supabase
@@ -36,6 +46,8 @@ async function resetAndAdvanceSchedules(supabase: any, now: Date) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -45,7 +57,6 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Get yesterday's date (report is generated at midnight for the previous day)
     const now = new Date();
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -54,14 +65,12 @@ Deno.serve(async (req) => {
     const dayStart = `${reportDate}T00:00:00.000Z`;
     const dayEnd = `${reportDate}T23:59:59.999Z`;
 
-    // Get all distinct users who had schedules yesterday
     const { data: userSchedules } = await supabase
       .from("schedules")
       .select("user_id, category, duration, is_completed, scheduled_time")
       .gte("scheduled_time", dayStart)
       .lte("scheduled_time", dayEnd);
 
-    // Reset all completed schedules and advance repeating schedule dates to today
     await resetAndAdvanceSchedules(supabase, now);
 
     if (!userSchedules || userSchedules.length === 0) {
@@ -70,7 +79,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Group by user
     const userMap = new Map<string, typeof userSchedules>();
     for (const s of userSchedules) {
       const list = userMap.get(s.user_id) || [];
@@ -88,7 +96,6 @@ Deno.serve(async (req) => {
         .filter((s) => s.is_completed)
         .reduce((sum, s) => sum + (s.duration || 0), 0);
 
-      // Category breakdown
       const categoryBreakdown: Record<string, { total: number; completed: number; minutes: number }> = {};
       for (const s of schedules) {
         if (!categoryBreakdown[s.category]) {
@@ -101,13 +108,10 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Productivity score (0-100)
       const productivityScore = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-      // Calculate streak
       let streakDays = 0;
       if (completed === total && total > 0) {
-        // Check previous days for streak
         streakDays = 1;
         const { data: prevReports } = await supabase
           .from("daily_reports")
@@ -143,7 +147,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Upsert reports
     const { error } = await supabase.from("daily_reports").upsert(reports, {
       onConflict: "user_id,report_date",
     });
@@ -155,8 +158,8 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("Error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("Report generation failed");
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -1,9 +1,20 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { HmacSha256 } from 'https://deno.land/std@0.224.0/crypto/mod.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+const ALLOWED_ORIGINS = [
+  'https://daymytime.lovable.app',
+  'https://daymytime.com',
+  'https://www.daymytime.com',
+]
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || ''
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app')
+    ? origin
+    : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  }
 }
 
 const VALID_PLANS: Record<string, { amount: number; months: number }> = {
@@ -12,6 +23,8 @@ const VALID_PLANS: Record<string, { amount: number; months: number }> = {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -42,7 +55,6 @@ Deno.serve(async (req) => {
 
     const { plan } = await req.json()
 
-    // Server-side validation - don't trust client amount
     const validPlan = VALID_PLANS[plan]
     if (!validPlan) {
       return new Response(JSON.stringify({ error: 'Invalid plan' }), {
@@ -59,7 +71,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Create Razorpay order
     const orderResponse = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
@@ -75,8 +86,7 @@ Deno.serve(async (req) => {
     })
 
     if (!orderResponse.ok) {
-      const errBody = await orderResponse.text()
-      console.error('Razorpay order error:', errBody)
+      console.error('Razorpay order creation failed')
       return new Response(JSON.stringify({ error: 'Failed to create order' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -84,7 +94,7 @@ Deno.serve(async (req) => {
 
     const order = await orderResponse.json()
 
-    // Store order in subscriptions for later verification
+    // Use service role to insert subscription (client no longer has INSERT)
     const serviceClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
     await serviceClient.from('subscriptions').insert({
       user_id: userId,
@@ -104,7 +114,7 @@ Deno.serve(async (req) => {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    console.error('Error:', err)
+    console.error('Payment order error')
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

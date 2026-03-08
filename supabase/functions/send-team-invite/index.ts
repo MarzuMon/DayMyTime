@@ -1,17 +1,30 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+const ALLOWED_ORIGINS = [
+  'https://daymytime.lovable.app',
+  'https://daymytime.com',
+  'https://www.daymytime.com',
+]
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || ''
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.lovable.app')
+    ? origin
+    : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  }
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Validate JWT
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -24,7 +37,6 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    // Create anon client to verify the user's JWT
     const anonClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     })
@@ -48,7 +60,6 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-    // Verify caller is the team owner
     const { data: team } = await supabase
       .from('teams')
       .select('owner_id, name')
@@ -62,7 +73,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check if invitation already exists
     const { data: existing } = await supabase
       .from('team_invitations')
       .select('id, status')
@@ -77,15 +87,12 @@ Deno.serve(async (req) => {
       })
     }
 
-    // If previously declined/expired, delete and re-invite
     if (existing) {
       await supabase.from('team_invitations').delete().eq('id', existing.id)
     }
 
-    // Get inviter name
     const { data: inviter } = await supabase.from('profiles').select('display_name').eq('id', userId).single()
 
-    // Create invitation using authenticated user ID as invited_by
     const { data: invitation, error: inviteError } = await supabase
       .from('team_invitations')
       .insert({ team_id: teamId, email, invited_by: userId })
