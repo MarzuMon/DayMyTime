@@ -91,7 +91,10 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
               <ExternalLink className="h-3 w-3" aria-hidden="true" />
             </a>
           )}
-        </div>
+
+          {imageUrl && (
+            <img src={imageUrl} alt={schedule.title} className="mt-3 h-20 w-auto rounded-md border object-cover" loading="lazy" />
+          )}
 
         {/* Actions - always visible on mobile, hover on desktop */}
         <div className="flex flex-col gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
