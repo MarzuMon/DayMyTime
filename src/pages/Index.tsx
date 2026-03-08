@@ -59,8 +59,11 @@ const Index = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
-      .then(({ data }) => setDisplayName(data?.display_name || ''));
+    supabase.from('profiles').select('display_name, is_pro').eq('id', user.id).maybeSingle()
+      .then(({ data }) => {
+        setDisplayName(data?.display_name || '');
+        setIsPro(data?.is_pro || false);
+      });
   }, [user]);
 
   const handleEnableNotifications = async () => {
