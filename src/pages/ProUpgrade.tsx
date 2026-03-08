@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import SEOHead from '@/components/SEOHead';
+import ReferralPromoCard from '@/components/ReferralPromoCard';
 
 const PromotionsBanner = lazy(() => import('@/components/PromotionsBanner'));
 
@@ -165,6 +166,8 @@ export default function ProUpgrade() {
             <p className="text-xs text-center text-muted-foreground">
               Auto-renews. Cancel anytime. Reverts to free if not renewed.
             </p>
+
+            <ReferralPromoCard />
 
             <Suspense fallback={null}>
               <PromotionsBanner />

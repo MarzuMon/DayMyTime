@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { motion } from 'framer-motion';
 import SEOHead from '@/components/SEOHead';
+import ReferralPromoCard from '@/components/ReferralPromoCard';
 
 function ForgotPassword({ email: parentEmail }: { email: string }) {
   const email = parentEmail;
@@ -329,7 +330,9 @@ export default function Auth() {
             Continue with Apple
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <ReferralPromoCard compact />
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
             {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               onClick={() => setIsLogin(!isLogin)}
