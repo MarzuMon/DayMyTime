@@ -106,7 +106,7 @@ export default function AcceptInvite() {
             <CardDescription>You need an account to join a team.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" onClick={() => navigate(`/auth?redirect=/accept-invite?token=${token}`)}>
+            <Button className="w-full" onClick={() => navigate(`/auth?redirect=${encodeURIComponent(`/accept-invite?token=${token}`)}`)}>
               Sign In / Sign Up
             </Button>
           </CardContent>
