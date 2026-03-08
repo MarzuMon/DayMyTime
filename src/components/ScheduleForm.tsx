@@ -12,6 +12,7 @@ import { useAdminSetting } from '@/hooks/use-admin-settings';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import AlarmToneSelector from '@/components/AlarmToneSelector';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface GlobalTemplate {
   id: string;
