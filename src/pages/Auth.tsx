@@ -62,12 +62,17 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get('ref');
   const redirectTo = searchParams.get('redirect');
+
+  // Redirect authenticated users to /app
+  if (!authLoading && user) {
+    return <Navigate to={redirectTo || '/app'} replace />;
+  }
 
   const trackReferral = async (userId: string) => {
     if (!refCode) return;
