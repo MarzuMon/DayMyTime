@@ -16,6 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
 import { motion } from 'framer-motion';
 import SEOHead from '@/components/SEOHead';
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
 const WeeklyPlanView = lazy(() => import('@/components/WeeklyPlanView'));
@@ -28,6 +29,7 @@ type ViewMode = 'list' | 'timeline';
 
 const Index = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [filterCategory, setFilterCategory] = useState<ScheduleCategory | 'all'>('all');
@@ -45,6 +47,7 @@ const Index = () => {
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
     setSchedules(s);
+    setIsLoading(false);
     return s;
   }, []);
 
@@ -145,6 +148,8 @@ const Index = () => {
       </section>
     );
   };
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
