@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import SEOHead from '@/components/SEOHead';
+import ReferralPromoCard from '@/components/ReferralPromoCard';
 
 const PromotionsBanner = lazy(() => import('@/components/PromotionsBanner'));
 
