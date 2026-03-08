@@ -6,7 +6,7 @@ export default function AddSchedule() {
   const [time, setTime] = useState("");
   const [meeting, setMeeting] = useState("");
 
-  async function saveSchedule() {
+  async function save() {
     await supabase.from("schedules").insert([
       {
         title: title,
@@ -15,7 +15,7 @@ export default function AddSchedule() {
       },
     ]);
 
-    alert("Schedule saved");
+    alert("Saved");
   }
 
   return (
@@ -28,7 +28,7 @@ export default function AddSchedule() {
 
       <input placeholder="Meeting Link" onChange={(e) => setMeeting(e.target.value)} />
 
-      <button onClick={saveSchedule}>Save</button>
+      <button onClick={save}>Save</button>
     </div>
   );
 }
