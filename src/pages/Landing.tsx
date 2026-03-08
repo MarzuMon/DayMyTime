@@ -147,6 +147,16 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 export default function Landing() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, 'change', (latest) => {
+    setShowScrollTop(latest > 400);
+  });
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
