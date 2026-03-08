@@ -324,10 +324,65 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
                   <SelectItem value="daily">Daily</SelectItem>
                   <SelectItem value="weekly">Weekly</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="custom">Custom days</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
+          {/* Custom Day Picker */}
+          {repeatType === 'custom' && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Repeat on</Label>
+              <div className="flex flex-wrap gap-2">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
+                  <label
+                    key={i}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-colors ${
+                      repeatDays.includes(i)
+                        ? 'bg-primary/10 border-primary text-primary'
+                        : 'bg-card border-border text-muted-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={repeatDays.includes(i)}
+                      onCheckedChange={(checked) => {
+                        setRepeatDays(prev =>
+                          checked ? [...prev, i].sort() : prev.filter(d => d !== i)
+                        );
+                      }}
+                      className="h-3 w-3"
+                    />
+                    {day}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Team Picker */}
+          {category === 'team' && userTeams.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-medium">
+                <Users className="h-3.5 w-3.5 text-muted-foreground" /> Assign to Team
+              </Label>
+              <Select value={teamId} onValueChange={setTeamId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a team..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {userTeams.map(t => (
+                    <SelectItem key={t.id} value={t.id}>
+                      👥 {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {category === 'team' && userTeams.length === 0 && (
+            <p className="text-xs text-muted-foreground">No teams found. Create or join a team first.</p>
+          )}
 
           {/* Image Upload */}
           <div className="space-y-2">
