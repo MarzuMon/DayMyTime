@@ -1,9 +1,9 @@
-import Navbar from "../components/Navbar";
-
 export default function Home() {
   return (
     <div className="bg-slate-900 text-white min-h-screen">
-      <Navbar />
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <span className="text-xl font-bold">DayMyTime</span>
+      </nav>
 
       <div className="text-center mt-20">
         <h1 className="text-5xl font-bold">
