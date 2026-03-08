@@ -88,8 +88,13 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50" role="navigation" aria-label="Main navigation">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" />
-            <span className="font-display font-bold text-lg tracking-tight">DayMyTime</span>
+            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl sm:hidden" />
+            <img
+              src={theme === 'dark' ? '/images/logo_N-full.png' : '/images/logo_D-full.png'}
+              alt="DayMyTime"
+              className="hidden sm:block h-9 w-auto object-contain"
+            />
+            <span className="font-display font-bold text-lg tracking-tight sm:hidden">DayMyTime</span>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="rounded-xl">
