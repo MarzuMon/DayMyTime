@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { categoryConfig } from '@/lib/types';
-import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, LayoutTemplate } from 'lucide-react';
+import { Clock, Link as LinkIcon, Tag, Type, AlignLeft, RotateCcw, LayoutTemplate, ImagePlus, X } from 'lucide-react';
 import { useAdminSetting } from '@/hooks/use-admin-settings';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
