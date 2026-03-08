@@ -1,6 +1,6 @@
 export type MeetingPlatform = 'zoom' | 'meet' | 'teams' | 'other';
 
-export type ScheduleCategory = 'meeting' | 'class' | 'work' | 'personal' | 'exam' | 'other';
+export type ScheduleCategory = 'meeting' | 'class' | 'work' | 'personal' | 'exam' | 'team' | 'other';
 
 export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly';
 
