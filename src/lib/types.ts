@@ -38,6 +38,7 @@ export const categoryConfig: Record<ScheduleCategory, { label: string; emoji: st
   class: { label: 'Class', emoji: '📚' },
   work: { label: 'Work', emoji: '💼' },
   exam: { label: 'Exam', emoji: '📝' },
+  team: { label: 'Team', emoji: '👥' },
   other: { label: 'Other', emoji: '📌' },
 };
 
