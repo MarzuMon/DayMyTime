@@ -182,6 +182,8 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       imagePath,
       isCompleted: editSchedule?.isCompleted ?? false,
       createdAt: editSchedule?.createdAt ?? new Date().toISOString(),
+      teamId: category === 'team' && teamId ? teamId : undefined,
+      repeatDays: repeatType === 'custom' && repeatDays.length > 0 ? repeatDays : undefined,
     };
 
     setUploading(false);
