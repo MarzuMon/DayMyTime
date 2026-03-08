@@ -16,6 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
 import { motion } from 'framer-motion';
 import SEOHead from '@/components/SEOHead';
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
 const WeeklyPlanView = lazy(() => import('@/components/WeeklyPlanView'));
