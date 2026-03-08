@@ -87,7 +87,7 @@ const Index = () => {
   const handleDelete = async (id: string) => {
     const updated = await deleteSchedule(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules);
+    scheduleAllNotifications(updated, refreshSchedules, isPro);
   };
 
   const handleToggle = async (id: string) => {
