@@ -161,6 +161,40 @@ export default function Landing() {
             <div className="hidden sm:block w-px h-4 bg-border" />
             <span className="text-sm text-muted-foreground">Trusted by <strong className="text-foreground">10,000+</strong> students & professionals</span>
           </motion.div>
+
+          {/* Refer & Earn Promo */}
+          <motion.div
+            variants={fadeUp}
+            custom={5}
+            className="mt-10 max-w-xl mx-auto"
+          >
+            <div
+              className="relative rounded-2xl glass border border-primary/20 p-5 sm:p-6 overflow-hidden cursor-pointer group"
+              onClick={() => navigate('/auth')}
+            >
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/15 transition-colors duration-500" />
+              <div className="relative flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                <div className="h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shadow-glow shrink-0">
+                  <Sparkles className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-display font-bold text-sm sm:text-base">
+                    🚀 Refer &amp; Earn Pro
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 leading-relaxed">
+                    Share your link. When 20 friends sign up, you get <strong className="text-primary">1 month free Pro!</strong>
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 shrink-0 whitespace-nowrap"
+                  onClick={(e) => { e.stopPropagation(); navigate('/auth'); }}
+                >
+                  Sign In Now <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </section>
 
