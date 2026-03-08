@@ -182,7 +182,7 @@ export default function Landing() {
                     🚀 Refer &amp; Earn Pro
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 leading-relaxed">
-                    Share your link. When 20 friends sign up, you get <strong className="text-primary">1 month free Pro!</strong>
+                    Share your referral link. When 20 friends sign up, you get <strong className="text-primary">1 month free Pro!</strong>
                   </p>
                 </div>
                 <Button
