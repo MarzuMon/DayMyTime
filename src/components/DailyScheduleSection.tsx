@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import { CalendarDays, Clock, CheckCircle2, ExternalLink, Circle, Pencil } from 'lucide-react';
+import { CalendarDays, Clock, CheckCircle2, ExternalLink, Circle, Pencil, Trash2 } from 'lucide-react';
 import { Schedule, ScheduleCategory, categoryConfig } from '@/lib/types';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface TodaySchedule {
   id: string;
@@ -26,6 +27,7 @@ interface TodaySchedule {
 interface DailyScheduleSectionProps {
   onToggleComplete?: (id: string) => void;
   onEdit?: (schedule: Schedule) => void;
+  onDelete?: (id: string) => void;
 }
 
 const categoryColors: Record<string, string> = {
@@ -68,7 +70,7 @@ function toSchedule(s: TodaySchedule): Schedule {
   };
 }
 
-export default function DailyScheduleSection({ onToggleComplete, onEdit }: DailyScheduleSectionProps) {
+export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelete }: DailyScheduleSectionProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<TodaySchedule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -240,6 +242,26 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit }: Daily
                               >
                                 <Pencil className="h-3.5 w-3.5" />
                               </button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <button
+                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                                    aria-label="Delete schedule"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete "{s.title}"?</AlertDialogTitle>
+                                    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onDelete?.(s.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
                           </div>
                         );

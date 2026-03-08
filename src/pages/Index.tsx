@@ -299,6 +299,7 @@ const Index = () => {
           <DailyScheduleSection
             onToggleComplete={handleToggle}
             onEdit={(schedule) => { setEditingSchedule(schedule); setFormOpen(true); }}
+            onDelete={handleDelete}
           />
         </Suspense>
 
