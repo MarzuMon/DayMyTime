@@ -399,9 +399,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-                <CalendarDays className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" />
               <span className="font-display font-bold">DayMyTime</span>
             </div>
             <nav className="flex items-center gap-6 flex-wrap justify-center text-sm" aria-label="Footer navigation">

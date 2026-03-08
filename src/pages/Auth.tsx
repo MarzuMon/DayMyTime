@@ -194,9 +194,7 @@ export default function Auth() {
         >
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2.5 mb-3 lg:hidden">
-              <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-                <CalendarDays className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <img src="/images/logo-icon.png" alt="DayMyTime" className="h-10 w-10 rounded-xl shadow-glow" />
               <h1 className="font-display text-2xl font-bold">DayMyTime</h1>
             </div>
             <h1 className="hidden lg:block font-display text-2xl font-bold mb-1">
