@@ -61,6 +61,26 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(editSchedule?.imagePath ? getPublicUrl(editSchedule.imagePath) : null);
   const [uploading, setUploading] = useState(false);
+  const [teamId, setTeamId] = useState<string>(editSchedule?.teamId ?? '');
+  const [repeatDays, setRepeatDays] = useState<number[]>(editSchedule?.repeatDays ?? []);
+  const [userTeams, setUserTeams] = useState<{ id: string; name: string }[]>([]);
+
+  // Fetch user's teams
+  useEffect(() => {
+    if (!user) return;
+    const fetchTeams = async () => {
+      const { data: ownedTeams } = await supabase.from('teams').select('id, name').eq('owner_id', user.id);
+      const { data: memberTeams } = await supabase.from('team_members').select('team_id, teams(id, name)').eq('user_id', user.id);
+      const teams: { id: string; name: string }[] = [...(ownedTeams || [])];
+      memberTeams?.forEach((m: any) => {
+        if (m.teams && !teams.find(t => t.id === m.teams.id)) {
+          teams.push({ id: m.teams.id, name: m.teams.name });
+        }
+      });
+      setUserTeams(teams);
+    };
+    fetchTeams();
+  }, [user]);
 
   const { value: globalTemplates, loading: templatesLoading } = useAdminSetting<GlobalTemplate[]>('global_templates', []);
 
