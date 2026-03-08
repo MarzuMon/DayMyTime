@@ -190,8 +190,10 @@ export type Database = {
           is_completed: boolean
           meeting_link: string | null
           meeting_platform: string | null
+          repeat_days: Json | null
           repeat_type: string
           scheduled_time: string
+          team_id: string | null
           title: string
           user_id: string
         }
@@ -206,8 +208,10 @@ export type Database = {
           is_completed?: boolean
           meeting_link?: string | null
           meeting_platform?: string | null
+          repeat_days?: Json | null
           repeat_type?: string
           scheduled_time: string
+          team_id?: string | null
           title: string
           user_id: string
         }
@@ -222,12 +226,22 @@ export type Database = {
           is_completed?: boolean
           meeting_link?: string | null
           meeting_platform?: string | null
+          repeat_days?: Json | null
           repeat_type?: string
           scheduled_time?: string
+          team_id?: string | null
           title?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "schedules_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
