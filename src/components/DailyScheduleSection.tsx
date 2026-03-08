@@ -70,7 +70,7 @@ function toSchedule(s: TodaySchedule): Schedule {
   };
 }
 
-export default function DailyScheduleSection({ onToggleComplete, onEdit }: DailyScheduleSectionProps) {
+export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelete }: DailyScheduleSectionProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<TodaySchedule[]>([]);
   const [loading, setLoading] = useState(true);
