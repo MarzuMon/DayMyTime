@@ -1,9 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PageTransition from "@/components/PageTransition";
+import { AnimatePresence } from "framer-motion";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -30,32 +32,42 @@ function LoadingFallback() {
   );
 }
 
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Public routes */}
+        <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+        <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+        <Route path="/accept-invite" element={<PageTransition><AcceptInvite /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+        <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+        <Route path="/terms" element={<PageTransition><TermsOfService /></PageTransition>} />
+
+        {/* Protected routes */}
+        <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
+        <Route path="/pro" element={<ProtectedRoute><PageTransition><ProUpgrade /></PageTransition></ProtectedRoute>} />
+        <Route path="/author" element={<ProtectedRoute><PageTransition><Author /></PageTransition></ProtectedRoute>} />
+        <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><PageTransition><Analytics /></PageTransition></ProtectedRoute>} />
+
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
           <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/accept-invite" element={<AcceptInvite />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfService />} />
-
-              {/* Protected routes */}
-              <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/pro" element={<ProtectedRoute><ProUpgrade /></ProtectedRoute>} />
-              <Route path="/author" element={<ProtectedRoute><Author /></ProtectedRoute>} />
-              <Route path="/teams" element={<ProtectedRoute><Teams /></ProtectedRoute>} />
-              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AnimatedRoutes />
           </Suspense>
           <Toaster />
         </BrowserRouter>
