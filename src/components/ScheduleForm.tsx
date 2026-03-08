@@ -91,9 +91,12 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       setRepeatType(editSchedule?.repeatType ?? 'none');
       if (editSchedule) {
         setAlarmTone(editSchedule.alarmTone ?? 'default');
+        setImagePreview(editSchedule.imagePath ? getPublicUrl(editSchedule.imagePath) : null);
       } else {
-        setDefaultToneLoaded(false); // trigger reload of default
+        setDefaultToneLoaded(false);
+        setImagePreview(null);
       }
+      setImageFile(null);
     }
   }, [open, editSchedule]);
 
