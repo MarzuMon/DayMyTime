@@ -109,9 +109,41 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
     setCategory((t.category as ScheduleCategory) || 'other');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be under 5MB');
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !scheduledTime) return;
+    if (!title.trim() || !scheduledTime || !user) return;
+
+    setUploading(true);
+    let imagePath = editSchedule?.imagePath || undefined;
+
+    // Upload new image if selected
+    if (imageFile) {
+      const ext = imageFile.name.split('.').pop();
+      const filePath = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('schedule-images').upload(filePath, imageFile);
+      if (!error) {
+        imagePath = filePath;
+      }
+    } else if (!imagePreview && editSchedule?.imagePath) {
+      // Image was removed
+      imagePath = undefined;
+    }
 
     const schedule: Schedule = {
       id: editSchedule?.id ?? crypto.randomUUID(),
@@ -124,10 +156,12 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       category,
       repeatType,
       alarmTone,
+      imagePath,
       isCompleted: editSchedule?.isCompleted ?? false,
       createdAt: editSchedule?.createdAt ?? new Date().toISOString(),
     };
 
+    setUploading(false);
     onSave(schedule);
     onOpenChange(false);
   };
