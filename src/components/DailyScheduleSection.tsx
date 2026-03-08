@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import { CalendarDays, Clock, CheckCircle2, ExternalLink, Circle, Pencil } from 'lucide-react';
+import { CalendarDays, Clock, CheckCircle2, ExternalLink, Circle, Pencil, Trash2 } from 'lucide-react';
 import { Schedule, ScheduleCategory, categoryConfig } from '@/lib/types';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface TodaySchedule {
   id: string;
