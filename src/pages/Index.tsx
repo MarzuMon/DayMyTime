@@ -40,6 +40,7 @@ const Index = () => {
   const { isAdmin } = useUserRole();
   const [teamMemberCount, setTeamMemberCount] = useState(0);
   const [displayName, setDisplayName] = useState('');
+  const [isPro, setIsPro] = useState(false);
 
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
@@ -50,7 +51,7 @@ const Index = () => {
   useEffect(() => {
     refreshSchedules().then(s => {
       setNotifPermission(getNotificationPermission());
-      scheduleAllNotifications(s, refreshSchedules);
+      scheduleAllNotifications(s, refreshSchedules, isPro);
     });
     supabase.from('team_members').select('id', { count: 'exact', head: true })
       .then(({ count }) => setTeamMemberCount(count ?? 0));
