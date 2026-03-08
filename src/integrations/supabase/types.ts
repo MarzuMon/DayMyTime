@@ -59,6 +59,48 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_reports: {
+        Row: {
+          category_breakdown: Json
+          completed_schedules: number
+          created_at: string
+          focus_minutes: number
+          id: string
+          pending_schedules: number
+          productivity_score: number
+          report_date: string
+          streak_days: number
+          total_schedules: number
+          user_id: string
+        }
+        Insert: {
+          category_breakdown?: Json
+          completed_schedules?: number
+          created_at?: string
+          focus_minutes?: number
+          id?: string
+          pending_schedules?: number
+          productivity_score?: number
+          report_date: string
+          streak_days?: number
+          total_schedules?: number
+          user_id: string
+        }
+        Update: {
+          category_breakdown?: Json
+          completed_schedules?: number
+          created_at?: string
+          focus_minutes?: number
+          id?: string
+          pending_schedules?: number
+          productivity_score?: number
+          report_date?: string
+          streak_days?: number
+          total_schedules?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

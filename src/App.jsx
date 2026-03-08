@@ -16,6 +16,7 @@ const Author = lazy(() => import("./pages/Author"));
 const Teams = lazy(() => import("./pages/Teams"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const Reports = lazy(() => import("./pages/Reports"));
 const AcceptInvite = lazy(() => import("./pages/AcceptInvite"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -54,6 +55,7 @@ function AnimatedRoutes() {
         <Route path="/author" element={<ProtectedRoute><PageTransition><Author /></PageTransition></ProtectedRoute>} />
         <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><PageTransition><Analytics /></PageTransition></ProtectedRoute>} />
+        <Route path="/reports" element={<ProtectedRoute><PageTransition><Reports /></PageTransition></ProtectedRoute>} />
 
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>

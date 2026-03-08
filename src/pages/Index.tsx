@@ -352,7 +352,6 @@ const Index = () => {
             {renderSection('Today', todaySchedules)}
             {renderSection('Tomorrow', tomorrowSchedules)}
             {renderSection('Upcoming', upcomingSchedules)}
-            {renderSection('Completed', completedSchedules)}
           </>
         )}
 
