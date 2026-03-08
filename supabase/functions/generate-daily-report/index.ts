@@ -120,16 +120,6 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Reset ALL completed schedules back to incomplete (both repeating and non-repeating)
-    const { error: resetError } = await supabase
-      .from("schedules")
-      .update({ is_completed: false })
-      .eq("is_completed", true);
-
-    if (resetError) {
-      console.error("Reset error:", resetError);
-    }
-
     return new Response(
       JSON.stringify({ message: `Generated ${reports.length} reports`, reset: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
