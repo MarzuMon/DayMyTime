@@ -147,9 +147,7 @@ export default function Auth() {
 
         <div className="relative flex flex-col justify-center px-12 xl:px-20">
           <div className="flex items-center gap-3 mb-10">
-            <div className="h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-              <CalendarDays className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-11 w-11 rounded-xl shadow-glow" />
             <span className="font-display font-bold text-2xl">DayMyTime</span>
           </div>
 
