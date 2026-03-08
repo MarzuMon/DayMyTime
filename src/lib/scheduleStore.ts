@@ -57,7 +57,7 @@ export async function addSchedule(schedule: Schedule): Promise<Schedule[]> {
     repeat_days: schedule.repeatDays || null,
   });
 
-  if (error) console.error('Error adding schedule:', error);
+  if (error) console.error('Schedule add failed');
   return getSchedules();
 }
 
