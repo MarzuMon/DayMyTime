@@ -73,6 +73,34 @@ export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () =>
   schedules.filter((s) => !s.isCompleted).forEach((s) => scheduleNotification(s, onUpdate, isPro));
 }
 
+function showPreReminder(schedule: Schedule) {
+  if (Notification.permission !== "granted") return;
+
+  const catEmoji =
+    schedule.category === "meeting" ? "🤝"
+      : schedule.category === "class" ? "📚"
+        : schedule.category === "work" ? "💼"
+          : "📌";
+
+  const body = schedule.meetingLink
+    ? `Starting in ${PRE_REMINDER_MINUTES} minutes\n🔗 ${schedule.description || "Get ready!"}`
+    : `Starting in ${PRE_REMINDER_MINUTES} minutes\n${schedule.description || "Get ready!"}`;
+
+  const notification = new Notification(`⏰ ${catEmoji} ${schedule.title} — Soon!`, {
+    body,
+    icon: "/favicon.ico",
+    tag: `${schedule.id}-pre`,
+  });
+
+  notification.onclick = () => {
+    window.focus();
+    if (schedule.meetingLink) {
+      window.open(schedule.meetingLink, "_blank");
+    }
+    notification.close();
+  };
+}
+
 function snoozeSchedule(schedule: Schedule, onUpdate?: () => void) {
   const snoozedSchedule: Schedule = {
     ...schedule,
