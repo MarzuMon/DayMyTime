@@ -2,7 +2,7 @@ export type MeetingPlatform = 'zoom' | 'meet' | 'teams' | 'other';
 
 export type ScheduleCategory = 'meeting' | 'class' | 'work' | 'personal' | 'exam' | 'team' | 'other';
 
-export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly';
+export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'custom';
 
 export type AlarmTone = 'default' | 'chime' | 'bell' | 'alarm' | 'gentle' | 'urgent' | 'melody' | 'digital' | 'nature' | 'piano' | 'none';
 
