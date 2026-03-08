@@ -21,6 +21,9 @@ export default function ScheduleCard({ schedule, onToggleComplete, onDelete, onE
   const past = isPast(time) && !schedule.isCompleted;
   const catConfig = categoryConfig[schedule.category];
   const platform = schedule.meetingPlatform ? platformConfig[schedule.meetingPlatform] : null;
+  const imageUrl = schedule.imagePath
+    ? supabase.storage.from('schedule-images').getPublicUrl(schedule.imagePath).data.publicUrl
+    : null;
 
   const dateLabel = isToday(time) ? 'Today' : isTomorrow(time) ? 'Tomorrow' : format(time, 'MMM d');
 
