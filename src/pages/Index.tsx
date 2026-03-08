@@ -28,6 +28,7 @@ type ViewMode = 'list' | 'timeline';
 
 const Index = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [filterCategory, setFilterCategory] = useState<ScheduleCategory | 'all'>('all');
