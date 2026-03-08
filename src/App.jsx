@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -36,19 +37,23 @@ export default function App() {
         <BrowserRouter>
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/app" element={<Index />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/pro" element={<ProUpgrade />} />
-              <Route path="/author" element={<Author />} />
-              <Route path="/teams" element={<Teams />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/analytics" element={<Analytics />} />
               <Route path="/accept-invite" element={<AcceptInvite />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
+
+              {/* Protected routes */}
+              <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/pro" element={<ProtectedRoute><ProUpgrade /></ProtectedRoute>} />
+              <Route path="/author" element={<ProtectedRoute><Author /></ProtectedRoute>} />
+              <Route path="/teams" element={<ProtectedRoute><Teams /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
