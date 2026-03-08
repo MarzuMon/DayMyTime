@@ -93,7 +93,7 @@ const Index = () => {
   const handleToggle = async (id: string) => {
     const updated = await toggleComplete(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules);
+    scheduleAllNotifications(updated, refreshSchedules, isPro);
   };
 
   const handleEdit = (schedule: Schedule) => {
