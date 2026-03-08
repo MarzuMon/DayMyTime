@@ -53,7 +53,7 @@ export default function Reports() {
       .order('report_date', { ascending: false })
       .limit(30);
 
-    const typed = (data || []) as DailyReport[];
+    const typed = (data || []) as unknown as DailyReport[];
     setReports(typed);
     if (typed.length > 0) setSelectedReport(typed[0]);
     setLoading(false);
