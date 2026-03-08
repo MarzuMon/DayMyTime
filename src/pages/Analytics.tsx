@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, PieChart as PieIcon, BarChart3, CalendarCheck, Target, Flame, CalendarDays } from 'lucide-react';
+import { ArrowLeft, TrendingUp, PieChart as PieIcon, BarChart3, CalendarCheck, Target, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
