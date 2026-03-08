@@ -27,6 +27,7 @@ interface TodaySchedule {
 interface DailyScheduleSectionProps {
   onToggleComplete?: (id: string) => void;
   onEdit?: (schedule: Schedule) => void;
+  onDelete?: (id: string) => void;
 }
 
 const categoryColors: Record<string, string> = {
