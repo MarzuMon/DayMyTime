@@ -78,7 +78,7 @@ export async function updateSchedule(updated: Schedule): Promise<Schedule[]> {
     repeat_days: updated.repeatDays || null,
   }).eq('id', updated.id);
 
-  if (error) console.error('Error updating schedule:', error);
+  if (error) console.error('Schedule update failed');
   return getSchedules();
 }
 
