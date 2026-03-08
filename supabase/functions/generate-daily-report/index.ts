@@ -32,7 +32,15 @@ Deno.serve(async (req) => {
       .lte("scheduled_time", dayEnd);
 
     if (!userSchedules || userSchedules.length === 0) {
-      return new Response(JSON.stringify({ message: "No schedules to report" }), {
+      // Still reset completed schedules even if no yesterday schedules
+      const { error: resetError } = await supabase
+        .from("schedules")
+        .update({ is_completed: false })
+        .eq("is_completed", true);
+
+      if (resetError) console.error("Reset error:", resetError);
+
+      return new Response(JSON.stringify({ message: "No schedules to report", reset: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
