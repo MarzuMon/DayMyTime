@@ -102,6 +102,13 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
       } else {
+        // If "remember me" is off, mark session as temporary
+        if (!rememberMe) {
+          sessionStorage.setItem('dmt_session_only', 'true');
+        } else {
+          sessionStorage.removeItem('dmt_session_only');
+        }
+
         const storedRef = localStorage.getItem('dmt_ref');
         if (storedRef) {
           const { data: { user: loggedUser } } = await supabase.auth.getUser();
