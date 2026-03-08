@@ -65,7 +65,7 @@ export default function WeeklyPlanView({ onEdit }: WeeklyPlanViewProps) {
     setLoading(true);
     const { data } = await supabase
       .from('schedules')
-      .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type')
+      .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type, description, meeting_link, meeting_platform, image_path, alarm_tone, team_id, created_at')
       .eq('user_id', user.id)
       .order('scheduled_time', { ascending: true });
 
