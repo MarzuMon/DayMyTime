@@ -53,6 +53,8 @@ export async function addSchedule(schedule: Schedule): Promise<Schedule[]> {
     is_completed: schedule.isCompleted,
     image_path: schedule.imagePath || null,
     alarm_tone: schedule.alarmTone || 'default',
+    team_id: schedule.teamId || null,
+    repeat_days: schedule.repeatDays || null,
   });
 
   if (error) console.error('Error adding schedule:', error);
