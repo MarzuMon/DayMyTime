@@ -31,7 +31,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Clear session on tab close if "remember me" was unchecked
+    const handleBeforeUnload = () => {
+      if (sessionStorage.getItem('dmt_session_only') === 'true') {
+        supabase.auth.signOut();
+        sessionStorage.removeItem('dmt_session_only');
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string) => {
@@ -52,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    sessionStorage.removeItem('dmt_session_only');
     await supabase.auth.signOut();
   };
 
