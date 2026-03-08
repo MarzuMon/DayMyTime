@@ -54,16 +54,23 @@ export function cancelNotification(id: string) {
     clearTimeout(timer);
     scheduledTimers.delete(id);
   }
+  const preTimer = preReminderTimers.get(id);
+  if (preTimer) {
+    clearTimeout(preTimer);
+    preReminderTimers.delete(id);
+  }
 }
 
 export function cancelAllNotifications() {
   scheduledTimers.forEach((timer) => clearTimeout(timer));
   scheduledTimers.clear();
+  preReminderTimers.forEach((timer) => clearTimeout(timer));
+  preReminderTimers.clear();
 }
 
-export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () => void) {
+export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () => void, isPro?: boolean) {
   cancelAllNotifications();
-  schedules.filter((s) => !s.isCompleted).forEach((s) => scheduleNotification(s, onUpdate));
+  schedules.filter((s) => !s.isCompleted).forEach((s) => scheduleNotification(s, onUpdate, isPro));
 }
 
 function snoozeSchedule(schedule: Schedule, onUpdate?: () => void) {
