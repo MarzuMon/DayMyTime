@@ -28,6 +28,10 @@ interface ScheduleFormProps {
   editSchedule?: Schedule | null;
 }
 
+function getPublicUrl(path: string) {
+  return supabase.storage.from('schedule-images').getPublicUrl(path).data.publicUrl;
+}
+
 export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule }: ScheduleFormProps) {
   const { user } = useAuth();
   const [title, setTitle] = useState(editSchedule?.title ?? '');
