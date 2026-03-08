@@ -46,6 +46,7 @@ const Index = () => {
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
     setSchedules(s);
+    setIsLoading(false);
     return s;
   }, []);
 
