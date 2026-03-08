@@ -61,6 +61,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -101,6 +102,13 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
       } else {
+        // If "remember me" is off, mark session as temporary
+        if (!rememberMe) {
+          sessionStorage.setItem('dmt_session_only', 'true');
+        } else {
+          sessionStorage.removeItem('dmt_session_only');
+        }
+
         const storedRef = localStorage.getItem('dmt_ref');
         if (storedRef) {
           const { data: { user: loggedUser } } = await supabase.auth.getUser();
@@ -139,9 +147,7 @@ export default function Auth() {
 
         <div className="relative flex flex-col justify-center px-12 xl:px-20">
           <div className="flex items-center gap-3 mb-10">
-            <div className="h-11 w-11 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-              <CalendarDays className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-11 w-11 rounded-xl shadow-glow" />
             <span className="font-display font-bold text-2xl">DayMyTime</span>
           </div>
 
@@ -188,9 +194,7 @@ export default function Auth() {
         >
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2.5 mb-3 lg:hidden">
-              <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-                <CalendarDays className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <img src="/images/logo-icon.png" alt="DayMyTime" className="h-10 w-10 rounded-xl shadow-glow" />
               <h1 className="font-display text-2xl font-bold">DayMyTime</h1>
             </div>
             <h1 className="hidden lg:block font-display text-2xl font-bold mb-1">
@@ -255,6 +259,22 @@ export default function Auth() {
                 />
               </div>
             </div>
+
+            {isLogin && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                />
+                <Label htmlFor="rememberMe" className="text-xs text-muted-foreground cursor-pointer">
+                  Remember me
+                </Label>
+              </div>
+            )}
+
             <Button type="submit" className="w-full h-11 rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 transition-opacity" disabled={loading}>
               {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
             </Button>

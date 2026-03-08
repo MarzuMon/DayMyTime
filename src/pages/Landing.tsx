@@ -88,9 +88,7 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50" role="navigation" aria-label="Main navigation">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-              <CalendarDays className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" />
             <span className="font-display font-bold text-lg tracking-tight">DayMyTime</span>
           </div>
           <div className="flex items-center gap-2">
@@ -401,9 +399,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-                <CalendarDays className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" />
               <span className="font-display font-bold">DayMyTime</span>
             </div>
             <nav className="flex items-center gap-6 flex-wrap justify-center text-sm" aria-label="Footer navigation">
