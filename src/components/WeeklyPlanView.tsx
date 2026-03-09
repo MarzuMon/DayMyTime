@@ -100,36 +100,51 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
     return () => { supabase.removeChannel(channel); };
   }, [fetchSchedules]);
 
-  // Group schedules by day, expanding daily/custom repeats to their respective days
+  // Group schedules by day, but only show schedules for today and past days (not future days)
   const byDay: Record<number, WeekSchedule[]> = {};
   for (let i = 0; i < 7; i++) byDay[i] = [];
   const seen = new Set<string>();
+  
+  // Determine which days have "started" (reached midnight)
+  const todayDayIndex = getDay(now);
+  const isCurrentWeek = weekOffset === 0;
+  const isPastWeek = weekOffset < 0;
+  
+  // Helper: check if a day index has started (past midnight)
+  const hasDayStarted = (dayIndex: number): boolean => {
+    if (isPastWeek) return true; // All days in past weeks are visible
+    if (!isCurrentWeek) return false; // Future weeks: no days started yet
+    return dayIndex <= todayDayIndex; // Current week: only today and before
+  };
   
   schedules.forEach(s => {
     const sDate = new Date(s.scheduled_time);
     const inWeek = sDate >= weekStart && sDate <= weekEnd;
     
-    // Daily repeat: show on all 7 days
+    // Daily repeat: show only on days that have started
     if (s.repeat_type === 'daily') {
       for (let d = 0; d < 7; d++) {
+        if (!hasDayStarted(d)) continue;
         const key = `${s.id}-${d}`;
         if (!seen.has(key)) { seen.add(key); byDay[d].push(s); }
       }
       return;
     }
     
-    // Custom repeat days: show on specified days
+    // Custom repeat days: show only on days that have started
     if (s.repeat_type === 'custom' && Array.isArray(s.repeat_days)) {
       s.repeat_days.forEach((d: number) => {
+        if (!hasDayStarted(d)) return;
         const key = `${s.id}-${d}`;
         if (!seen.has(key)) { seen.add(key); byDay[d]?.push(s); }
       });
       return;
     }
     
-    // Regular schedule in this week
+    // Regular schedule in this week - only show if that day has started
     if (inWeek) {
       const day = getDay(sDate);
+      if (!hasDayStarted(day)) return;
       const key = `${s.id}-${day}`;
       if (!seen.has(key)) { seen.add(key); byDay[day]?.push(s); }
     }
