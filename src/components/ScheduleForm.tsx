@@ -52,6 +52,18 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       ? formatLocalDateTime(editSchedule.scheduledTime)
       : ''
   );
+
+  // Listen for prefill date from weekly plan
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const iso = (e as CustomEvent).detail;
+      if (iso && !editSchedule) {
+        setScheduledTime(formatLocalDateTime(iso));
+      }
+    };
+    window.addEventListener('prefill-schedule-date', handler);
+    return () => window.removeEventListener('prefill-schedule-date', handler);
+  }, [editSchedule]);
   const [duration, setDuration] = useState(editSchedule?.duration?.toString() ?? '30');
   const [meetingLink, setMeetingLink] = useState(editSchedule?.meetingLink ?? '');
   const [category, setCategory] = useState<ScheduleCategory>(editSchedule?.category ?? 'meeting');

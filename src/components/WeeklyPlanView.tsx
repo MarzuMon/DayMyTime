@@ -26,6 +26,7 @@ interface WeekSchedule {
 
 interface WeeklyPlanViewProps {
   onEdit?: (schedule: Schedule) => void;
+  onCreateForDate?: (date: Date) => void;
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -50,7 +51,7 @@ function toSchedule(s: WeekSchedule): Schedule {
   };
 }
 
-export default function WeeklyPlanView({ onEdit }: WeeklyPlanViewProps) {
+export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanViewProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<WeekSchedule[]>([]);
   const [_loading, setLoading] = useState(true);
@@ -143,7 +144,16 @@ export default function WeeklyPlanView({ onEdit }: WeeklyPlanViewProps) {
                 {name}
               </div>
               {daySchedules.length === 0 ? (
-                <div className="text-[10px] text-muted-foreground/50">—</div>
+                <button
+                  onClick={() => {
+                    const dayDate = addDays(weekStart, i);
+                    dayDate.setHours(9, 0, 0, 0);
+                    onCreateForDate?.(dayDate);
+                  }}
+                  className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors w-full py-2"
+                >
+                  + Add
+                </button>
               ) : (
                 <div className="space-y-0.5">
                   {daySchedules.slice(0, 3).map(s => {
