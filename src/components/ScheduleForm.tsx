@@ -64,7 +64,17 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
     window.addEventListener('prefill-schedule-date', handler);
     return () => window.removeEventListener('prefill-schedule-date', handler);
   }, [editSchedule]);
-  const [duration, setDuration] = useState(editSchedule?.duration?.toString() ?? '30');
+  // Duration stored as minutes internally, displayed as HH:MM
+  const minutesToTime = (mins: number): string => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+  const timeToMinutes = (time: string): number => {
+    const [h, m] = time.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
+  const [durationTime, setDurationTime] = useState(minutesToTime(editSchedule?.duration ?? 30));
   const [meetingLink, setMeetingLink] = useState(editSchedule?.meetingLink ?? '');
   const [category, setCategory] = useState<ScheduleCategory>(editSchedule?.category ?? 'meeting');
   const [repeatType, setRepeatType] = useState<RepeatType>(editSchedule?.repeatType ?? 'none');
