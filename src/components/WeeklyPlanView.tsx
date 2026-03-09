@@ -51,7 +51,7 @@ function toSchedule(s: WeekSchedule): Schedule {
   };
 }
 
-export default function WeeklyPlanView({ onEdit }: WeeklyPlanViewProps) {
+export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanViewProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<WeekSchedule[]>([]);
   const [_loading, setLoading] = useState(true);
