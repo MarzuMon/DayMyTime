@@ -192,6 +192,7 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
           const isFutureDay = isCurrentWeek && i > today;
           const isFutureWeek = weekOffset > 0;
           const isDayLocked = isFutureDay || isFutureWeek;
+          const isPastDayLocked = isDayPast(i);
 
           return (
             <div
@@ -201,25 +202,32 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
                   ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
                   : isDayLocked
                     ? 'border-border bg-muted/30 opacity-60'
-                    : 'border-border bg-card'
+                    : isPastDayLocked
+                      ? 'border-border bg-muted/10'
+                      : 'border-border bg-card'
               }`}
             >
-              <div className={`text-xs font-semibold mb-1.5 ${isTodayCol ? 'text-primary' : isDayLocked ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}>
+              <div className={`text-xs font-semibold mb-1.5 flex items-center justify-center gap-1 ${isTodayCol ? 'text-primary' : isDayLocked ? 'text-muted-foreground/50' : isPastDayLocked ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>
                 {name}
+                {isPastDayLocked && <Lock className="h-2.5 w-2.5 text-muted-foreground/40" />}
               </div>
               {isDayLocked ? (
                 <div className="text-[10px] text-muted-foreground/40 py-2">—</div>
               ) : daySchedules.length === 0 ? (
-                <button
-                  onClick={() => {
-                    const dayDate = addDays(weekStart, i);
-                    dayDate.setHours(9, 0, 0, 0);
-                    onCreateForDate?.(dayDate);
-                  }}
-                  className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors w-full py-2"
-                >
-                  + Add
-                </button>
+                isPastDayLocked ? (
+                  <div className="text-[10px] text-muted-foreground/40 py-2">—</div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      const dayDate = addDays(weekStart, i);
+                      dayDate.setHours(9, 0, 0, 0);
+                      onCreateForDate?.(dayDate);
+                    }}
+                    className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors w-full py-2"
+                  >
+                    + Add
+                  </button>
+                )
               ) : (
                 <div className="space-y-0.5">
                   {daySchedules.slice(0, 3).map(s => {
@@ -227,15 +235,21 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
                     return (
                       <div
                         key={s.id}
-                        onClick={() => onEdit?.(toSchedule(s))}
-                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all group/item ${
+                        onClick={() => {
+                          if (!isPastDayLocked) onEdit?.(toSchedule(s));
+                        }}
+                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate transition-all group/item ${
+                          isPastDayLocked
+                            ? 'cursor-default'
+                            : 'cursor-pointer hover:ring-1 hover:ring-primary/30'
+                        } ${
                           s.is_completed
                             ? 'bg-muted text-muted-foreground line-through'
                             : 'bg-primary/10 text-primary'
                         }`}
-                        title={`${s.title} - ${format(new Date(s.scheduled_time), 'h:mm a')} (click to edit)`}
+                        title={`${s.title} - ${format(new Date(s.scheduled_time), 'h:mm a')}${isPastDayLocked ? ' (locked)' : ' (click to edit)'}`}
                       >
-                        {cat?.emoji} {s.title}
+                        <span className="text-[8px] text-muted-foreground">{format(new Date(s.scheduled_time), 'h:mma')}</span> {cat?.emoji} {s.title}
                       </div>
                     );
                   })}
