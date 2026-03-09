@@ -39,7 +39,7 @@ function rowToSchedule(row: any): Schedule {
   };
 }
 
-export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDate }: DayScheduleDetailProps) {
+export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDate, onNavigate, canGoPrev = true, canGoNext = true }: DayScheduleDetailProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
