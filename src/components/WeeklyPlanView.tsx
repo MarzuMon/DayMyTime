@@ -116,6 +116,13 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
     if (!isCurrentWeek) return false; // Future weeks: no days started yet
     return dayIndex <= todayDayIndex; // Current week: only today and before
   };
+
+  // Helper: check if a day is in the past (before today) - used to lock editing
+  const isDayPast = (dayIndex: number): boolean => {
+    if (isPastWeek) return true;
+    if (!isCurrentWeek) return false;
+    return dayIndex < todayDayIndex;
+  };
   
   schedules.forEach(s => {
     const sDate = new Date(s.scheduled_time);
