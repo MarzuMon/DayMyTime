@@ -195,7 +195,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       title: title.trim(),
       description: description.trim(),
       scheduledTime: new Date(scheduledTime).toISOString(),
-      duration: parseInt(duration) || 30,
+      duration: timeToMinutes(durationTime) || 30,
       meetingLink: meetingLink.trim() || undefined,
       meetingPlatform: meetingLink.trim() ? detectMeetingPlatform(meetingLink.trim()) : undefined,
       category,
