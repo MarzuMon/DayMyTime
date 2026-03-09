@@ -14,6 +14,9 @@ interface DayScheduleDetailProps {
   onBack: () => void;
   onEdit: (schedule: Schedule) => void;
   onCreateForDate: (date: Date) => void;
+  onNavigate?: (direction: 'prev' | 'next') => void;
+  canGoPrev?: boolean;
+  canGoNext?: boolean;
 }
 
 function rowToSchedule(row: any): Schedule {
