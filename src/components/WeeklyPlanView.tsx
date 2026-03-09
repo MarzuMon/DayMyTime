@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { format, startOfWeek, endOfWeek, addDays, getDay } from 'date-fns';
+import { format, startOfWeek, endOfWeek, addDays, getDay, startOfDay } from 'date-fns';
 import { Calendar, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { categoryConfig, ScheduleCategory, Schedule } from '@/lib/types';
+import DayScheduleDetail from '@/components/DayScheduleDetail';
+import { AnimatePresence } from 'framer-motion';
 
 interface WeekSchedule {
   id: string;
@@ -15,13 +17,6 @@ interface WeekSchedule {
   is_completed: boolean;
   repeat_days: number[] | null;
   repeat_type: string;
-  description: string;
-  meeting_link: string | null;
-  meeting_platform: string | null;
-  image_path: string | null;
-  alarm_tone: string;
-  team_id: string | null;
-  created_at: string;
 }
 
 interface WeeklyPlanViewProps {
@@ -31,31 +26,12 @@ interface WeeklyPlanViewProps {
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function toSchedule(s: WeekSchedule): Schedule {
-  return {
-    id: s.id,
-    title: s.title,
-    description: s.description || '',
-    scheduledTime: s.scheduled_time,
-    duration: s.duration,
-    meetingLink: s.meeting_link || undefined,
-    meetingPlatform: (s.meeting_platform as any) || undefined,
-    category: s.category as ScheduleCategory,
-    repeatType: (s.repeat_type as any) || 'none',
-    isCompleted: s.is_completed,
-    createdAt: s.created_at,
-    imagePath: s.image_path || undefined,
-    alarmTone: (s.alarm_tone as any) || 'default',
-    teamId: s.team_id || undefined,
-    repeatDays: s.repeat_days || undefined,
-  };
-}
-
 export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanViewProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<WeekSchedule[]>([]);
   const [_loading, setLoading] = useState(true);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
   const now = new Date();
   const weekStart = startOfWeek(addDays(now, weekOffset * 7), { weekStartsOn: 0 });
@@ -64,15 +40,13 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
   const fetchSchedules = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    
-    // Fetch schedules in this week OR with repeat types (daily/custom)
+
     const { data } = await supabase
       .from('schedules')
-      .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type, description, meeting_link, meeting_platform, image_path, alarm_tone, team_id, created_at')
+      .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type')
       .eq('user_id', user.id)
       .order('scheduled_time', { ascending: true });
 
-    // Filter: schedules in this week OR daily/custom repeats
     const filtered = (data || []).filter((s: any) => {
       const sDate = new Date(s.scheduled_time);
       const inWeek = sDate >= weekStart && sDate <= weekEnd;
@@ -85,50 +59,40 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
     setLoading(false);
   }, [user, weekOffset]);
 
-  useEffect(() => {
-    fetchSchedules();
-  }, [fetchSchedules]);
+  useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
 
-  // Realtime updates
   useEffect(() => {
     const channel = supabase
       .channel('weekly-plan')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, () => {
-        fetchSchedules();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, () => fetchSchedules())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [fetchSchedules]);
 
-  // Group schedules by day, but only show schedules for today and past days (not future days)
+  // Group schedules by day
   const byDay: Record<number, WeekSchedule[]> = {};
   for (let i = 0; i < 7; i++) byDay[i] = [];
   const seen = new Set<string>();
-  
-  // Determine which days have "started" (reached midnight)
   const todayDayIndex = getDay(now);
   const isCurrentWeek = weekOffset === 0;
   const isPastWeek = weekOffset < 0;
-  
-  // Helper: check if a day index has started (past midnight)
+
   const hasDayStarted = (dayIndex: number): boolean => {
-    if (isPastWeek) return true; // All days in past weeks are visible
-    if (!isCurrentWeek) return false; // Future weeks: no days started yet
-    return dayIndex <= todayDayIndex; // Current week: only today and before
+    if (isPastWeek) return true;
+    if (!isCurrentWeek) return false;
+    return dayIndex <= todayDayIndex;
   };
 
-  // Helper: check if a day is in the past (before today) - used to lock editing
   const isDayPast = (dayIndex: number): boolean => {
     if (isPastWeek) return true;
     if (!isCurrentWeek) return false;
     return dayIndex < todayDayIndex;
   };
-  
+
   schedules.forEach(s => {
     const sDate = new Date(s.scheduled_time);
     const inWeek = sDate >= weekStart && sDate <= weekEnd;
-    
-    // Daily repeat: show only on days that have started
+
     if (s.repeat_type === 'daily') {
       for (let d = 0; d < 7; d++) {
         if (!hasDayStarted(d)) continue;
@@ -137,8 +101,7 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
       }
       return;
     }
-    
-    // Custom repeat days: show only on days that have started
+
     if (s.repeat_type === 'custom' && Array.isArray(s.repeat_days)) {
       s.repeat_days.forEach((d: number) => {
         if (!hasDayStarted(d)) return;
@@ -147,8 +110,7 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
       });
       return;
     }
-    
-    // Regular schedule in this week - only show if that day has started
+
     if (inWeek) {
       const day = getDay(sDate);
       if (!hasDayStarted(day)) return;
@@ -159,6 +121,28 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
 
   const today = getDay(now);
   const weekLabel = `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`;
+
+  // If a day is selected, show the detail view
+  if (selectedDayIndex !== null) {
+    const selectedDate = addDays(weekStart, selectedDayIndex);
+    selectedDate.setHours(9, 0, 0, 0);
+
+    return (
+      <section className="space-y-3">
+        <AnimatePresence mode="wait">
+          <DayScheduleDetail
+            key={selectedDayIndex}
+            date={selectedDate}
+            onBack={() => setSelectedDayIndex(null)}
+            onEdit={(schedule) => onEdit?.(schedule)}
+            onCreateForDate={(date) => {
+              onCreateForDate?.(date);
+            }}
+          />
+        </AnimatePresence>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-3">
@@ -195,39 +179,34 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
           const isPastDayLocked = isDayPast(i);
 
           return (
-            <div
+            <button
               key={i}
-              className={`rounded-lg border p-2 text-center transition-colors min-h-[80px] ${
+              onClick={() => {
+                if (!isDayLocked) setSelectedDayIndex(i);
+              }}
+              disabled={isDayLocked}
+              className={`rounded-lg border p-2 text-center transition-all min-h-[80px] ${
                 isTodayCol
                   ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
                   : isDayLocked
-                    ? 'border-border bg-muted/30 opacity-60'
+                    ? 'border-border bg-muted/30 opacity-60 cursor-not-allowed'
                     : isPastDayLocked
-                      ? 'border-border bg-muted/10'
-                      : 'border-border bg-card'
-              }`}
+                      ? 'border-border bg-muted/10 cursor-pointer hover:border-primary/40 hover:bg-primary/5'
+                      : 'border-border bg-card cursor-pointer hover:border-primary/40 hover:bg-primary/5'
+              } ${!isDayLocked ? 'active:scale-[0.97]' : ''}`}
             >
-              <div className={`text-xs font-semibold mb-1.5 flex items-center justify-center gap-1 ${isTodayCol ? 'text-primary' : isDayLocked ? 'text-muted-foreground/50' : isPastDayLocked ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>
+              <div className={`text-xs font-semibold mb-1.5 flex items-center justify-center gap-1 ${
+                isTodayCol ? 'text-primary' : isDayLocked ? 'text-muted-foreground/50' : isPastDayLocked ? 'text-muted-foreground/70' : 'text-muted-foreground'
+              }`}>
                 {name}
                 {isPastDayLocked && <Lock className="h-2.5 w-2.5 text-muted-foreground/40" />}
               </div>
               {isDayLocked ? (
                 <div className="text-[10px] text-muted-foreground/40 py-2">—</div>
               ) : daySchedules.length === 0 ? (
-                isPastDayLocked ? (
-                  <div className="text-[10px] text-muted-foreground/40 py-2">—</div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      const dayDate = addDays(weekStart, i);
-                      dayDate.setHours(9, 0, 0, 0);
-                      onCreateForDate?.(dayDate);
-                    }}
-                    className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors w-full py-2"
-                  >
-                    + Add
-                  </button>
-                )
+                <div className="text-[10px] text-muted-foreground/50 py-2">
+                  {isPastDayLocked ? '—' : 'Tap to add'}
+                </div>
               ) : (
                 <div className="space-y-0.5">
                   {daySchedules.slice(0, 3).map(s => {
@@ -235,21 +214,13 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
                     return (
                       <div
                         key={s.id}
-                        onClick={() => {
-                          if (!isPastDayLocked) onEdit?.(toSchedule(s));
-                        }}
-                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate transition-all group/item ${
-                          isPastDayLocked
-                            ? 'cursor-default'
-                            : 'cursor-pointer hover:ring-1 hover:ring-primary/30'
-                        } ${
+                        className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate ${
                           s.is_completed
                             ? 'bg-muted text-muted-foreground line-through'
                             : 'bg-primary/10 text-primary'
                         }`}
-                        title={`${s.title} - ${format(new Date(s.scheduled_time), 'h:mm a')}${isPastDayLocked ? ' (locked)' : ' (click to edit)'}`}
                       >
-                        <span className="text-[8px] text-muted-foreground">{format(new Date(s.scheduled_time), 'h:mma')}</span> {cat?.emoji} {s.title}
+                        {cat?.emoji} {s.title}
                       </div>
                     );
                   })}
@@ -266,7 +237,7 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
                   {completedCount > 0 && <span className="ml-1">✓{completedCount}</span>}
                 </div>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
