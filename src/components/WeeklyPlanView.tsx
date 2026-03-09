@@ -144,7 +144,16 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
                 {name}
               </div>
               {daySchedules.length === 0 ? (
-                <div className="text-[10px] text-muted-foreground/50">—</div>
+                <button
+                  onClick={() => {
+                    const dayDate = addDays(weekStart, i);
+                    dayDate.setHours(9, 0, 0, 0);
+                    onCreateForDate?.(dayDate);
+                  }}
+                  className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors w-full py-2"
+                >
+                  + Add
+                </button>
               ) : (
                 <div className="space-y-0.5">
                   {daySchedules.slice(0, 3).map(s => {
