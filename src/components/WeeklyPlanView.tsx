@@ -122,6 +122,20 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
   const today = getDay(now);
   const weekLabel = `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`;
 
+  // Determine navigable boundaries (only days that have started)
+  const canNavigateTo = (dayIndex: number): boolean => {
+    if (dayIndex < 0 || dayIndex > 6) return false;
+    return hasDayStarted(dayIndex);
+  };
+
+  const handleDayNavigate = (direction: 'prev' | 'next') => {
+    if (selectedDayIndex === null) return;
+    const newIndex = direction === 'prev' ? selectedDayIndex - 1 : selectedDayIndex + 1;
+    if (canNavigateTo(newIndex)) {
+      setSelectedDayIndex(newIndex);
+    }
+  };
+
   // If a day is selected, show the detail view
   if (selectedDayIndex !== null) {
     const selectedDate = addDays(weekStart, selectedDayIndex);
@@ -138,6 +152,9 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
             onCreateForDate={(date) => {
               onCreateForDate?.(date);
             }}
+            onNavigate={handleDayNavigate}
+            canGoPrev={canNavigateTo(selectedDayIndex - 1)}
+            canGoNext={canNavigateTo(selectedDayIndex + 1)}
           />
         </AnimatePresence>
       </section>

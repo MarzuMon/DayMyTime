@@ -6,14 +6,17 @@ import { Schedule, ScheduleCategory, categoryConfig } from '@/lib/types';
 import { toggleComplete, deleteSchedule } from '@/lib/scheduleStore';
 import ScheduleCard from '@/components/ScheduleCard';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, Lock } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Plus, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 
 interface DayScheduleDetailProps {
   date: Date;
   onBack: () => void;
   onEdit: (schedule: Schedule) => void;
   onCreateForDate: (date: Date) => void;
+  onNavigate?: (direction: 'prev' | 'next') => void;
+  canGoPrev?: boolean;
+  canGoNext?: boolean;
 }
 
 function rowToSchedule(row: any): Schedule {
@@ -36,7 +39,7 @@ function rowToSchedule(row: any): Schedule {
   };
 }
 
-export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDate }: DayScheduleDetailProps) {
+export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDate, onNavigate, canGoPrev = true, canGoNext = true }: DayScheduleDetailProps) {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,13 +113,26 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
   const activeSchedules = schedules.filter(s => !s.isCompleted);
   const completedSchedules = schedules.filter(s => s.isCompleted);
 
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    const threshold = 50;
+    if (info.offset.x > threshold && canGoPrev) {
+      onNavigate?.('prev');
+    } else if (info.offset.x < -threshold && canGoNext) {
+      onNavigate?.('next');
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
-      className="space-y-4"
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.2}
+      onDragEnd={handleDragEnd}
+      className="space-y-4 touch-pan-y"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -135,15 +151,27 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
             <p className="text-xs text-muted-foreground">{format(date, 'MMMM d, yyyy')}</p>
           </div>
         </div>
-        {!isLocked && (
-          <Button
-            size="sm"
-            className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90"
-            onClick={() => onCreateForDate(date)}
-          >
-            <Plus className="h-4 w-4 mr-1" /> Add
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {canGoPrev && (
+            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl" onClick={() => onNavigate?.('prev')}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          )}
+          {canGoNext && (
+            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl" onClick={() => onNavigate?.('next')}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+          {!isLocked && (
+            <Button
+              size="sm"
+              className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90"
+              onClick={() => onCreateForDate(date)}
+            >
+              <Plus className="h-4 w-4 mr-1" /> Add
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Locked banner */}
