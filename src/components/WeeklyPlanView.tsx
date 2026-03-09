@@ -67,18 +67,11 @@ export default function WeeklyPlanView({ onEdit }: WeeklyPlanViewProps) {
       .from('schedules')
       .select('id, title, scheduled_time, duration, category, is_completed, repeat_days, repeat_type, description, meeting_link, meeting_platform, image_path, alarm_tone, team_id, created_at')
       .eq('user_id', user.id)
+      .gte('scheduled_time', weekStart.toISOString())
+      .lte('scheduled_time', weekEnd.toISOString())
       .order('scheduled_time', { ascending: true });
 
-    // Filter: schedules in this week OR with repeat_days/daily repeat
-    const filtered = (data || []).filter((s: any) => {
-      const sDate = new Date(s.scheduled_time);
-      const inWeek = sDate >= weekStart && sDate <= weekEnd;
-      const hasRepeatDays = s.repeat_type === 'custom' && Array.isArray(s.repeat_days) && s.repeat_days.length > 0;
-      const isDaily = s.repeat_type === 'daily';
-      return inWeek || hasRepeatDays || isDaily;
-    });
-
-    setSchedules(filtered as WeekSchedule[]);
+    setSchedules((data || []) as WeekSchedule[]);
     setLoading(false);
   }, [user, weekOffset]);
 
