@@ -6,8 +6,8 @@ import { Schedule, ScheduleCategory, categoryConfig } from '@/lib/types';
 import { toggleComplete, deleteSchedule } from '@/lib/scheduleStore';
 import ScheduleCard from '@/components/ScheduleCard';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, Lock } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Plus, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 
 interface DayScheduleDetailProps {
   date: Date;
