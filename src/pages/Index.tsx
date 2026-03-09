@@ -292,7 +292,18 @@ const Index = () => {
 
         {/* Weekly Plan */}
         <Suspense fallback={null}>
-          <WeeklyPlanView onEdit={(schedule) => { setEditingSchedule(schedule); setFormOpen(true); }} />
+          <WeeklyPlanView
+            onEdit={(schedule) => { setEditingSchedule(schedule); setFormOpen(true); }}
+            onCreateForDate={(date) => {
+              setEditingSchedule(null);
+              setFormOpen(true);
+              // Pass date via a small timeout so the form mounts first
+              setTimeout(() => {
+                const event = new CustomEvent('prefill-schedule-date', { detail: date.toISOString() });
+                window.dispatchEvent(event);
+              }, 100);
+            }}
+          />
         </Suspense>
 
         {/* Daily Schedule */}
