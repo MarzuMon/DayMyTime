@@ -150,7 +150,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
     if (!t) return;
     setTitle(t.name);
     setDescription(t.description);
-    setDuration(t.duration.toString());
+    setDurationTime(minutesToTime(t.duration));
     setCategory((t.category as ScheduleCategory) || 'other');
   };
 
