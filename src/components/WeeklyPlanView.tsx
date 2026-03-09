@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, startOfWeek, endOfWeek, addDays, getDay } from 'date-fns';
-import { Calendar, ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { categoryConfig, ScheduleCategory, Schedule } from '@/lib/types';
 
