@@ -128,7 +128,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
           ? formatLocalDateTime(editSchedule.scheduledTime)
           : ''
       );
-      setDuration(editSchedule?.duration?.toString() ?? '30');
+      setDurationTime(minutesToTime(editSchedule?.duration ?? 30));
       setMeetingLink(editSchedule?.meetingLink ?? '');
       setCategory(editSchedule?.category ?? 'meeting');
       setRepeatType(editSchedule?.repeatType ?? 'none');
