@@ -200,7 +200,9 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
               <div className={`text-xs font-semibold mb-1.5 ${isTodayCol ? 'text-primary' : isDayLocked ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}>
                 {name}
               </div>
-              {daySchedules.length === 0 ? (
+              {isDayLocked ? (
+                <div className="text-[10px] text-muted-foreground/40 py-2">—</div>
+              ) : daySchedules.length === 0 ? (
                 <button
                   onClick={() => {
                     const dayDate = addDays(weekStart, i);
