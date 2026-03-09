@@ -284,16 +284,18 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             </div>
             <div className="space-y-2">
               <Label htmlFor="duration" className="flex items-center gap-2 text-sm font-medium">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" /> Duration (min)
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" /> Duration (Time)
               </Label>
               <Input
                 id="duration"
-                type="number"
-                min="5"
-                max="480"
-                value={duration}
-                onChange={e => setDuration(e.target.value)}
+                type="time"
+                value={durationTime}
+                onChange={e => setDurationTime(e.target.value)}
+                step="300"
               />
+              <p className="text-[10px] text-muted-foreground">
+                {timeToMinutes(durationTime)} min total
+              </p>
             </div>
           </div>
 
