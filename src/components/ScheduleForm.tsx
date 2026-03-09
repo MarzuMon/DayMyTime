@@ -295,7 +295,6 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
                 step="300"
               />
             </div>
-            </div>
           </div>
 
           {/* Auto-calculated End Time */}
