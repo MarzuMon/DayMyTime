@@ -64,7 +64,17 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
     window.addEventListener('prefill-schedule-date', handler);
     return () => window.removeEventListener('prefill-schedule-date', handler);
   }, [editSchedule]);
-  const [duration, setDuration] = useState(editSchedule?.duration?.toString() ?? '30');
+  // Duration stored as minutes internally, displayed as HH:MM
+  const minutesToTime = (mins: number): string => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+  const timeToMinutes = (time: string): number => {
+    const [h, m] = time.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
+  const [durationTime, setDurationTime] = useState(minutesToTime(editSchedule?.duration ?? 30));
   const [meetingLink, setMeetingLink] = useState(editSchedule?.meetingLink ?? '');
   const [category, setCategory] = useState<ScheduleCategory>(editSchedule?.category ?? 'meeting');
   const [repeatType, setRepeatType] = useState<RepeatType>(editSchedule?.repeatType ?? 'none');
@@ -118,7 +128,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
           ? formatLocalDateTime(editSchedule.scheduledTime)
           : ''
       );
-      setDuration(editSchedule?.duration?.toString() ?? '30');
+      setDurationTime(minutesToTime(editSchedule?.duration ?? 30));
       setMeetingLink(editSchedule?.meetingLink ?? '');
       setCategory(editSchedule?.category ?? 'meeting');
       setRepeatType(editSchedule?.repeatType ?? 'none');
@@ -140,7 +150,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
     if (!t) return;
     setTitle(t.name);
     setDescription(t.description);
-    setDuration(t.duration.toString());
+    setDurationTime(minutesToTime(t.duration));
     setCategory((t.category as ScheduleCategory) || 'other');
   };
 
@@ -185,7 +195,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
       title: title.trim(),
       description: description.trim(),
       scheduledTime: new Date(scheduledTime).toISOString(),
-      duration: parseInt(duration) || 30,
+      duration: timeToMinutes(durationTime) || 30,
       meetingLink: meetingLink.trim() || undefined,
       meetingPlatform: meetingLink.trim() ? detectMeetingPlatform(meetingLink.trim()) : undefined,
       category,
@@ -274,16 +284,18 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
             </div>
             <div className="space-y-2">
               <Label htmlFor="duration" className="flex items-center gap-2 text-sm font-medium">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" /> Duration (min)
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" /> Duration (Time)
               </Label>
               <Input
                 id="duration"
-                type="number"
-                min="5"
-                max="480"
-                value={duration}
-                onChange={e => setDuration(e.target.value)}
+                type="time"
+                value={durationTime}
+                onChange={e => setDurationTime(e.target.value)}
+                step="300"
               />
+              <p className="text-[10px] text-muted-foreground">
+                {timeToMinutes(durationTime)} min total
+              </p>
             </div>
           </div>
 
