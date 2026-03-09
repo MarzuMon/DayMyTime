@@ -182,16 +182,22 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
           const activeCount = daySchedules.filter(s => !s.is_completed).length;
           const completedCount = daySchedules.filter(s => s.is_completed).length;
 
+          const isFutureDay = isCurrentWeek && i > today;
+          const isFutureWeek = weekOffset > 0;
+          const isDayLocked = isFutureDay || isFutureWeek;
+
           return (
             <div
               key={i}
               className={`rounded-lg border p-2 text-center transition-colors min-h-[80px] ${
                 isTodayCol
                   ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                  : 'border-border bg-card'
+                  : isDayLocked
+                    ? 'border-border bg-muted/30 opacity-60'
+                    : 'border-border bg-card'
               }`}
             >
-              <div className={`text-xs font-semibold mb-1.5 ${isTodayCol ? 'text-primary' : 'text-muted-foreground'}`}>
+              <div className={`text-xs font-semibold mb-1.5 ${isTodayCol ? 'text-primary' : isDayLocked ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}>
                 {name}
               </div>
               {daySchedules.length === 0 ? (
