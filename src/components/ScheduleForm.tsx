@@ -314,7 +314,7 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
                 })()}
               </p>
             </div>
-          )
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="meetingLink" className="flex items-center gap-2 text-sm font-medium">
