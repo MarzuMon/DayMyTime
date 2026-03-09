@@ -26,6 +26,7 @@ interface WeekSchedule {
 
 interface WeeklyPlanViewProps {
   onEdit?: (schedule: Schedule) => void;
+  onCreateForDate?: (date: Date) => void;
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
