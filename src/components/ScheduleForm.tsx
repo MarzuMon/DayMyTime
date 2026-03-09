@@ -294,9 +294,6 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
                 onChange={e => setDurationTime(e.target.value)}
                 step="300"
               />
-              <p className="text-[10px] text-muted-foreground">
-                {timeToMinutes(durationTime)} min total
-              </p>
             </div>
           </div>
 
