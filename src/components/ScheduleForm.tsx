@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Schedule, ScheduleCategory, detectMeetingPlatform, RepeatType, AlarmTone } from '@/lib/types';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -298,6 +299,22 @@ export default function ScheduleForm({ open, onOpenChange, onSave, editSchedule 
               </p>
             </div>
           </div>
+
+          {/* Auto-calculated End Time */}
+          {scheduledTime && durationTime && timeToMinutes(durationTime) > 0 && (
+            <div className="rounded-md bg-muted/50 border border-border px-3 py-2">
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">End Time:</span>{' '}
+                {(() => {
+                  const start = new Date(scheduledTime);
+                  const mins = timeToMinutes(durationTime);
+                  if (isNaN(start.getTime()) || mins <= 0) return '—';
+                  const end = new Date(start.getTime() + mins * 60000);
+                  return format(end, 'MMM d, yyyy h:mm a');
+                })()}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="meetingLink" className="flex items-center gap-2 text-sm font-medium">
