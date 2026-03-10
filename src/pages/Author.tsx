@@ -19,7 +19,7 @@ import {
 } from 'recharts';
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
-  Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee,
+  Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee, Search,
   Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound
 } from 'lucide-react';
 import { toast } from 'sonner';
