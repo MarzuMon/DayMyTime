@@ -274,6 +274,7 @@ export default function Author() {
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
             <TabsTrigger value="teams"><UsersRound className="h-4 w-4 mr-1.5" /> Teams</TabsTrigger>
             <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
+            <TabsTrigger value="seo"><Search className="h-4 w-4 mr-1.5" /> SEO</TabsTrigger>
           </TabsList>
 
           {/* Analytics Tab */}
