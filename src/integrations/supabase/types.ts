@@ -285,6 +285,24 @@ export type Database = {
           },
         ]
       }
+      seo_keywords: {
+        Row: {
+          created_at: string
+          id: string
+          keyword: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keyword: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keyword?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           amount: number
