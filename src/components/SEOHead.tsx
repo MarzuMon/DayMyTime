@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useSeoKeywords } from '@/hooks/use-seo-keywords';
 
 interface SEOHeadProps {
   title: string;
@@ -8,6 +9,8 @@ interface SEOHeadProps {
 }
 
 export default function SEOHead({ title, description, canonical, type = 'website' }: SEOHeadProps) {
+  const seoKeywords = useSeoKeywords();
+
   useEffect(() => {
     document.title = title;
 
@@ -29,6 +32,10 @@ export default function SEOHead({ title, description, canonical, type = 'website
     setMeta('twitter:title', title);
     setMeta('twitter:description', description);
 
+    if (seoKeywords.length > 0) {
+      setMeta('keywords', seoKeywords.join(', '));
+    }
+
     if (canonical) {
       let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
       if (!link) {
@@ -43,7 +50,7 @@ export default function SEOHead({ title, description, canonical, type = 'website
       const link = document.querySelector('link[rel="canonical"]');
       if (link) link.remove();
     };
-  }, [title, description, canonical, type]);
+  }, [title, description, canonical, type, seoKeywords]);
 
   return null;
 }

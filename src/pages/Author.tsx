@@ -19,7 +19,7 @@ import {
 } from 'recharts';
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
-  Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee,
+  Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee, Search,
   Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,6 +29,7 @@ import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
 import PromotionManagementTab from '@/components/author/PromotionManagementTab';
 import TeamManagementTab from '@/components/author/TeamManagementTab';
+import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 
 interface AdPlacement {
   id: string;
@@ -273,6 +274,7 @@ export default function Author() {
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
             <TabsTrigger value="teams"><UsersRound className="h-4 w-4 mr-1.5" /> Teams</TabsTrigger>
             <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
+            <TabsTrigger value="seo"><Search className="h-4 w-4 mr-1.5" /> SEO</TabsTrigger>
           </TabsList>
 
           {/* Analytics Tab */}
@@ -520,6 +522,10 @@ export default function Author() {
 
           <TabsContent value="templates" className="space-y-4">
             <TemplateManagementTab />
+          </TabsContent>
+
+          <TabsContent value="seo" className="space-y-4">
+            <SeoKeywordsTab />
           </TabsContent>
         </Tabs>
       </main>

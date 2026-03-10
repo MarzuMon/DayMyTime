@@ -258,6 +258,26 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
           );
         })}
       </div>
+
+      {/* Dot indicator */}
+      <div className="flex items-center justify-center gap-1.5 pt-1">
+        {DAY_NAMES.map((_, i) => {
+          const isTodayDot = i === today && weekOffset === 0;
+          const isSelected = selectedDayIndex === i;
+          return (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                isSelected
+                  ? 'w-4 bg-primary'
+                  : isTodayDot
+                    ? 'w-2 bg-primary/50'
+                    : 'w-1.5 bg-muted-foreground/30'
+              }`}
+            />
+          );
+        })}
+      </div>
     </section>
   );
 }
