@@ -29,6 +29,7 @@ import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
 import PromotionManagementTab from '@/components/author/PromotionManagementTab';
 import TeamManagementTab from '@/components/author/TeamManagementTab';
+import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 
 interface AdPlacement {
   id: string;
