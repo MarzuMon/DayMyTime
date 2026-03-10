@@ -523,6 +523,10 @@ export default function Author() {
           <TabsContent value="templates" className="space-y-4">
             <TemplateManagementTab />
           </TabsContent>
+
+          <TabsContent value="seo" className="space-y-4">
+            <SeoKeywordsTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
