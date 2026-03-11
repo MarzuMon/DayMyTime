@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Plus, Search } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Trash2, Plus, Search, Upload, Download, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SeoKeyword {
@@ -15,6 +16,8 @@ interface SeoKeyword {
 export default function SeoKeywordsTab() {
   const [keywords, setKeywords] = useState<SeoKeyword[]>([]);
   const [newKeyword, setNewKeyword] = useState('');
+  const [bulkInput, setBulkInput] = useState('');
+  const [showBulk, setShowBulk] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchKeywords = async () => {
@@ -42,6 +45,48 @@ export default function SeoKeywordsTab() {
     fetchKeywords();
   };
 
+  const bulkImport = async () => {
+    const lines = bulkInput
+      .split(/[,\n]/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    if (lines.length === 0) {
+      toast.error('No keywords to import');
+      return;
+    }
+
+    const existingSet = new Set(keywords.map(k => k.keyword.toLowerCase()));
+    const newOnes = lines.filter(l => !existingSet.has(l.toLowerCase()));
+    const duplicateCount = lines.length - newOnes.length;
+
+    if (newOnes.length === 0) {
+      toast.error('All keywords already exist');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('seo_keywords')
+      .insert(newOnes.map(keyword => ({ keyword })));
+
+    if (error) { toast.error('Failed to import keywords'); return; }
+
+    toast.success(`Imported ${newOnes.length} keyword${newOnes.length > 1 ? 's' : ''}${duplicateCount > 0 ? ` (${duplicateCount} duplicates skipped)` : ''}`);
+    setBulkInput('');
+    setShowBulk(false);
+    fetchKeywords();
+  };
+
+  const exportKeywords = () => {
+    if (keywords.length === 0) {
+      toast.error('No keywords to export');
+      return;
+    }
+    const text = keywords.map(k => k.keyword).join(', ');
+    navigator.clipboard.writeText(text);
+    toast.success(`${keywords.length} keywords copied to clipboard`);
+  };
+
   const deleteKeyword = async (id: string) => {
     const { error } = await supabase.from('seo_keywords').delete().eq('id', id);
     if (error) { toast.error('Failed to delete keyword'); return; }
@@ -61,7 +106,7 @@ export default function SeoKeywordsTab() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Add keyword */}
+          {/* Add single keyword */}
           <div className="flex gap-2">
             <Input
               placeholder="Enter a keyword..."
@@ -74,6 +119,40 @@ export default function SeoKeywordsTab() {
               <Plus className="h-4 w-4 mr-1" /> Add
             </Button>
           </div>
+
+          {/* Bulk actions */}
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowBulk(!showBulk)}>
+              <Upload className="h-3.5 w-3.5 mr-1" /> Bulk Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportKeywords} disabled={keywords.length === 0}>
+              <Copy className="h-3.5 w-3.5 mr-1" /> Export All
+            </Button>
+          </div>
+
+          {/* Bulk import textarea */}
+          {showBulk && (
+            <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
+              <p className="text-xs text-muted-foreground">
+                Paste multiple keywords separated by commas or new lines:
+              </p>
+              <Textarea
+                placeholder="keyword1, keyword2&#10;keyword3&#10;keyword4, keyword5"
+                value={bulkInput}
+                onChange={e => setBulkInput(e.target.value)}
+                rows={4}
+                className="text-sm"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" onClick={bulkImport} disabled={!bulkInput.trim()}>
+                  <Download className="h-3.5 w-3.5 mr-1" /> Import
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => { setShowBulk(false); setBulkInput(''); }}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Keyword list */}
           {loading ? (
