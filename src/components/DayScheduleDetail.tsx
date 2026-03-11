@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Schedule, ScheduleCategory, categoryConfig } from '@/lib/types';
 import { toggleComplete, deleteSchedule } from '@/lib/scheduleStore';
+import { isRepeatingSchedule, fetchCompletionsForDate, toggleDateCompletion } from '@/lib/scheduleCompletions';
 import ScheduleCard from '@/components/ScheduleCard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -19,7 +20,7 @@ interface DayScheduleDetailProps {
   canGoNext?: boolean;
 }
 
-function rowToSchedule(row: any): Schedule {
+function rowToSchedule(row: any, overrideCompleted?: boolean): Schedule {
   return {
     id: row.id,
     title: row.title,
@@ -30,7 +31,7 @@ function rowToSchedule(row: any): Schedule {
     meetingPlatform: row.meeting_platform || undefined,
     category: row.category as ScheduleCategory,
     repeatType: row.repeat_type || 'none',
-    isCompleted: row.is_completed,
+    isCompleted: overrideCompleted !== undefined ? overrideCompleted : row.is_completed,
     createdAt: row.created_at,
     imagePath: row.image_path || undefined,
     alarmTone: row.alarm_tone || 'default',
@@ -44,13 +45,12 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // A day is locked if it's before today (past midnight)
   const now = new Date();
   const today = startOfDay(now);
   const dayStart = startOfDay(date);
   const isLocked = dayStart < today;
   const isTodayDate = isToday(date);
-  const dayOfWeek = date.getDay(); // 0=Sun
+  const dayOfWeek = date.getDay();
 
   const fetchSchedules = useCallback(async () => {
     if (!user) return;
@@ -59,7 +59,6 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
     const dayStartISO = startOfDay(date).toISOString();
     const dayEndISO = startOfDay(addDays(date, 1)).toISOString();
 
-    // Fetch schedules for this specific day + daily/custom repeats
     const { data } = await supabase
       .from('schedules')
       .select('*')
@@ -74,28 +73,46 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
       return inDay || isDaily || hasRepeatDay;
     });
 
-    setSchedules(filtered.map(rowToSchedule));
+    // For repeating schedules, fetch per-date completion status
+    const repeatingIds = filtered
+      .filter((s: any) => isRepeatingSchedule(s.repeat_type))
+      .map((s: any) => s.id);
+
+    const completionMap = await fetchCompletionsForDate(repeatingIds, date);
+
+    const mappedSchedules = filtered.map((row: any) => {
+      if (isRepeatingSchedule(row.repeat_type)) {
+        const dateCompleted = completionMap.get(row.id) ?? false;
+        return rowToSchedule(row, dateCompleted);
+      }
+      return rowToSchedule(row);
+    });
+
+    setSchedules(mappedSchedules);
     setLoading(false);
   }, [user, date, dayOfWeek]);
 
-  useEffect(() => {
-    fetchSchedules();
-  }, [fetchSchedules]);
+  useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
 
-  // Realtime
   useEffect(() => {
     const channel = supabase
       .channel('day-detail')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, () => {
-        fetchSchedules();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, () => fetchSchedules())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedule_completions' }, () => fetchSchedules())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [fetchSchedules]);
 
   const handleToggle = async (id: string) => {
     if (isLocked) return;
-    await toggleComplete(id);
+    const schedule = schedules.find(s => s.id === id);
+    if (!schedule || !user) return;
+
+    if (isRepeatingSchedule(schedule.repeatType)) {
+      await toggleDateCompletion(id, user.id, date);
+    } else {
+      await toggleComplete(id);
+    }
     fetchSchedules();
   };
 
@@ -182,7 +199,6 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
         </div>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
@@ -191,23 +207,17 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
         </div>
       )}
 
-      {/* Empty state */}
       {!loading && schedules.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground text-sm">No schedules for this day</p>
           {!isLocked && (
-            <Button
-              variant="outline"
-              className="mt-3 rounded-xl"
-              onClick={() => onCreateForDate(date)}
-            >
+            <Button variant="outline" className="mt-3 rounded-xl" onClick={() => onCreateForDate(date)}>
               <Plus className="h-4 w-4 mr-1.5" /> Add Schedule
             </Button>
           )}
         </div>
       )}
 
-      {/* Active schedules */}
       {!loading && activeSchedules.length > 0 && (
         <section className="space-y-2">
           <h3 className="font-display font-semibold text-xs uppercase tracking-wider text-muted-foreground">
@@ -216,19 +226,13 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
           <div className="space-y-2">
             {activeSchedules.map(s => (
               <div key={s.id} className={isLocked ? 'opacity-70 pointer-events-none' : ''}>
-                <ScheduleCard
-                  schedule={s}
-                  onToggleComplete={handleToggle}
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                />
+                <ScheduleCard schedule={s} onToggleComplete={handleToggle} onDelete={handleDelete} onEdit={handleEdit} />
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Completed schedules */}
       {!loading && completedSchedules.length > 0 && (
         <section className="space-y-2">
           <h3 className="font-display font-semibold text-xs uppercase tracking-wider text-muted-foreground">
@@ -237,12 +241,7 @@ export default function DayScheduleDetail({ date, onBack, onEdit, onCreateForDat
           <div className="space-y-2">
             {completedSchedules.map(s => (
               <div key={s.id} className={isLocked ? 'opacity-70 pointer-events-none' : ''}>
-                <ScheduleCard
-                  schedule={s}
-                  onToggleComplete={handleToggle}
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                />
+                <ScheduleCard schedule={s} onToggleComplete={handleToggle} onDelete={handleDelete} onEdit={handleEdit} />
               </div>
             ))}
           </div>

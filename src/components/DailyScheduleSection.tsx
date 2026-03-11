@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { CalendarDays, Clock, CheckCircle2, ExternalLink, Circle, Pencil, Trash2 } from 'lucide-react';
 import { Schedule, ScheduleCategory, categoryConfig } from '@/lib/types';
+import { isRepeatingSchedule, fetchCompletionsForDate, toggleDateCompletion } from '@/lib/scheduleCompletions';
+import { toggleComplete } from '@/lib/scheduleStore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface TodaySchedule {
@@ -50,7 +52,7 @@ const categoryDotColors: Record<string, string> = {
   other: 'bg-slate-400',
 };
 
-function toSchedule(s: TodaySchedule): Schedule {
+function toSchedule(s: TodaySchedule, overrideCompleted?: boolean): Schedule {
   return {
     id: s.id,
     title: s.title,
@@ -61,7 +63,7 @@ function toSchedule(s: TodaySchedule): Schedule {
     meetingPlatform: (s.meeting_platform as any) || undefined,
     category: s.category as ScheduleCategory,
     repeatType: (s.repeat_type as any) || 'none',
-    isCompleted: s.is_completed,
+    isCompleted: overrideCompleted !== undefined ? overrideCompleted : s.is_completed,
     createdAt: s.created_at,
     imagePath: s.image_path || undefined,
     alarmTone: (s.alarm_tone as any) || 'default',
@@ -72,8 +74,11 @@ function toSchedule(s: TodaySchedule): Schedule {
 
 export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelete }: DailyScheduleSectionProps) {
   const { user } = useAuth();
-  const [schedules, setSchedules] = useState<TodaySchedule[]>([]);
+  const [schedules, setSchedules] = useState<(TodaySchedule & { effectiveCompleted: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const fetchToday = useCallback(async () => {
     if (!user) return;
@@ -81,7 +86,7 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
-    const todayDayOfWeek = todayStart.getDay(); // 0=Sun, 6=Sat
+    const todayDayOfWeek = todayStart.getDay();
 
     const { data } = await supabase
       .from('schedules')
@@ -89,7 +94,6 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
       .eq('user_id', user.id)
       .order('scheduled_time', { ascending: true });
 
-    // Filter: schedules for today OR daily repeats OR custom repeat matching today's day
     const filtered = (data || []).filter((s: any) => {
       const sDate = new Date(s.scheduled_time);
       const inToday = sDate >= todayStart && sDate <= todayEnd;
@@ -98,7 +102,21 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
       return inToday || isDaily || hasRepeatToday;
     });
 
-    setSchedules(filtered as TodaySchedule[]);
+    // Fetch per-date completions for repeating schedules
+    const repeatingIds = filtered
+      .filter((s: any) => isRepeatingSchedule(s.repeat_type))
+      .map((s: any) => s.id);
+
+    const completionMap = await fetchCompletionsForDate(repeatingIds, todayStart);
+
+    const withEffective = filtered.map((s: any) => ({
+      ...s,
+      effectiveCompleted: isRepeatingSchedule(s.repeat_type)
+        ? (completionMap.get(s.id) ?? false)
+        : s.is_completed,
+    }));
+
+    setSchedules(withEffective as (TodaySchedule & { effectiveCompleted: boolean })[]);
     setLoading(false);
   }, [user]);
 
@@ -108,12 +126,25 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
     if (!user) return;
     const channel = supabase
       .channel('today-schedules')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules', filter: `user_id=eq.${user.id}` }, () => {
-        fetchToday();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules', filter: `user_id=eq.${user.id}` }, () => fetchToday())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedule_completions' }, () => fetchToday())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, fetchToday]);
+
+  const handleToggle = async (id: string) => {
+    if (!user) return;
+    const schedule = schedules.find(s => s.id === id);
+    if (!schedule) return;
+
+    if (isRepeatingSchedule(schedule.repeat_type)) {
+      await toggleDateCompletion(id, user.id, new Date());
+    } else {
+      await toggleComplete(id);
+      if (onToggleComplete) onToggleComplete(id);
+    }
+    fetchToday();
+  };
 
   if (loading) return null;
 
@@ -136,8 +167,8 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
     return 'upcoming';
   };
 
-  const active = schedules.filter(s => !s.is_completed);
-  const completed = schedules.filter(s => s.is_completed);
+  const active = schedules.filter(s => !s.effectiveCompleted);
+  const completed = schedules.filter(s => s.effectiveCompleted);
 
   return (
     <section className="space-y-4">
@@ -196,18 +227,17 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
                           <div
                             key={s.id}
                             className={`flex items-center gap-2 p-2 rounded-lg border-l-3 transition-all group ${
-                              s.is_completed 
-                                ? 'bg-secondary/30 opacity-60 border-l-muted-foreground' 
+                              s.effectiveCompleted
+                                ? 'bg-secondary/30 opacity-60 border-l-muted-foreground'
                                 : `${categoryColors[s.category] || categoryColors.other} ${status === 'soon' ? 'ring-1 ring-primary/30' : ''}`
                             }`}
                           >
-                            {/* Toggle complete button */}
                             <button
-                              onClick={() => onToggleComplete?.(s.id)}
+                              onClick={() => handleToggle(s.id)}
                               className="flex-shrink-0 hover:scale-110 transition-transform"
-                              aria-label={s.is_completed ? 'Mark incomplete' : 'Mark complete'}
+                              aria-label={s.effectiveCompleted ? 'Mark incomplete' : 'Mark complete'}
                             >
-                              {s.is_completed ? (
+                              {s.effectiveCompleted ? (
                                 <CheckCircle2 className="h-4 w-4 text-primary" />
                               ) : (
                                 <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
@@ -215,28 +245,27 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
                             </button>
 
                             <div className="flex-1 min-w-0">
-                              <p className={`text-xs font-medium truncate ${s.is_completed ? 'line-through' : ''}`}>{s.title}</p>
+                              <p className={`text-xs font-medium truncate ${s.effectiveCompleted ? 'line-through' : ''}`}>{s.title}</p>
                               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                                 <span className="font-mono">{format(new Date(s.scheduled_time), 'h:mm a')}</span>
                                 <span>·</span>
                                 <span>{s.duration}m</span>
                                 <span>·</span>
                                 <span>{cat?.emoji} {cat?.label}</span>
-                                {status === 'soon' && !s.is_completed && (
+                                {status === 'soon' && !s.effectiveCompleted && (
                                   <span className="text-primary font-medium">Soon</span>
                                 )}
                               </div>
                             </div>
 
-                            {/* Action buttons */}
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              {s.meeting_link && !s.is_completed && (
+                              {s.meeting_link && !s.effectiveCompleted && (
                                 <a href={s.meeting_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
                                   <ExternalLink className="h-3.5 w-3.5" />
                                 </a>
                               )}
                               <button
-                                onClick={() => onEdit?.(toSchedule(s))}
+                                onClick={() => onEdit?.(toSchedule(s, s.effectiveCompleted))}
                                 className="text-muted-foreground hover:text-primary transition-opacity"
                                 aria-label="Edit schedule"
                               >
@@ -244,10 +273,7 @@ export default function DailyScheduleSection({ onToggleComplete, onEdit, onDelet
                               </button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <button
-                                    className="text-muted-foreground hover:text-destructive transition-opacity"
-                                    aria-label="Delete schedule"
-                                  >
+                                  <button className="text-muted-foreground hover:text-destructive transition-opacity" aria-label="Delete schedule">
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </button>
                                 </AlertDialogTrigger>

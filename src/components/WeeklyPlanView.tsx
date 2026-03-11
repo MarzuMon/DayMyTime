@@ -5,6 +5,7 @@ import { format, startOfWeek, endOfWeek, addDays, getDay, startOfDay } from 'dat
 import { Calendar, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { categoryConfig, ScheduleCategory, Schedule } from '@/lib/types';
+import { isRepeatingSchedule, fetchCompletionsForDate, toDateString } from '@/lib/scheduleCompletions';
 import DayScheduleDetail from '@/components/DayScheduleDetail';
 import { AnimatePresence } from 'framer-motion';
 
@@ -32,10 +33,28 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
   const [_loading, setLoading] = useState(true);
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+  // Per-day completion overrides for repeating schedules: Map<"scheduleId-dayIndex", boolean>
+  const [dateCompletions, setDateCompletions] = useState<Map<string, boolean>>(new Map());
 
   const now = new Date();
   const weekStart = startOfWeek(addDays(now, weekOffset * 7), { weekStartsOn: 0 });
   const weekEnd = endOfWeek(addDays(now, weekOffset * 7), { weekStartsOn: 0 });
+
+  const todayDayIndex = getDay(now);
+  const isCurrentWeek = weekOffset === 0;
+  const isPastWeek = weekOffset < 0;
+
+  const hasDayStarted = (dayIndex: number): boolean => {
+    if (isPastWeek) return true;
+    if (!isCurrentWeek) return false;
+    return dayIndex <= todayDayIndex;
+  };
+
+  const isDayPast = (dayIndex: number): boolean => {
+    if (isPastWeek) return true;
+    if (!isCurrentWeek) return false;
+    return dayIndex < todayDayIndex;
+  };
 
   const fetchSchedules = useCallback(async () => {
     if (!user) return;
@@ -55,6 +74,40 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
       return inWeek || isDaily || hasRepeatDays;
     });
 
+    // Fetch per-date completions for repeating schedules for each started day
+    const repeatingIds = filtered
+      .filter((s: any) => isRepeatingSchedule(s.repeat_type))
+      .map((s: any) => s.id);
+
+    const newCompletions = new Map<string, boolean>();
+
+    if (repeatingIds.length > 0) {
+      // Fetch completions for all started days in the week
+      const startedDays: Date[] = [];
+      for (let i = 0; i < 7; i++) {
+        if (isPastWeek || (isCurrentWeek && i <= todayDayIndex)) {
+          startedDays.push(addDays(weekStart, i));
+        }
+      }
+
+      // Batch fetch all completions for the week
+      if (startedDays.length > 0) {
+        const dateStrings = startedDays.map(d => toDateString(d));
+        const { data: completionData } = await supabase
+          .from('schedule_completions')
+          .select('schedule_id, completion_date, is_completed')
+          .in('schedule_id', repeatingIds)
+          .in('completion_date', dateStrings);
+
+        (completionData || []).forEach((row: any) => {
+          const dayDate = new Date(row.completion_date + 'T00:00:00');
+          const dayIdx = getDay(dayDate);
+          newCompletions.set(`${row.schedule_id}-${dayIdx}`, row.is_completed);
+        });
+      }
+    }
+
+    setDateCompletions(newCompletions);
     setSchedules(filtered as WeekSchedule[]);
     setLoading(false);
   }, [user, weekOffset]);
@@ -65,28 +118,21 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
     const channel = supabase
       .channel('weekly-plan')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, () => fetchSchedules())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'schedule_completions' }, () => fetchSchedules())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [fetchSchedules]);
 
-  // Group schedules by day
-  const byDay: Record<number, WeekSchedule[]> = {};
+  // Group schedules by day with per-date completion
+  const byDay: Record<number, (WeekSchedule & { effectiveCompleted: boolean })[]> = {};
   for (let i = 0; i < 7; i++) byDay[i] = [];
   const seen = new Set<string>();
-  const todayDayIndex = getDay(now);
-  const isCurrentWeek = weekOffset === 0;
-  const isPastWeek = weekOffset < 0;
 
-  const hasDayStarted = (dayIndex: number): boolean => {
-    if (isPastWeek) return true;
-    if (!isCurrentWeek) return false;
-    return dayIndex <= todayDayIndex;
-  };
-
-  const isDayPast = (dayIndex: number): boolean => {
-    if (isPastWeek) return true;
-    if (!isCurrentWeek) return false;
-    return dayIndex < todayDayIndex;
+  const getEffectiveCompleted = (s: WeekSchedule, dayIndex: number): boolean => {
+    if (isRepeatingSchedule(s.repeat_type)) {
+      return dateCompletions.get(`${s.id}-${dayIndex}`) ?? false;
+    }
+    return s.is_completed;
   };
 
   schedules.forEach(s => {
@@ -97,7 +143,10 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
       for (let d = 0; d < 7; d++) {
         if (!hasDayStarted(d)) continue;
         const key = `${s.id}-${d}`;
-        if (!seen.has(key)) { seen.add(key); byDay[d].push(s); }
+        if (!seen.has(key)) {
+          seen.add(key);
+          byDay[d].push({ ...s, effectiveCompleted: getEffectiveCompleted(s, d) });
+        }
       }
       return;
     }
@@ -106,7 +155,10 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
       s.repeat_days.forEach((d: number) => {
         if (!hasDayStarted(d)) return;
         const key = `${s.id}-${d}`;
-        if (!seen.has(key)) { seen.add(key); byDay[d]?.push(s); }
+        if (!seen.has(key)) {
+          seen.add(key);
+          byDay[d]?.push({ ...s, effectiveCompleted: getEffectiveCompleted(s, d) });
+        }
       });
       return;
     }
@@ -115,14 +167,16 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
       const day = getDay(sDate);
       if (!hasDayStarted(day)) return;
       const key = `${s.id}-${day}`;
-      if (!seen.has(key)) { seen.add(key); byDay[day]?.push(s); }
+      if (!seen.has(key)) {
+        seen.add(key);
+        byDay[day]?.push({ ...s, effectiveCompleted: getEffectiveCompleted(s, day) });
+      }
     }
   });
 
   const today = getDay(now);
   const weekLabel = `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d, yyyy')}`;
 
-  // Determine navigable boundaries (only days that have started)
   const canNavigateTo = (dayIndex: number): boolean => {
     if (dayIndex < 0 || dayIndex > 6) return false;
     return hasDayStarted(dayIndex);
@@ -136,7 +190,6 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
     }
   };
 
-  // If a day is selected, show the detail view
   if (selectedDayIndex !== null) {
     const selectedDate = addDays(weekStart, selectedDayIndex);
     selectedDate.setHours(9, 0, 0, 0);
@@ -149,9 +202,7 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
             date={selectedDate}
             onBack={() => setSelectedDayIndex(null)}
             onEdit={(schedule) => onEdit?.(schedule)}
-            onCreateForDate={(date) => {
-              onCreateForDate?.(date);
-            }}
+            onCreateForDate={(date) => onCreateForDate?.(date)}
             onNavigate={handleDayNavigate}
             canGoPrev={canNavigateTo(selectedDayIndex - 1)}
             canGoNext={canNavigateTo(selectedDayIndex + 1)}
@@ -187,8 +238,8 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
         {DAY_NAMES.map((name, i) => {
           const isTodayCol = i === today && weekOffset === 0;
           const daySchedules = byDay[i] || [];
-          const activeCount = daySchedules.filter(s => !s.is_completed).length;
-          const completedCount = daySchedules.filter(s => s.is_completed).length;
+          const activeCount = daySchedules.filter(s => !s.effectiveCompleted).length;
+          const completedCount = daySchedules.filter(s => s.effectiveCompleted).length;
 
           const isFutureDay = isCurrentWeek && i > today;
           const isFutureWeek = weekOffset > 0;
@@ -198,9 +249,7 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
           return (
             <button
               key={i}
-              onClick={() => {
-                if (!isDayLocked) setSelectedDayIndex(i);
-              }}
+              onClick={() => { if (!isDayLocked) setSelectedDayIndex(i); }}
               disabled={isDayLocked}
               className={`rounded-lg border p-2 text-center transition-all min-h-[80px] ${
                 isTodayCol
@@ -226,13 +275,13 @@ export default function WeeklyPlanView({ onEdit, onCreateForDate }: WeeklyPlanVi
                 </div>
               ) : (
                 <div className="space-y-0.5">
-                  {daySchedules.slice(0, 3).map(s => {
+                  {daySchedules.slice(0, 3).map((s, idx) => {
                     const cat = categoryConfig[s.category as ScheduleCategory];
                     return (
                       <div
-                        key={s.id}
+                        key={`${s.id}-${idx}`}
                         className={`text-[9px] leading-tight px-1 py-0.5 rounded truncate ${
-                          s.is_completed
+                          s.effectiveCompleted
                             ? 'bg-muted text-muted-foreground line-through'
                             : 'bg-primary/10 text-primary'
                         }`}
