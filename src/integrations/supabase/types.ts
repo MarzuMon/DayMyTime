@@ -220,6 +220,41 @@ export type Database = {
           },
         ]
       }
+      schedule_completions: {
+        Row: {
+          completion_date: string
+          created_at: string
+          id: string
+          is_completed: boolean
+          schedule_id: string
+          user_id: string
+        }
+        Insert: {
+          completion_date: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          schedule_id: string
+          user_id: string
+        }
+        Update: {
+          completion_date?: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          schedule_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_completions_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schedules: {
         Row: {
           alarm_tone: string
