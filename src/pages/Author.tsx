@@ -264,7 +264,7 @@ export default function Author() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="flex flex-wrap w-full gap-1">
+          <TabsList className="flex flex-wrap w-full h-auto gap-1">
             <TabsTrigger value="analytics"><BarChart3 className="h-4 w-4 mr-1.5" /> Analytics</TabsTrigger>
             <TabsTrigger value="pro-analytics"><Crown className="h-4 w-4 mr-1.5" /> Pro Stats</TabsTrigger>
             <TabsTrigger value="users"><Users className="h-4 w-4 mr-1.5" /> Users</TabsTrigger>
