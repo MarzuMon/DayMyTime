@@ -101,6 +101,192 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_tips: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          created_by: string | null
+          excerpt: string
+          featured_image: string | null
+          id: string
+          keywords: string | null
+          likes_count: number
+          meta_description: string | null
+          publish_date: string
+          seo_title: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          featured_image?: string | null
+          id?: string
+          keywords?: string | null
+          likes_count?: number
+          meta_description?: string | null
+          publish_date?: string
+          seo_title?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          featured_image?: string | null
+          id?: string
+          keywords?: string | null
+          likes_count?: number
+          meta_description?: string | null
+          publish_date?: string
+          seo_title?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      history_posts: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          created_by: string | null
+          excerpt: string
+          featured_image: string | null
+          id: string
+          keywords: string | null
+          likes_count: number
+          meta_description: string | null
+          publish_date: string
+          seo_title: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          featured_image?: string | null
+          id?: string
+          keywords?: string | null
+          likes_count?: number
+          meta_description?: string | null
+          publish_date?: string
+          seo_title?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          featured_image?: string | null
+          id?: string
+          keywords?: string | null
+          likes_count?: number
+          meta_description?: string | null
+          publish_date?: string
+          seo_title?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      newsletter_followers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          post_type: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          post_type: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          post_type?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          post_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          post_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          post_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
