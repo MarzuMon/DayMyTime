@@ -22,6 +22,8 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const About = lazy(() => import("./pages/About"));
+const History = lazy(() => import("./pages/History"));
+const TodayTip = lazy(() => import("./pages/TodayTip"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
