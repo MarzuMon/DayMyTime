@@ -529,6 +529,10 @@ export default function Author() {
           <TabsContent value="seo" className="space-y-4">
             <SeoKeywordsTab />
           </TabsContent>
+
+          <TabsContent value="content" className="space-y-4">
+            <ContentManagementTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
