@@ -237,6 +237,16 @@ export default function Landing() {
                 </Button>
               </motion.div>
 
+              {/* Content Section Buttons */}
+              <motion.div variants={fadeUp} custom={3.5} className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
+                <Button size="sm" variant="outline" onClick={() => navigate('/history')} className="rounded-xl glass gap-1.5">
+                  📜 This Day in History
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => navigate('/todaytip')} className="rounded-xl glass gap-1.5">
+                  💡 Today's Productivity Tip
+                </Button>
+              </motion.div>
+
               {/* Social proof */}
               <motion.div variants={fadeUp} custom={4} className="mt-8 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 sm:gap-6">
                 <div className="flex items-center gap-1.5">
