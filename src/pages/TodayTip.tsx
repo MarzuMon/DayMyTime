@@ -22,6 +22,8 @@ interface DailyTip {
   content: string;
   excerpt: string;
   featured_image: string | null;
+  featured_image_2: string | null;
+  image_align: string;
   author_name: string;
   publish_date: string;
   seo_title: string | null;
