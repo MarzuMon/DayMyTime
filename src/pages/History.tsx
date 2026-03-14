@@ -23,6 +23,8 @@ interface HistoryPost {
   content: string;
   excerpt: string;
   featured_image: string | null;
+  featured_image_2: string | null;
+  image_align: string;
   author_name: string;
   publish_date: string;
   seo_title: string | null;
@@ -220,13 +222,15 @@ export default function History() {
           <div className="text-center py-20 text-muted-foreground">Loading...</div>
         ) : todayPost ? (
           <motion.article initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-16">
-            {todayPost.featured_image && (
-              <img
-                src={todayPost.featured_image}
-                alt={todayPost.title}
-                className="w-full h-64 sm:h-80 object-cover rounded-2xl mb-6"
-                loading="lazy"
-              />
+            {(todayPost.featured_image || todayPost.featured_image_2) && (
+              <div className={`flex gap-3 mb-6 ${todayPost.image_align === 'center' ? 'justify-center' : todayPost.image_align === 'right' ? 'justify-end' : 'justify-start'}`}>
+                {todayPost.featured_image && (
+                  <img src={todayPost.featured_image} alt={todayPost.title} className={`${todayPost.featured_image_2 ? 'w-1/2' : 'w-full'} h-64 sm:h-80 object-cover rounded-2xl`} loading="lazy" />
+                )}
+                {todayPost.featured_image_2 && (
+                  <img src={todayPost.featured_image_2} alt={`${todayPost.title} - 2`} className={`${todayPost.featured_image ? 'w-1/2' : 'w-full'} h-64 sm:h-80 object-cover rounded-2xl`} loading="lazy" />
+                )}
+              </div>
             )}
             <h2 className="font-display text-2xl sm:text-3xl font-bold mb-3">{todayPost.title}</h2>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
