@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminSetting } from '@/hooks/use-admin-settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
@@ -17,7 +20,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
-  Plus, Edit, Trash2, Eye, Sparkles, Loader2, Calendar, FileText, Lightbulb, Send
+  Plus, Edit, Trash2, Eye, Sparkles, Loader2, Calendar, FileText, Lightbulb, Send,
+  Upload, Image, AlignLeft, AlignCenter, AlignRight, Clock, Timer
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -28,6 +32,8 @@ interface Post {
   content: string;
   excerpt: string;
   featured_image: string | null;
+  featured_image_2: string | null;
+  image_align: string;
   author_name: string;
   publish_date: string;
   seo_title: string | null;
@@ -39,7 +45,8 @@ interface Post {
 }
 
 const emptyPost = {
-  title: '', content: '', excerpt: '', featured_image: '',
+  title: '', content: '', excerpt: '', featured_image: '', featured_image_2: '',
+  image_align: 'center',
   author_name: 'DayMyTime Team', publish_date: format(new Date(), 'yyyy-MM-dd'),
   seo_title: '', meta_description: '', keywords: '', status: 'draft'
 };
@@ -63,6 +70,27 @@ export default function ContentManagementTab() {
   const [form, setForm] = useState(emptyPost);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [uploading1, setUploading1] = useState(false);
+  const [uploading2, setUploading2] = useState(false);
+  const [imageMode1, setImageMode1] = useState<'url' | 'upload'>('url');
+  const [imageMode2, setImageMode2] = useState<'url' | 'upload'>('url');
+  const fileRef1 = useRef<HTMLInputElement>(null);
+  const fileRef2 = useRef<HTMLInputElement>(null);
+
+  // Auto-publish settings
+  const { value: autoPublish, save: saveAutoPublish, loading: autoLoading } = useAdminSetting<{
+    enabled: boolean;
+    time: string;
+    history: boolean;
+    tips: boolean;
+  }>('auto_publish_content', { enabled: false, time: '06:00', history: true, tips: true });
+
+  // Manual scheduling
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [scheduleTime, setScheduleTime] = useState('06:00');
+  const [scheduleType, setScheduleType] = useState<'history' | 'tips' | 'both'>('both');
+  const [scheduling, setScheduling] = useState(false);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -79,9 +107,29 @@ export default function ContentManagementTab() {
 
   const table = activeTab === 'history' ? 'history_posts' : 'daily_tips';
 
+  const uploadImage = async (file: File, slot: 1 | 2) => {
+    const setter = slot === 1 ? setUploading1 : setUploading2;
+    setter(true);
+    const ext = file.name.split('.').pop();
+    const path = `${activeTab}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('content-images').upload(path, file);
+    if (error) {
+      toast.error('Upload failed: ' + error.message);
+      setter(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from('content-images').getPublicUrl(path);
+    const field = slot === 1 ? 'featured_image' : 'featured_image_2';
+    setForm(f => ({ ...f, [field]: urlData.publicUrl }));
+    toast.success('Image uploaded!');
+    setter(false);
+  };
+
   const openNew = () => {
     setEditingPost(null);
     setForm({ ...emptyPost });
+    setImageMode1('url');
+    setImageMode2('url');
     setDialogOpen(true);
   };
 
@@ -89,11 +137,15 @@ export default function ContentManagementTab() {
     setEditingPost(post);
     setForm({
       title: post.title, content: post.content, excerpt: post.excerpt,
-      featured_image: post.featured_image || '', author_name: post.author_name,
+      featured_image: post.featured_image || '', featured_image_2: post.featured_image_2 || '',
+      image_align: post.image_align || 'center',
+      author_name: post.author_name,
       publish_date: post.publish_date, seo_title: post.seo_title || '',
       meta_description: post.meta_description || '', keywords: post.keywords || '',
       status: post.status
     });
+    setImageMode1(post.featured_image ? 'url' : 'url');
+    setImageMode2(post.featured_image_2 ? 'url' : 'url');
     setDialogOpen(true);
   };
 
@@ -106,7 +158,10 @@ export default function ContentManagementTab() {
     const slug = generateSlug(form.title, form.publish_date);
     const payload = {
       title: form.title, slug, content: form.content, excerpt: form.excerpt || form.content.slice(0, 160),
-      featured_image: form.featured_image || null, author_name: form.author_name,
+      featured_image: form.featured_image || null,
+      featured_image_2: form.featured_image_2 || null,
+      image_align: form.image_align,
+      author_name: form.author_name,
       publish_date: form.publish_date, seo_title: form.seo_title || form.title,
       meta_description: form.meta_description || form.excerpt || form.content.slice(0, 160),
       keywords: form.keywords, status: form.status,
@@ -163,10 +218,87 @@ export default function ContentManagementTab() {
     setGenerating(false);
   };
 
+  const scheduleGeneration = async () => {
+    setScheduling(true);
+    try {
+      const { error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          type: scheduleType === 'both' ? 'both' : scheduleType === 'history' ? 'history' : 'tip',
+          schedule: true,
+          publish_date: scheduleDate,
+          auto_publish: true,
+        }
+      });
+      if (error) throw error;
+      toast.success(`Content scheduled for ${scheduleDate}!`);
+      setScheduleDialogOpen(false);
+      fetchAll();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to schedule content');
+    }
+    setScheduling(false);
+  };
+
   const posts = activeTab === 'history' ? historyPosts : dailyTips;
 
   return (
     <div className="space-y-4">
+      {/* Auto-Publish Settings */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Timer className="h-4 w-4" /> Auto-Publish Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Auto-generate & publish daily</p>
+              <p className="text-xs text-muted-foreground">AI generates and publishes content at the scheduled time</p>
+            </div>
+            <Switch
+              checked={autoPublish.enabled}
+              onCheckedChange={(checked) => saveAutoPublish({ ...autoPublish, enabled: checked })}
+            />
+          </div>
+          {autoPublish.enabled && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t">
+              <div>
+                <Label className="text-xs">Time</Label>
+                <Input
+                  type="time"
+                  value={autoPublish.time}
+                  onChange={e => saveAutoPublish({ ...autoPublish, time: e.target.value })}
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={autoPublish.history}
+                  onCheckedChange={(checked) => saveAutoPublish({ ...autoPublish, history: checked })}
+                />
+                <Label className="text-xs">History</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={autoPublish.tips}
+                  onCheckedChange={(checked) => saveAutoPublish({ ...autoPublish, tips: checked })}
+                />
+                <Label className="text-xs">Tips</Label>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => setScheduleDialogOpen(true)}>
+                <Clock className="h-3.5 w-3.5 mr-1" /> Schedule Manual
+              </Button>
+            </div>
+          )}
+          {!autoPublish.enabled && (
+            <Button size="sm" variant="outline" onClick={() => setScheduleDialogOpen(true)}>
+              <Clock className="h-3.5 w-3.5 mr-1" /> Schedule Manual Generation
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <TabsList>
@@ -225,10 +357,64 @@ export default function ContentManagementTab() {
                 <Input type="date" value={form.publish_date} onChange={e => setForm(f => ({ ...f, publish_date: e.target.value }))} />
               </div>
             </div>
+
+            {/* Image 1 */}
+            <ImageUploadField
+              label="Featured Image 1"
+              mode={imageMode1}
+              onModeChange={setImageMode1}
+              value={form.featured_image}
+              onValueChange={(v) => setForm(f => ({ ...f, featured_image: v }))}
+              uploading={uploading1}
+              fileRef={fileRef1}
+              onFileSelect={(file) => uploadImage(file, 1)}
+            />
+
+            {/* Image 2 */}
+            <ImageUploadField
+              label="Featured Image 2"
+              mode={imageMode2}
+              onModeChange={setImageMode2}
+              value={form.featured_image_2}
+              onValueChange={(v) => setForm(f => ({ ...f, featured_image_2: v }))}
+              uploading={uploading2}
+              fileRef={fileRef2}
+              onFileSelect={(file) => uploadImage(file, 2)}
+            />
+
+            {/* Image Alignment */}
             <div>
-              <Label>Featured Image URL</Label>
-              <Input value={form.featured_image} onChange={e => setForm(f => ({ ...f, featured_image: e.target.value }))} placeholder="https://..." />
+              <Label className="mb-2 block">Image Alignment</Label>
+              <div className="flex gap-2">
+                {(['left', 'center', 'right'] as const).map(align => (
+                  <Button
+                    key={align}
+                    size="sm"
+                    variant={form.image_align === align ? 'default' : 'outline'}
+                    onClick={() => setForm(f => ({ ...f, image_align: align }))}
+                    className="gap-1"
+                  >
+                    {align === 'left' && <AlignLeft className="h-4 w-4" />}
+                    {align === 'center' && <AlignCenter className="h-4 w-4" />}
+                    {align === 'right' && <AlignRight className="h-4 w-4" />}
+                    {align.charAt(0).toUpperCase() + align.slice(1)}
+                  </Button>
+                ))}
+              </div>
             </div>
+
+            {/* Image Preview */}
+            {(form.featured_image || form.featured_image_2) && (
+              <div className={`flex gap-3 ${form.image_align === 'center' ? 'justify-center' : form.image_align === 'right' ? 'justify-end' : 'justify-start'}`}>
+                {form.featured_image && (
+                  <img src={form.featured_image} alt="Preview 1" className="h-24 rounded-lg object-cover" />
+                )}
+                {form.featured_image_2 && (
+                  <img src={form.featured_image_2} alt="Preview 2" className="h-24 rounded-lg object-cover" />
+                )}
+              </div>
+            )}
+
             <details className="border rounded-lg p-3">
               <summary className="cursor-pointer font-medium text-sm">SEO Settings</summary>
               <div className="space-y-3 mt-3">
@@ -257,6 +443,89 @@ export default function ContentManagementTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Content Generation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Date</Label>
+              <Input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Content Type</Label>
+              <Select value={scheduleType} onValueChange={(v: any) => setScheduleType(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="both">Both History & Tip</SelectItem>
+                  <SelectItem value="history">History Only</SelectItem>
+                  <SelectItem value="tips">Tip Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={scheduleGeneration} disabled={scheduling}>
+              {scheduling ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+              Generate & Publish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function ImageUploadField({ label, mode, onModeChange, value, onValueChange, uploading, fileRef, onFileSelect }: {
+  label: string; mode: 'url' | 'upload'; onModeChange: (m: 'url' | 'upload') => void;
+  value: string; onValueChange: (v: string) => void;
+  uploading: boolean; fileRef: React.RefObject<HTMLInputElement>;
+  onFileSelect: (f: File) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <Label>{label}</Label>
+        <div className="flex gap-1">
+          <Button size="sm" variant={mode === 'url' ? 'default' : 'ghost'} onClick={() => onModeChange('url')} className="h-6 text-xs px-2">
+            URL
+          </Button>
+          <Button size="sm" variant={mode === 'upload' ? 'default' : 'ghost'} onClick={() => onModeChange('upload')} className="h-6 text-xs px-2">
+            <Upload className="h-3 w-3 mr-1" /> Upload
+          </Button>
+        </div>
+      </div>
+      {mode === 'url' ? (
+        <Input value={value} onChange={e => onValueChange(e.target.value)} placeholder="https://..." />
+      ) : (
+        <div className="flex gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={e => {
+              const file = e.target.files?.[0];
+              if (file) onFileSelect(file);
+            }}
+          />
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Image className="h-4 w-4 mr-1" />}
+            {uploading ? 'Uploading...' : value ? 'Change Image' : 'Choose Image'}
+          </Button>
+          {value && <span className="text-xs text-muted-foreground self-center truncate max-w-[120px]">✓ uploaded</span>}
+        </div>
+      )}
     </div>
   );
 }
@@ -272,16 +541,21 @@ function PostList({ posts, onEdit, onDelete, onPublish, loading }: {
       {posts.map(post => (
         <Card key={post.id}>
           <CardContent className="flex items-center justify-between gap-4 py-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-medium text-sm truncate">{post.title}</h3>
-                <Badge variant={post.status === 'published' ? 'default' : 'secondary'} className="text-xs shrink-0">
-                  {post.status}
-                </Badge>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {post.featured_image && (
+                <img src={post.featured_image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-medium text-sm truncate">{post.title}</h3>
+                  <Badge variant={post.status === 'published' ? 'default' : 'secondary'} className="text-xs shrink-0">
+                    {post.status}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count}
-              </p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               {post.status === 'draft' && (
