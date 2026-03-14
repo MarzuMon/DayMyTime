@@ -170,8 +170,15 @@ export default function TodayTip() {
           <div className="text-center py-20 text-muted-foreground">Loading...</div>
         ) : todayTip ? (
           <motion.article initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-16">
-            {todayTip.featured_image && (
-              <img src={todayTip.featured_image} alt={todayTip.title} className="w-full h-64 sm:h-80 object-cover rounded-2xl mb-6" loading="lazy" />
+            {(todayTip.featured_image || todayTip.featured_image_2) && (
+              <div className={`flex gap-3 mb-6 ${todayTip.image_align === 'center' ? 'justify-center' : todayTip.image_align === 'right' ? 'justify-end' : 'justify-start'}`}>
+                {todayTip.featured_image && (
+                  <img src={todayTip.featured_image} alt={todayTip.title} className={`${todayTip.featured_image_2 ? 'w-1/2' : 'w-full'} h-64 sm:h-80 object-cover rounded-2xl`} loading="lazy" />
+                )}
+                {todayTip.featured_image_2 && (
+                  <img src={todayTip.featured_image_2} alt={`${todayTip.title} - 2`} className={`${todayTip.featured_image ? 'w-1/2' : 'w-full'} h-64 sm:h-80 object-cover rounded-2xl`} loading="lazy" />
+                )}
+              </div>
             )}
             <h2 className="font-display text-2xl sm:text-3xl font-bold mb-3">{todayTip.title}</h2>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
