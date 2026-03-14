@@ -109,7 +109,9 @@ export type Database = {
           created_by: string | null
           excerpt: string
           featured_image: string | null
+          featured_image_2: string | null
           id: string
+          image_align: string
           keywords: string | null
           likes_count: number
           meta_description: string | null
@@ -127,7 +129,9 @@ export type Database = {
           created_by?: string | null
           excerpt?: string
           featured_image?: string | null
+          featured_image_2?: string | null
           id?: string
+          image_align?: string
           keywords?: string | null
           likes_count?: number
           meta_description?: string | null
@@ -145,7 +149,9 @@ export type Database = {
           created_by?: string | null
           excerpt?: string
           featured_image?: string | null
+          featured_image_2?: string | null
           id?: string
+          image_align?: string
           keywords?: string | null
           likes_count?: number
           meta_description?: string | null
@@ -166,7 +172,9 @@ export type Database = {
           created_by: string | null
           excerpt: string
           featured_image: string | null
+          featured_image_2: string | null
           id: string
+          image_align: string
           keywords: string | null
           likes_count: number
           meta_description: string | null
@@ -184,7 +192,9 @@ export type Database = {
           created_by?: string | null
           excerpt?: string
           featured_image?: string | null
+          featured_image_2?: string | null
           id?: string
+          image_align?: string
           keywords?: string | null
           likes_count?: number
           meta_description?: string | null
@@ -202,7 +212,9 @@ export type Database = {
           created_by?: string | null
           excerpt?: string
           featured_image?: string | null
+          featured_image_2?: string | null
           id?: string
+          image_align?: string
           keywords?: string | null
           likes_count?: number
           meta_description?: string | null
