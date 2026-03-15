@@ -518,13 +518,7 @@ export default function Author() {
             <PromotionManagementTab />
           </TabsContent>
 
-          <TabsContent value="teams" className="space-y-4">
-            <TeamManagementTab />
-          </TabsContent>
 
-          <TabsContent value="templates" className="space-y-4">
-            <TemplateManagementTab />
-          </TabsContent>
 
           <TabsContent value="seo" className="space-y-4">
             <SeoKeywordsTab />
