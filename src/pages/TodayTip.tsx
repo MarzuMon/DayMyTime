@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
@@ -10,7 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Sun, Moon, Lightbulb, Heart, Share2,
-  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar
+  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar,
+  Instagram, Copy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -34,6 +35,7 @@ interface DailyTip {
 
 export default function TodayTip() {
   const navigate = useNavigate();
+  const { slug } = useParams();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [tips, setTips] = useState<DailyTip[]>([]);
@@ -45,23 +47,54 @@ export default function TodayTip() {
   const [email, setEmail] = useState('');
   const PAGE_SIZE = 9;
 
-  useEffect(() => { fetchTips(); }, [page]);
-  useEffect(() => { if (selectedTip && user) checkLiked(); }, [selectedTip, user]);
+  useEffect(() => {
+    if (slug) {
+      fetchBySlug(slug);
+    } else {
+      fetchTips();
+    }
+  }, [slug, page]);
+
+  useEffect(() => {
+    if (selectedTip) {
+      trackView(selectedTip.id);
+      if (user) checkLiked();
+    }
+  }, [selectedTip, user]);
+
+  const fetchBySlug = async (s: string) => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('daily_tips').select('*').eq('slug', s).eq('status', 'published').maybeSingle();
+    if (data) setSelectedTip(data as unknown as DailyTip);
+    const { data: listData } = await supabase
+      .from('daily_tips').select('*').eq('status', 'published')
+      .order('publish_date', { ascending: false }).range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    if (listData) {
+      setTips(listData as unknown as DailyTip[]);
+      setHasMore(listData.length === PAGE_SIZE);
+    }
+    setLoading(false);
+  };
 
   const fetchTips = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from('daily_tips')
-      .select('*')
-      .eq('status', 'published')
-      .order('publish_date', { ascending: false })
-      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+      .from('daily_tips').select('*').eq('status', 'published')
+      .order('publish_date', { ascending: false }).range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
     if (data) {
       setTips(data as unknown as DailyTip[]);
       setHasMore(data.length === PAGE_SIZE);
       if (!selectedTip && data.length > 0) setSelectedTip(data[0] as unknown as DailyTip);
     }
     setLoading(false);
+  };
+
+  const trackView = async (postId: string) => {
+    await supabase.from('page_views').insert({
+      page_path: `/todaytip/${slug || ''}`,
+      post_id: postId,
+    } as any);
   };
 
   const checkLiked = async () => {
@@ -93,10 +126,20 @@ export default function TodayTip() {
     else { toast.success('Subscribed!'); setEmail(''); }
   };
 
+  const getShareUrl = () => {
+    if (!selectedTip) return '';
+    return `https://daymytime.com/todaytip/${selectedTip.slug}`;
+  };
+
   const share = (platform: string) => {
     if (!selectedTip) return;
-    const url = `https://daymytime.com/todaytip`;
+    const url = getShareUrl();
     const text = selectedTip.title;
+    if (platform === 'instagram' || platform === 'copy') {
+      navigator.clipboard.writeText(url);
+      toast.success(platform === 'instagram' ? 'Link copied! Paste it on Instagram.' : 'Link copied!');
+      return;
+    }
     const links: Record<string, string> = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
@@ -122,7 +165,7 @@ export default function TodayTip() {
       <SEOHead
         title={todayTip?.seo_title || "Today's Productivity Tip – DayMyTime"}
         description={todayTip?.meta_description || "Daily productivity tips for better time management. Boost your efficiency with actionable advice from DayMyTime."}
-        canonical="https://daymytime.com/todaytip"
+        canonical={`https://daymytime.com/todaytip${todayTip ? `/${todayTip.slug}` : ''}`}
       />
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />}
 
@@ -203,6 +246,12 @@ export default function TodayTip() {
               <Button size="sm" variant="outline" onClick={() => share('linkedin')} className="gap-1.5">
                 <Linkedin className="h-4 w-4" /> Post
               </Button>
+              <Button size="sm" variant="outline" onClick={() => share('instagram')} className="gap-1.5">
+                <Instagram className="h-4 w-4" /> Instagram
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => share('copy')} className="gap-1.5">
+                <Copy className="h-4 w-4" /> Copy Link
+              </Button>
             </div>
 
             {/* Newsletter */}
@@ -231,7 +280,7 @@ export default function TodayTip() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {tips.map(tip => (
                 <motion.div key={tip.id} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                  <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow h-full" onClick={() => { setSelectedTip(tip); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow h-full" onClick={() => { setSelectedTip(tip); navigate(`/todaytip/${tip.slug}`); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     {tip.featured_image && (
                       <img src={tip.featured_image} alt={tip.title} className="w-full h-40 object-cover" loading="lazy" />
                     )}

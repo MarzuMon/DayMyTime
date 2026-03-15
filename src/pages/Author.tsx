@@ -19,16 +19,16 @@ import {
 } from 'recharts';
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
-  Settings, CreditCard, Megaphone, LayoutTemplate, IndianRupee, Search,
+  Settings, CreditCard, Megaphone, IndianRupee, Search,
   Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 import UserManagementTab from '@/components/author/UserManagementTab';
-import TemplateManagementTab from '@/components/author/TemplateManagementTab';
+
 import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
 import PromotionManagementTab from '@/components/author/PromotionManagementTab';
-import TeamManagementTab from '@/components/author/TeamManagementTab';
+
 import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 import ContentManagementTab from '@/components/author/ContentManagementTab';
 
@@ -273,8 +273,8 @@ export default function Author() {
             <TabsTrigger value="referrals"><Trophy className="h-4 w-4 mr-1.5" /> Referrals</TabsTrigger>
             <TabsTrigger value="promotions"><Gift className="h-4 w-4 mr-1.5" /> Promos</TabsTrigger>
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
-            <TabsTrigger value="teams"><UsersRound className="h-4 w-4 mr-1.5" /> Teams</TabsTrigger>
-            <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
+
+
             <TabsTrigger value="seo"><Search className="h-4 w-4 mr-1.5" /> SEO</TabsTrigger>
             <TabsTrigger value="content"><FileText className="h-4 w-4 mr-1.5" /> Content</TabsTrigger>
           </TabsList>
@@ -518,13 +518,7 @@ export default function Author() {
             <PromotionManagementTab />
           </TabsContent>
 
-          <TabsContent value="teams" className="space-y-4">
-            <TeamManagementTab />
-          </TabsContent>
 
-          <TabsContent value="templates" className="space-y-4">
-            <TemplateManagementTab />
-          </TabsContent>
 
           <TabsContent value="seo" className="space-y-4">
             <SeoKeywordsTab />

@@ -21,7 +21,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
   Plus, Edit, Trash2, Eye, Sparkles, Loader2, Calendar, FileText, Lightbulb, Send,
-  Upload, Image, AlignLeft, AlignCenter, AlignRight, Clock, Timer
+  Upload, Image, AlignLeft, AlignCenter, AlignRight, Clock, Timer,
+  Twitter, Facebook, Linkedin, Instagram, Copy, ExternalLink, BarChart3, Heart
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -59,6 +60,11 @@ function generateSlug(title: string, date: string): string {
   return `${month}-${day}-${slug}`;
 }
 
+function getPostUrl(post: Post, type: 'history' | 'tips'): string {
+  const base = type === 'history' ? '/history' : '/todaytip';
+  return `https://daymytime.com${base}/${post.slug}`;
+}
+
 export default function ContentManagementTab() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('history');
@@ -77,6 +83,10 @@ export default function ContentManagementTab() {
   const fileRef1 = useRef<HTMLInputElement>(null);
   const fileRef2 = useRef<HTMLInputElement>(null);
 
+  // Analytics
+  const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
+  const [totalViews, setTotalViews] = useState(0);
+
   // Auto-publish settings
   const { value: autoPublish, save: saveAutoPublish, loading: autoLoading } = useAdminSetting<{
     enabled: boolean;
@@ -92,7 +102,7 @@ export default function ContentManagementTab() {
   const [scheduleType, setScheduleType] = useState<'history' | 'tips' | 'both'>('both');
   const [scheduling, setScheduling] = useState(false);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); fetchAnalytics(); }, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -103,6 +113,18 @@ export default function ContentManagementTab() {
     if (h.data) setHistoryPosts(h.data as unknown as Post[]);
     if (t.data) setDailyTips(t.data as unknown as Post[]);
     setLoading(false);
+  };
+
+  const fetchAnalytics = async () => {
+    const { data } = await supabase.from('page_views').select('post_id');
+    if (data) {
+      setTotalViews(data.length);
+      const counts: Record<string, number> = {};
+      data.forEach(v => {
+        if (v.post_id) counts[v.post_id] = (counts[v.post_id] || 0) + 1;
+      });
+      setViewCounts(counts);
+    }
   };
 
   const table = activeTab === 'history' ? 'history_posts' : 'daily_tips';
@@ -149,12 +171,13 @@ export default function ContentManagementTab() {
     setDialogOpen(true);
   };
 
-  const savePost = async () => {
+  const savePost = async (overrideStatus?: string) => {
     if (!form.title.trim() || !form.content.trim()) {
       toast.error('Title and content are required');
       return;
     }
     setSaving(true);
+    const status = overrideStatus || form.status;
     const slug = generateSlug(form.title, form.publish_date);
     const payload = {
       title: form.title, slug, content: form.content, excerpt: form.excerpt || form.content.slice(0, 160),
@@ -164,7 +187,7 @@ export default function ContentManagementTab() {
       author_name: form.author_name,
       publish_date: form.publish_date, seo_title: form.seo_title || form.title,
       meta_description: form.meta_description || form.excerpt || form.content.slice(0, 160),
-      keywords: form.keywords, status: form.status,
+      keywords: form.keywords, status,
       ...(editingPost ? {} : { created_by: user?.id }),
     };
 
@@ -176,7 +199,7 @@ export default function ContentManagementTab() {
     }
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(editingPost ? 'Post updated!' : 'Post created!');
+    toast.success(status === 'published' ? 'Published!' : status === 'scheduled' ? 'Scheduled!' : 'Draft saved!');
     setDialogOpen(false);
     fetchAll();
   };
@@ -239,10 +262,74 @@ export default function ContentManagementTab() {
     setScheduling(false);
   };
 
+  const copyLink = (post: Post) => {
+    const url = getPostUrl(post, activeTab as 'history' | 'tips');
+    navigator.clipboard.writeText(url);
+    toast.success('Link copied!');
+  };
+
+  const sharePost = (post: Post, platform: string) => {
+    const url = getPostUrl(post, activeTab as 'history' | 'tips');
+    const text = post.title;
+    if (platform === 'instagram') {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copied! Paste it on Instagram.');
+      return;
+    }
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copied!');
+      return;
+    }
+    const links: Record<string, string> = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+    };
+    window.open(links[platform], '_blank', 'width=600,height=400');
+  };
+
+  const previewPost = (post: Post) => {
+    const base = activeTab === 'history' ? '/history' : '/todaytip';
+    window.open(`${base}/${post.slug}`, '_blank');
+  };
+
   const posts = activeTab === 'history' ? historyPosts : dailyTips;
+  const allPosts = [...historyPosts, ...dailyTips];
+  const publishedCount = allPosts.filter(p => p.status === 'published').length;
+  const totalLikes = allPosts.reduce((s, p) => s + p.likes_count, 0);
 
   return (
     <div className="space-y-4">
+      {/* Content Analytics */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" /> Content Analytics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="p-3 rounded-lg bg-secondary text-center">
+              <p className="text-xl font-bold">{allPosts.length}</p>
+              <p className="text-xs text-muted-foreground">Total Posts</p>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary text-center">
+              <p className="text-xl font-bold">{publishedCount}</p>
+              <p className="text-xs text-muted-foreground">Published</p>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary text-center">
+              <p className="text-xl font-bold flex items-center justify-center gap-1"><Heart className="h-4 w-4" />{totalLikes}</p>
+              <p className="text-xs text-muted-foreground">Total Likes</p>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary text-center">
+              <p className="text-xl font-bold flex items-center justify-center gap-1"><Eye className="h-4 w-4" />{totalViews}</p>
+              <p className="text-xs text-muted-foreground">Page Views</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Auto-Publish Settings */}
       <Card>
         <CardHeader className="pb-3">
@@ -314,10 +401,14 @@ export default function ContentManagementTab() {
         </div>
 
         <TabsContent value="history">
-          <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost} loading={loading} />
+          <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
+            onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
+            viewCounts={viewCounts} loading={loading} />
         </TabsContent>
         <TabsContent value="tips">
-          <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost} loading={loading} />
+          <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
+            onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
+            viewCounts={viewCounts} loading={loading} />
         </TabsContent>
       </Tabs>
 
@@ -434,10 +525,13 @@ export default function ContentManagementTab() {
             </details>
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={() => { setForm(f => ({ ...f, status: 'draft' })); savePost(); }} disabled={saving}>
+            <Button variant="outline" onClick={() => savePost('draft')} disabled={saving}>
               <FileText className="h-4 w-4 mr-1" /> Save Draft
             </Button>
-            <Button onClick={() => { setForm(f => ({ ...f, status: 'published' })); setTimeout(savePost, 0); }} disabled={saving}>
+            <Button variant="secondary" onClick={() => savePost('scheduled')} disabled={saving}>
+              <Clock className="h-4 w-4 mr-1" /> Schedule
+            </Button>
+            <Button onClick={() => savePost('published')} disabled={saving}>
               <Send className="h-4 w-4 mr-1" /> Publish
             </Button>
           </DialogFooter>
@@ -530,9 +624,11 @@ function ImageUploadField({ label, mode, onModeChange, value, onValueChange, upl
   );
 }
 
-function PostList({ posts, onEdit, onDelete, onPublish, loading }: {
+function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCopyLink, viewCounts, loading }: {
   posts: Post[]; onEdit: (p: Post) => void; onDelete: (id: string) => void;
-  onPublish: (id: string) => void; loading: boolean;
+  onPublish: (id: string) => void; onShare: (p: Post, platform: string) => void;
+  onPreview: (p: Post) => void; onCopyLink: (p: Post) => void;
+  viewCounts: Record<string, number>; loading: boolean;
 }) {
   if (loading) return <div className="text-center py-10 text-muted-foreground">Loading...</div>;
   if (posts.length === 0) return <div className="text-center py-10 text-muted-foreground">No posts yet. Create one!</div>;
@@ -540,49 +636,70 @@ function PostList({ posts, onEdit, onDelete, onPublish, loading }: {
     <div className="space-y-3">
       {posts.map(post => (
         <Card key={post.id}>
-          <CardContent className="flex items-center justify-between gap-4 py-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              {post.featured_image && (
-                <img src={post.featured_image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-medium text-sm truncate">{post.title}</h3>
-                  <Badge variant={post.status === 'published' ? 'default' : 'secondary'} className="text-xs shrink-0">
-                    {post.status}
-                  </Badge>
+          <CardContent className="py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {post.featured_image && (
+                  <img src={post.featured_image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-medium text-sm truncate">{post.title}</h3>
+                    <Badge variant={post.status === 'published' ? 'default' : post.status === 'scheduled' ? 'outline' : 'secondary'} className="text-xs shrink-0">
+                      {post.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count} · 👁 {viewCounts[post.id] || 0}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count}
-                </p>
               </div>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              {post.status === 'draft' && (
-                <Button size="sm" variant="ghost" onClick={() => onPublish(post.id)}>
-                  <Eye className="h-4 w-4" />
+              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
+                {/* Share buttons */}
+                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'twitter')} title="Tweet">
+                  <Twitter className="h-3.5 w-3.5" />
                 </Button>
-              )}
-              <Button size="sm" variant="ghost" onClick={() => onEdit(post)}>
-                <Edit className="h-4 w-4" />
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button size="sm" variant="ghost" className="text-destructive">
-                    <Trash2 className="h-4 w-4" />
+                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'facebook')} title="Facebook">
+                  <Facebook className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'linkedin')} title="LinkedIn">
+                  <Linkedin className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'instagram')} title="Instagram">
+                  <Instagram className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => onCopyLink(post)} title="Copy Link">
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => onPreview(post)} title="Preview">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+                {post.status !== 'published' && (
+                  <Button size="sm" variant="ghost" onClick={() => onPublish(post.id)} title="Publish">
+                    <Eye className="h-4 w-4" />
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete post?</AlertDialogTitle>
-                    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDelete(post.id)}>Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => onEdit(post)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="ghost" className="text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete post?</AlertDialogTitle>
+                      <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => onDelete(post.id)}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           </CardContent>
         </Card>

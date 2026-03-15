@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
@@ -10,8 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Sun, Moon, Calendar, Heart, Bookmark, Share2, MessageSquare,
-  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Send, Clock, User
+  ArrowLeft, Sun, Moon, Calendar, Heart, Share2, MessageSquare,
+  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Send, Clock, User,
+  Instagram, Copy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -44,6 +45,7 @@ interface Comment {
 
 export default function History() {
   const navigate = useNavigate();
+  const { slug } = useParams();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [posts, setPosts] = useState<HistoryPost[]>([]);
@@ -57,16 +59,51 @@ export default function History() {
   const [email, setEmail] = useState('');
   const PAGE_SIZE = 9;
 
+  // Load specific post by slug
   useEffect(() => {
-    fetchPosts();
-  }, [page]);
+    if (slug) {
+      fetchBySlug(slug);
+    } else {
+      fetchPosts();
+    }
+  }, [slug, page]);
 
   useEffect(() => {
-    if (selectedPost && user) {
-      checkLiked();
-      fetchComments();
+    if (selectedPost) {
+      trackView(selectedPost.id);
+      if (user) {
+        checkLiked();
+        fetchComments();
+      } else {
+        fetchComments();
+      }
     }
   }, [selectedPost, user]);
+
+  const fetchBySlug = async (s: string) => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('history_posts')
+      .select('*')
+      .eq('slug', s)
+      .eq('status', 'published')
+      .maybeSingle();
+    if (data) {
+      setSelectedPost(data as unknown as HistoryPost);
+    }
+    // Also fetch list
+    const { data: listData } = await supabase
+      .from('history_posts')
+      .select('*')
+      .eq('status', 'published')
+      .order('publish_date', { ascending: false })
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    if (listData) {
+      setPosts(listData as unknown as HistoryPost[]);
+      setHasMore(listData.length === PAGE_SIZE);
+    }
+    setLoading(false);
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -82,6 +119,13 @@ export default function History() {
       if (!selectedPost && data.length > 0) setSelectedPost(data[0] as unknown as HistoryPost);
     }
     setLoading(false);
+  };
+
+  const trackView = async (postId: string) => {
+    await supabase.from('page_views').insert({
+      page_path: `/history/${slug || ''}`,
+      post_id: postId,
+    } as any);
   };
 
   const checkLiked = async () => {
@@ -145,10 +189,20 @@ export default function History() {
     else { toast.success('Subscribed!'); setEmail(''); }
   };
 
+  const getShareUrl = () => {
+    if (!selectedPost) return '';
+    return `https://daymytime.com/history/${selectedPost.slug}`;
+  };
+
   const share = (platform: string) => {
     if (!selectedPost) return;
-    const url = `https://daymytime.com/history/${selectedPost.slug}`;
+    const url = getShareUrl();
     const text = selectedPost.title;
+    if (platform === 'instagram' || platform === 'copy') {
+      navigator.clipboard.writeText(url);
+      toast.success(platform === 'instagram' ? 'Link copied! Paste it on Instagram.' : 'Link copied!');
+      return;
+    }
     const links: Record<string, string> = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
@@ -255,6 +309,12 @@ export default function History() {
               <Button size="sm" variant="outline" onClick={() => share('linkedin')} className="gap-1.5">
                 <Linkedin className="h-4 w-4" /> Post
               </Button>
+              <Button size="sm" variant="outline" onClick={() => share('instagram')} className="gap-1.5">
+                <Instagram className="h-4 w-4" /> Instagram
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => share('copy')} className="gap-1.5">
+                <Copy className="h-4 w-4" /> Copy Link
+              </Button>
             </div>
 
             {/* Comments */}
@@ -312,7 +372,7 @@ export default function History() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {posts.map(post => (
                 <motion.div key={post.id} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                  <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow h-full" onClick={() => { setSelectedPost(post); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow h-full" onClick={() => { setSelectedPost(post); navigate(`/history/${post.slug}`); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     {post.featured_image && (
                       <img src={post.featured_image} alt={post.title} className="w-full h-40 object-cover" loading="lazy" />
                     )}
