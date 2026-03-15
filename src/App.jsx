@@ -53,6 +53,7 @@ function AnimatedRoutes() {
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
         <Route path="/history" element={<PageTransition><History /></PageTransition>} />
         <Route path="/todaytip" element={<PageTransition><TodayTip /></PageTransition>} />
+        <Route path="/todaytip/:slug" element={<PageTransition><TodayTip /></PageTransition>} />
 
         {/* Protected routes */}
         <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
