@@ -273,8 +273,8 @@ export default function Author() {
             <TabsTrigger value="referrals"><Trophy className="h-4 w-4 mr-1.5" /> Referrals</TabsTrigger>
             <TabsTrigger value="promotions"><Gift className="h-4 w-4 mr-1.5" /> Promos</TabsTrigger>
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
-            <TabsTrigger value="teams"><UsersRound className="h-4 w-4 mr-1.5" /> Teams</TabsTrigger>
-            <TabsTrigger value="templates"><LayoutTemplate className="h-4 w-4 mr-1.5" /> Templates</TabsTrigger>
+
+
             <TabsTrigger value="seo"><Search className="h-4 w-4 mr-1.5" /> SEO</TabsTrigger>
             <TabsTrigger value="content"><FileText className="h-4 w-4 mr-1.5" /> Content</TabsTrigger>
           </TabsList>

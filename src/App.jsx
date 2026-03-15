@@ -52,6 +52,7 @@ function AnimatedRoutes() {
         <Route path="/terms" element={<PageTransition><TermsOfService /></PageTransition>} />
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
         <Route path="/history" element={<PageTransition><History /></PageTransition>} />
+        <Route path="/history/:slug" element={<PageTransition><History /></PageTransition>} />
         <Route path="/todaytip" element={<PageTransition><TodayTip /></PageTransition>} />
         <Route path="/todaytip/:slug" element={<PageTransition><TodayTip /></PageTransition>} />
 
