@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import UserManagementTab from '@/components/author/UserManagementTab';
-import TemplateManagementTab from '@/components/author/TemplateManagementTab';
+
 import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
 import PromotionManagementTab from '@/components/author/PromotionManagementTab';
