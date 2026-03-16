@@ -295,8 +295,8 @@ export default function ContentManagementTab() {
   };
 
   const previewPost = (post: Post) => {
-    const base = activeTab === 'history' ? '/history' : '/todaytip';
-    window.open(`${base}/${post.slug}`, '_blank');
+    const url = getPreviewUrl(post, activeTab as 'history' | 'tips');
+    window.open(url, '_blank');
   };
 
   const posts = activeTab === 'history' ? historyPosts : dailyTips;
