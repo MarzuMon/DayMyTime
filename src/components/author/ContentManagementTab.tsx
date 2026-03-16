@@ -65,6 +65,11 @@ function getPostUrl(post: Post, type: 'history' | 'tips'): string {
   return `https://daymytime.com${base}/${post.slug}`;
 }
 
+function getPreviewUrl(post: Post, type: 'history' | 'tips'): string {
+  const base = type === 'history' ? '/history' : '/todaytip';
+  return `${base}/${post.slug}`;
+}
+
 export default function ContentManagementTab() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('history');
