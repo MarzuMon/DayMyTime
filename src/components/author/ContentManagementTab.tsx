@@ -65,6 +65,11 @@ function getPostUrl(post: Post, type: 'history' | 'tips'): string {
   return `https://daymytime.com${base}/${post.slug}`;
 }
 
+function getPreviewUrl(post: Post, type: 'history' | 'tips'): string {
+  const base = type === 'history' ? '/history' : '/todaytip';
+  return `${base}/${post.slug}`;
+}
+
 export default function ContentManagementTab() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('history');
@@ -290,8 +295,8 @@ export default function ContentManagementTab() {
   };
 
   const previewPost = (post: Post) => {
-    const base = activeTab === 'history' ? '/history' : '/todaytip';
-    window.open(`${base}/${post.slug}`, '_blank');
+    const url = getPreviewUrl(post, activeTab as 'history' | 'tips');
+    window.open(url, '_blank');
   };
 
   const posts = activeTab === 'history' ? historyPosts : dailyTips;
@@ -550,6 +555,10 @@ export default function ContentManagementTab() {
               <Input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} />
             </div>
             <div>
+              <Label>Time</Label>
+              <Input type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} />
+            </div>
+            <div>
               <Label>Content Type</Label>
               <Select value={scheduleType} onValueChange={(v: any) => setScheduleType(v)}>
                 <SelectTrigger>
@@ -639,9 +648,15 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
           <CardContent className="py-3">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                {post.featured_image && (
-                  <img src={post.featured_image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />
-                )}
+                <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
+                  {post.featured_image ? (
+                    <img src={post.featured_image} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-medium text-sm truncate">{post.title}</h3>
