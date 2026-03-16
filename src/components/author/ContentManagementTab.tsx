@@ -555,6 +555,10 @@ export default function ContentManagementTab() {
               <Input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} />
             </div>
             <div>
+              <Label>Time</Label>
+              <Input type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} />
+            </div>
+            <div>
               <Label>Content Type</Label>
               <Select value={scheduleType} onValueChange={(v: any) => setScheduleType(v)}>
                 <SelectTrigger>
