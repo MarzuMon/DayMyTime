@@ -648,9 +648,15 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
           <CardContent className="py-3">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                {post.featured_image && (
-                  <img src={post.featured_image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />
-                )}
+                <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
+                  {post.featured_image ? (
+                    <img src={post.featured_image} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-medium text-sm truncate">{post.title}</h3>
