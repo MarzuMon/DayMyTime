@@ -163,9 +163,12 @@ export default function TodayTip() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
-        title={todayTip?.seo_title || "Today's Productivity Tip – DayMyTime"}
-        description={todayTip?.meta_description || "Daily productivity tips for better time management. Boost your efficiency with actionable advice from DayMyTime."}
+        title={todayTip?.seo_title || "Today's Productivity Tip – Daily Inspiration & Self Improvement | DayMyTime"}
+        description={todayTip?.meta_description || "Daily productivity tips and self improvement ideas for better time management. Boost your efficiency with actionable daily inspiration from DayMyTime."}
         canonical={`https://daymytime.com/todaytip${todayTip ? `/${todayTip.slug}` : ''}`}
+        type={todayTip ? 'article' : 'website'}
+        image={todayTip?.featured_image || undefined}
+        article={todayTip ? { publishedTime: todayTip.publish_date, author: todayTip.author_name, section: 'Productivity' } : undefined}
       />
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />}
 

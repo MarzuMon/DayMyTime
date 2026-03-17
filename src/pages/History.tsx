@@ -226,9 +226,12 @@ export default function History() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
-        title={todayPost?.seo_title || "This Day in History – DayMyTime"}
-        description={todayPost?.meta_description || "Discover what happened on this day in history. Daily historical events, stories, and facts curated by DayMyTime."}
+        title={todayPost?.seo_title || "This Day in History – Daily Historical Events & Facts | DayMyTime"}
+        description={todayPost?.meta_description || "Discover what happened on this day in history. Daily historical events, stories, and fascinating facts curated by DayMyTime for history enthusiasts."}
         canonical={`https://daymytime.com/history${todayPost ? `/${todayPost.slug}` : ''}`}
+        type={todayPost ? 'article' : 'website'}
+        image={todayPost?.featured_image || undefined}
+        article={todayPost ? { publishedTime: todayPost.publish_date, author: todayPost.author_name, section: 'History' } : undefined}
       />
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />}
 
