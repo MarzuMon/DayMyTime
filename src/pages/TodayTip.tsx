@@ -305,8 +305,19 @@ export default function TodayTip() {
         )}
       </main>
 
-      <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} DayMyTime. All rights reserved.</p>
+      <footer className="border-t py-8" role="contentinfo">
+        <div className="max-w-4xl mx-auto px-4">
+          <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground mb-4" aria-label="Footer navigation">
+            <a href="/" className="hover:text-foreground transition-colors">Home</a>
+            <a href="/history" className="hover:text-foreground transition-colors">This Day in History</a>
+            <a href="/about" className="hover:text-foreground transition-colors">About</a>
+            <a href="/contact" className="hover:text-foreground transition-colors">Contact</a>
+            <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</a>
+          </nav>
+          <p className="text-center text-xs text-muted-foreground">© {new Date().getFullYear()} DayMyTime. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
