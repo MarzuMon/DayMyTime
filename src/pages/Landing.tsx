@@ -618,10 +618,10 @@ export default function Landing() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-3">
-                <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" />
+                <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" width="32" height="32" />
                 <span className="font-display font-bold">DayMyTime</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">Smart Visual Scheduler for students and professionals.</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Smart Visual Scheduler with productivity tips, daily inspiration, and history facts for students and professionals.</p>
             </div>
             {/* Product */}
             <div>
@@ -632,10 +632,12 @@ export default function Landing() {
                 <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
               </nav>
             </div>
-            {/* Company */}
+            {/* Content */}
             <div>
-              <h4 className="font-display font-semibold text-sm mb-3">Company</h4>
-              <nav className="space-y-2 text-sm" aria-label="Company links">
+              <h4 className="font-display font-semibold text-sm mb-3">Content</h4>
+              <nav className="space-y-2 text-sm" aria-label="Content links">
+                <a href="/todaytip" className="block text-muted-foreground hover:text-foreground transition-colors">Productivity Tips</a>
+                <a href="/history" className="block text-muted-foreground hover:text-foreground transition-colors">This Day in History</a>
                 <a href="/about" className="block text-muted-foreground hover:text-foreground transition-colors">About</a>
                 <a href="/contact" className="block text-muted-foreground hover:text-foreground transition-colors">Contact</a>
               </nav>
@@ -646,6 +648,7 @@ export default function Landing() {
               <nav className="space-y-2 text-sm" aria-label="Legal links">
                 <a href="/privacy" className="block text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
                 <a href="/terms" className="block text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
+                <a href="/disclaimer" className="block text-muted-foreground hover:text-foreground transition-colors">Disclaimer</a>
               </nav>
             </div>
           </div>
