@@ -161,8 +161,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <SEOHead
-        title="DayMyTime – Smart Visual Scheduler | Plan Smart. Live Better."
-        description="Plan your day visually, get smart alerts, and join meetings instantly with DayMyTime. Free visual scheduler for students and professionals."
+        title="DayMyTime – Smart Visual Scheduler | Productivity Tips & Daily Inspiration"
+        description="Make every day count with DayMyTime. Discover productivity tips, inspiring history stories, and practical self improvement ideas. Free visual scheduler for students and professionals."
         canonical="https://daymytime.com/"
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
