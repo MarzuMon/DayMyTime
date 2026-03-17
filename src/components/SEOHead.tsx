@@ -6,9 +6,15 @@ interface SEOHeadProps {
   description: string;
   canonical?: string;
   type?: string;
+  image?: string;
+  article?: {
+    publishedTime?: string;
+    author?: string;
+    section?: string;
+  };
 }
 
-export default function SEOHead({ title, description, canonical, type = 'website' }: SEOHeadProps) {
+export default function SEOHead({ title, description, canonical, type = 'website', image, article }: SEOHeadProps) {
   const seoKeywords = useSeoKeywords();
 
   useEffect(() => {
@@ -32,6 +38,17 @@ export default function SEOHead({ title, description, canonical, type = 'website
     setMeta('twitter:title', title);
     setMeta('twitter:description', description);
 
+    if (image) {
+      setMeta('og:image', image, true);
+      setMeta('twitter:image', image);
+    }
+
+    if (type === 'article' && article) {
+      if (article.publishedTime) setMeta('article:published_time', article.publishedTime, true);
+      if (article.author) setMeta('article:author', article.author, true);
+      if (article.section) setMeta('article:section', article.section, true);
+    }
+
     if (seoKeywords.length > 0) {
       setMeta('keywords', seoKeywords.join(', '));
     }
@@ -50,7 +67,7 @@ export default function SEOHead({ title, description, canonical, type = 'website
       const link = document.querySelector('link[rel="canonical"]');
       if (link) link.remove();
     };
-  }, [title, description, canonical, type, seoKeywords]);
+  }, [title, description, canonical, type, seoKeywords, image, article]);
 
   return null;
 }

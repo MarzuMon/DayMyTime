@@ -226,9 +226,12 @@ export default function History() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
-        title={todayPost?.seo_title || "This Day in History – DayMyTime"}
-        description={todayPost?.meta_description || "Discover what happened on this day in history. Daily historical events, stories, and facts curated by DayMyTime."}
+        title={todayPost?.seo_title || "This Day in History – Daily Historical Events & Facts | DayMyTime"}
+        description={todayPost?.meta_description || "Discover what happened on this day in history. Daily historical events, stories, and fascinating facts curated by DayMyTime for history enthusiasts."}
         canonical={`https://daymytime.com/history${todayPost ? `/${todayPost.slug}` : ''}`}
+        type={todayPost ? 'article' : 'website'}
+        image={todayPost?.featured_image || undefined}
+        article={todayPost ? { publishedTime: todayPost.publish_date, author: todayPost.author_name, section: 'History' } : undefined}
       />
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />}
 
@@ -398,8 +401,19 @@ export default function History() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} DayMyTime. All rights reserved.</p>
+      <footer className="border-t py-8" role="contentinfo">
+        <div className="max-w-4xl mx-auto px-4">
+          <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground mb-4" aria-label="Footer navigation">
+            <a href="/" className="hover:text-foreground transition-colors">Home</a>
+            <a href="/todaytip" className="hover:text-foreground transition-colors">Productivity Tips</a>
+            <a href="/about" className="hover:text-foreground transition-colors">About</a>
+            <a href="/contact" className="hover:text-foreground transition-colors">Contact</a>
+            <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</a>
+          </nav>
+          <p className="text-center text-xs text-muted-foreground">© {new Date().getFullYear()} DayMyTime. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );

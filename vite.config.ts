@@ -13,27 +13,80 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-date': ['date-fns'],
+        },
+      },
+    },
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: true,
+      },
+    },
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico"],
+      includeAssets: ["favicon.ico", "images/logo-icon.png"],
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/~oauth/],
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webp}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
       },
       manifest: {
         name: "DayMyTime – Smart Visual Scheduler",
         short_name: "DayMyTime",
-        description: "Take Control of Your Time. Plan Smart. Live Better.",
+        description: "Plan your day visually with productivity tips, daily inspiration, and smart scheduling. Free for students and professionals.",
         theme_color: "#1e3a8a",
         background_color: "#0a0a0a",
         display: "standalone",
         start_url: "/",
+        categories: ["productivity", "education", "utilities"],
         icons: [
           { src: "/pwa-512.png", sizes: "512x512", type: "image/png" },
+          { src: "/images/logo-icon.png", sizes: "192x192", type: "image/png" },
         ],
       },
     }),

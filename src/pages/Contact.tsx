@@ -62,8 +62,8 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
-        title="Contact Us – DayMyTime"
-        description="Have a question or feedback about DayMyTime? Send us a message and we'll get back to you."
+        title="Contact Us – DayMyTime | Questions, Feedback & Support"
+        description="Have a question or feedback about DayMyTime? Send us a message and we'll get back to you. We love hearing from our users."
         canonical="https://daymytime.com/contact"
       />
       <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40" role="navigation">

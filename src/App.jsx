@@ -24,6 +24,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const About = lazy(() => import("./pages/About"));
 const History = lazy(() => import("./pages/History"));
 const TodayTip = lazy(() => import("./pages/TodayTip"));
+const Disclaimer = lazy(() => import("./pages/Disclaimer"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ function AnimatedRoutes() {
         <Route path="/history/:slug" element={<PageTransition><History /></PageTransition>} />
         <Route path="/todaytip" element={<PageTransition><TodayTip /></PageTransition>} />
         <Route path="/todaytip/:slug" element={<PageTransition><TodayTip /></PageTransition>} />
+        <Route path="/disclaimer" element={<PageTransition><Disclaimer /></PageTransition>} />
 
         {/* Protected routes */}
         <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />

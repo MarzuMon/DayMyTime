@@ -1,8 +1,19 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /app
+Disallow: /profile
+Disallow: /author
+Disallow: /analytics
+Disallow: /reports
+Disallow: /teams
+Disallow: /accept-invite
+Disallow: /reset-password
 
 User-agent: Bingbot
 Allow: /
+Disallow: /app
+Disallow: /profile
+Disallow: /author
 
 User-agent: Twitterbot
 Allow: /
@@ -12,5 +23,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /app
+Disallow: /profile
+Disallow: /author
+Disallow: /analytics
+Disallow: /reports
+Disallow: /teams
 
 Sitemap: https://daymytime.com/sitemap.xml

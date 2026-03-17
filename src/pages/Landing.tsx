@@ -105,14 +105,17 @@ const jsonLd = {
     { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free" },
     { "@type": "Offer", "price": "5", "priceCurrency": "USD", "name": "Pro Monthly" },
   ],
-  "description": "Plan your day visually, get smart alerts, and join meetings instantly with DayMyTime.",
+  "description": "Make every day count with DayMyTime. Discover productivity tips, inspiring history stories, and practical self improvement ideas. Free visual scheduler.",
   "url": "https://daymytime.com",
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "4.9",
     "reviewCount": "1200",
     "bestRating": "5"
-  }
+  },
+  "sameAs": [
+    "https://twitter.com/daymytime"
+  ]
 };
 
 function FAQItem({ q, a }: { q: string; a: string }) {
@@ -161,8 +164,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <SEOHead
-        title="DayMyTime – Smart Visual Scheduler | Plan Smart. Live Better."
-        description="Plan your day visually, get smart alerts, and join meetings instantly with DayMyTime. Free visual scheduler for students and professionals."
+        title="DayMyTime – Smart Visual Scheduler | Productivity Tips & Daily Inspiration"
+        description="Make every day count with DayMyTime. Discover productivity tips, inspiring history stories, and practical self improvement ideas. Free visual scheduler for students and professionals."
         canonical="https://daymytime.com/"
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -171,7 +174,7 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50" role="navigation" aria-label="Main navigation">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" loading="eager" fetchPriority="high" />
+            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" loading="eager" fetchPriority="high" width="36" height="36" />
             <span className="font-display font-bold text-lg tracking-tight">DayMyTime</span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
@@ -216,34 +219,34 @@ export default function Landing() {
                 variants={fadeUp} custom={1}
                 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6"
               >
-                Plan Your Day{' '}
-                <span className="text-gradient">Visually</span>
+                Make Every Day{' '}
+                <span className="text-gradient">Count</span>
               </motion.h1>
 
               <motion.p
                 variants={fadeUp} custom={2}
                 className="text-muted-foreground text-lg sm:text-xl max-w-lg mx-auto lg:mx-0 mb-8 leading-relaxed"
               >
-                Schedule tasks, receive smart alerts, and join meetings instantly.
-                Simple, fast, and meeting-ready.
+                Discover productivity tips, inspiring history stories, and practical ideas to improve your daily life.
+                Plan smart. Live better.
               </motion.p>
 
               <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
-                <Button size="lg" onClick={() => navigate('/auth')} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 transition-opacity">
-                  Start Free <ArrowRight className="h-4 w-4 ml-2" />
+                <Button size="lg" onClick={() => navigate('/todaytip')} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 transition-opacity">
+                  Explore Today <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl glass">
-                  <Play className="h-4 w-4 mr-2" /> Watch Demo
+                <Button size="lg" variant="outline" onClick={() => navigate('/history')} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl glass">
+                  <Play className="h-4 w-4 mr-2" /> Read History
                 </Button>
               </motion.div>
 
               {/* Content Section Buttons */}
               <motion.div variants={fadeUp} custom={3.5} className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
-                <Button size="sm" variant="outline" onClick={() => navigate('/history')} className="rounded-xl glass gap-1.5">
-                  📜 This Day in History
+                <Button size="sm" variant="outline" onClick={() => navigate('/auth')} className="rounded-xl glass gap-1.5">
+                  🚀 Start Free Scheduler
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => navigate('/todaytip')} className="rounded-xl glass gap-1.5">
-                  💡 Today's Productivity Tip
+                <Button size="sm" variant="outline" onClick={() => navigate('/about')} className="rounded-xl glass gap-1.5">
+                  📖 Learn More
                 </Button>
               </motion.div>
 
@@ -380,12 +383,14 @@ export default function Landing() {
                 className="group rounded-2xl border bg-card overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300"
               >
                 <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={image}
-                    alt={`${title} screenshot`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
+                    <img
+                      src={image}
+                      alt={`${title} - DayMyTime scheduler screenshot`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                      width="400"
+                      height="300"
+                    />
                 </div>
                 <div className="p-4">
                   <h3 className="font-display font-semibold text-sm mb-1">{title}</h3>
@@ -618,10 +623,10 @@ export default function Landing() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-3">
-                <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" />
+                <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" width="32" height="32" />
                 <span className="font-display font-bold">DayMyTime</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">Smart Visual Scheduler for students and professionals.</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Smart Visual Scheduler with productivity tips, daily inspiration, and history facts for students and professionals.</p>
             </div>
             {/* Product */}
             <div>
@@ -632,10 +637,12 @@ export default function Landing() {
                 <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
               </nav>
             </div>
-            {/* Company */}
+            {/* Content */}
             <div>
-              <h4 className="font-display font-semibold text-sm mb-3">Company</h4>
-              <nav className="space-y-2 text-sm" aria-label="Company links">
+              <h4 className="font-display font-semibold text-sm mb-3">Content</h4>
+              <nav className="space-y-2 text-sm" aria-label="Content links">
+                <a href="/todaytip" className="block text-muted-foreground hover:text-foreground transition-colors">Productivity Tips</a>
+                <a href="/history" className="block text-muted-foreground hover:text-foreground transition-colors">This Day in History</a>
                 <a href="/about" className="block text-muted-foreground hover:text-foreground transition-colors">About</a>
                 <a href="/contact" className="block text-muted-foreground hover:text-foreground transition-colors">Contact</a>
               </nav>
@@ -646,6 +653,7 @@ export default function Landing() {
               <nav className="space-y-2 text-sm" aria-label="Legal links">
                 <a href="/privacy" className="block text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
                 <a href="/terms" className="block text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
+                <a href="/disclaimer" className="block text-muted-foreground hover:text-foreground transition-colors">Disclaimer</a>
               </nav>
             </div>
           </div>
