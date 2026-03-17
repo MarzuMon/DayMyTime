@@ -229,11 +229,11 @@ export default function Landing() {
               </motion.p>
 
               <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
-                <Button size="lg" onClick={() => navigate('/auth')} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 transition-opacity">
-                  Start Free <ArrowRight className="h-4 w-4 ml-2" />
+                <Button size="lg" onClick={() => navigate('/todaytip')} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 transition-opacity">
+                  Explore Today <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl glass">
-                  <Play className="h-4 w-4 mr-2" /> Watch Demo
+                <Button size="lg" variant="outline" onClick={() => navigate('/history')} className="w-full sm:w-auto h-12 px-8 text-base rounded-xl glass">
+                  <Play className="h-4 w-4 mr-2" /> Read History
                 </Button>
               </motion.div>
 
