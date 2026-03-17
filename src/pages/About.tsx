@@ -17,8 +17,8 @@ export default function About() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="About – DayMyTime"
-        description="Learn about DayMyTime, the smart visual scheduler built for students and professionals."
+        title="About DayMyTime – Our Mission for Productivity & Self Improvement"
+        description="Learn about DayMyTime, the smart visual scheduler with daily productivity tips, history facts, and self improvement tools built for students and professionals."
         canonical="https://daymytime.com/about"
       />
 

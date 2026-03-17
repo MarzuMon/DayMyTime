@@ -9,8 +9,8 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
-        title="Privacy Policy – DayMyTime"
-        description="Learn how DayMyTime handles your data, privacy, and security."
+        title="Privacy Policy – DayMyTime | Data Handling & Security"
+        description="Learn how DayMyTime handles your data, privacy, and security. We are committed to protecting your personal information and schedule data."
         canonical="https://daymytime.com/privacy"
       />
       <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40" role="navigation">

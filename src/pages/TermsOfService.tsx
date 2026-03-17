@@ -9,8 +9,8 @@ export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEOHead
-        title="Terms of Service – DayMyTime"
-        description="Read the terms and conditions for using the DayMyTime smart visual scheduler."
+        title="Terms of Service – DayMyTime | Usage Terms & Conditions"
+        description="Read the terms and conditions for using the DayMyTime smart visual scheduler. Understand your rights and responsibilities as a user."
         canonical="https://daymytime.com/terms"
       />
       <nav className="border-b bg-card/80 backdrop-blur sticky top-0 z-40" role="navigation">

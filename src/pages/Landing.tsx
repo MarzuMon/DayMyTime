@@ -105,14 +105,17 @@ const jsonLd = {
     { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free" },
     { "@type": "Offer", "price": "5", "priceCurrency": "USD", "name": "Pro Monthly" },
   ],
-  "description": "Plan your day visually, get smart alerts, and join meetings instantly with DayMyTime.",
+  "description": "Make every day count with DayMyTime. Discover productivity tips, inspiring history stories, and practical self improvement ideas. Free visual scheduler.",
   "url": "https://daymytime.com",
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "4.9",
     "reviewCount": "1200",
     "bestRating": "5"
-  }
+  },
+  "sameAs": [
+    "https://twitter.com/daymytime"
+  ]
 };
 
 function FAQItem({ q, a }: { q: string; a: string }) {
