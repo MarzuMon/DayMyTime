@@ -216,16 +216,16 @@ export default function Landing() {
                 variants={fadeUp} custom={1}
                 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6"
               >
-                Plan Your Day{' '}
-                <span className="text-gradient">Visually</span>
+                Make Every Day{' '}
+                <span className="text-gradient">Count</span>
               </motion.h1>
 
               <motion.p
                 variants={fadeUp} custom={2}
                 className="text-muted-foreground text-lg sm:text-xl max-w-lg mx-auto lg:mx-0 mb-8 leading-relaxed"
               >
-                Schedule tasks, receive smart alerts, and join meetings instantly.
-                Simple, fast, and meeting-ready.
+                Discover productivity tips, inspiring history stories, and practical ideas to improve your daily life.
+                Plan smart. Live better.
               </motion.p>
 
               <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
