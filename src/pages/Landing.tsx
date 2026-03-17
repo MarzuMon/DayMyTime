@@ -239,11 +239,11 @@ export default function Landing() {
 
               {/* Content Section Buttons */}
               <motion.div variants={fadeUp} custom={3.5} className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
-                <Button size="sm" variant="outline" onClick={() => navigate('/history')} className="rounded-xl glass gap-1.5">
-                  📜 This Day in History
+                <Button size="sm" variant="outline" onClick={() => navigate('/auth')} className="rounded-xl glass gap-1.5">
+                  🚀 Start Free Scheduler
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => navigate('/todaytip')} className="rounded-xl glass gap-1.5">
-                  💡 Today's Productivity Tip
+                <Button size="sm" variant="outline" onClick={() => navigate('/about')} className="rounded-xl glass gap-1.5">
+                  📖 Learn More
                 </Button>
               </motion.div>
 
