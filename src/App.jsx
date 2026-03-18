@@ -25,6 +25,7 @@ const About = lazy(() => import("./pages/About"));
 const History = lazy(() => import("./pages/History"));
 const TodayTip = lazy(() => import("./pages/TodayTip"));
 const Disclaimer = lazy(() => import("./pages/Disclaimer"));
+const Topics = lazy(() => import("./pages/Topics"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
