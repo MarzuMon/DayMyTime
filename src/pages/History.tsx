@@ -351,8 +351,11 @@ export default function History() {
               </div>
             </div>
 
+            {/* Related Posts */}
+            <RelatedPosts currentPostId={todayPost.id} type="history" keywords={todayPost.keywords} />
+
             {/* Newsletter */}
-            <Card className="bg-primary/5 border-primary/20">
+            <Card className="bg-primary/5 border-primary/20 mt-8">
               <CardContent className="pt-6">
                 <h3 className="font-display font-bold mb-2">📬 Get daily history updates</h3>
                 <p className="text-sm text-muted-foreground mb-3">Subscribe to receive articles directly in your inbox.</p>
