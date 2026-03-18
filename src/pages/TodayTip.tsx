@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
+import BreadcrumbNav from '@/components/BreadcrumbNav';
+import RelatedPosts from '@/components/RelatedPosts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
