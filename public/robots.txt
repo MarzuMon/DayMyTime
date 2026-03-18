@@ -1,5 +1,6 @@
 User-agent: Googlebot
 Allow: /
+Allow: /topics/
 Disallow: /app
 Disallow: /profile
 Disallow: /author
@@ -11,6 +12,7 @@ Disallow: /reset-password
 
 User-agent: Bingbot
 Allow: /
+Allow: /topics/
 Disallow: /app
 Disallow: /profile
 Disallow: /author
@@ -23,6 +25,7 @@ Allow: /
 
 User-agent: *
 Allow: /
+Allow: /topics/
 Disallow: /app
 Disallow: /profile
 Disallow: /author

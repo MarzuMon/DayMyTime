@@ -643,6 +643,9 @@ export default function Landing() {
               <nav className="space-y-2 text-sm" aria-label="Content links">
                 <a href="/todaytip" className="block text-muted-foreground hover:text-foreground transition-colors">Productivity Tips</a>
                 <a href="/history" className="block text-muted-foreground hover:text-foreground transition-colors">This Day in History</a>
+                <a href="/topics/productivity-tips" className="block text-muted-foreground hover:text-foreground transition-colors">Productivity Guide</a>
+                <a href="/topics/daily-motivation" className="block text-muted-foreground hover:text-foreground transition-colors">Daily Motivation</a>
+                <a href="/topics/self-improvement" className="block text-muted-foreground hover:text-foreground transition-colors">Self Improvement</a>
                 <a href="/about" className="block text-muted-foreground hover:text-foreground transition-colors">About</a>
                 <a href="/contact" className="block text-muted-foreground hover:text-foreground transition-colors">Contact</a>
               </nav>

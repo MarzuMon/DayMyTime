@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
+import BreadcrumbNav from '@/components/BreadcrumbNav';
+import RelatedPosts from '@/components/RelatedPosts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -257,7 +259,13 @@ export default function History() {
       {/* Hero */}
       <section className="pt-20 pb-10 relative">
         <div className="absolute inset-0 gradient-hero opacity-50" />
-        <div className="relative max-w-4xl mx-auto px-4 text-center">
+       <div className="relative max-w-4xl mx-auto px-4">
+          <BreadcrumbNav items={[
+            { label: 'Home', href: '/' },
+            { label: 'History', href: '/history' },
+            ...(todayPost ? [{ label: todayPost.title }] : []),
+          ]} />
+          <div className="text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-primary/20 text-xs font-semibold text-primary mb-4">
               <Calendar className="h-3.5 w-3.5" />
@@ -270,6 +278,7 @@ export default function History() {
               Discover fascinating events that shaped our world on this day.
             </p>
           </motion.div>
+          </div>
         </div>
       </section>
 
@@ -349,8 +358,11 @@ export default function History() {
               </div>
             </div>
 
+            {/* Related Posts */}
+            <RelatedPosts currentPostId={todayPost.id} type="history" keywords={todayPost.keywords} />
+
             {/* Newsletter */}
-            <Card className="bg-primary/5 border-primary/20">
+            <Card className="bg-primary/5 border-primary/20 mt-8">
               <CardContent className="pt-6">
                 <h3 className="font-display font-bold mb-2">📬 Get daily history updates</h3>
                 <p className="text-sm text-muted-foreground mb-3">Subscribe to receive articles directly in your inbox.</p>

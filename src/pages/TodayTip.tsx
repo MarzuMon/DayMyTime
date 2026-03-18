@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
+import BreadcrumbNav from '@/components/BreadcrumbNav';
+import RelatedPosts from '@/components/RelatedPosts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -194,7 +196,13 @@ export default function TodayTip() {
       {/* Hero */}
       <section className="pt-20 pb-10 relative">
         <div className="absolute inset-0 gradient-hero opacity-50" />
-        <div className="relative max-w-4xl mx-auto px-4 text-center">
+       <div className="relative max-w-4xl mx-auto px-4">
+          <BreadcrumbNav items={[
+            { label: 'Home', href: '/' },
+            { label: 'Productivity Tips', href: '/todaytip' },
+            ...(todayTip ? [{ label: todayTip.title }] : []),
+          ]} />
+          <div className="text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-accent/20 text-xs font-semibold text-accent mb-4">
               <Lightbulb className="h-3.5 w-3.5" />
@@ -207,6 +215,7 @@ export default function TodayTip() {
               Actionable advice to help you manage your time better, every day.
             </p>
           </motion.div>
+          </div>
         </div>
       </section>
 
@@ -257,8 +266,11 @@ export default function TodayTip() {
               </Button>
             </div>
 
+            {/* Related Posts */}
+            <RelatedPosts currentPostId={todayTip.id} type="tips" keywords={todayTip.keywords} />
+
             {/* Newsletter */}
-            <Card className="bg-accent/5 border-accent/20">
+            <Card className="bg-accent/5 border-accent/20 mt-8">
               <CardContent className="pt-6">
                 <h3 className="font-display font-bold mb-2">💡 Get daily productivity tips</h3>
                 <p className="text-sm text-muted-foreground mb-3">Subscribe for actionable time management advice.</p>
