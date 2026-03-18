@@ -278,6 +278,7 @@ export default function History() {
               Discover fascinating events that shaped our world on this day.
             </p>
           </motion.div>
+          </div>
         </div>
       </section>
 
