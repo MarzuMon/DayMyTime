@@ -215,6 +215,7 @@ export default function TodayTip() {
               Actionable advice to help you manage your time better, every day.
             </p>
           </motion.div>
+          </div>
         </div>
       </section>
 
