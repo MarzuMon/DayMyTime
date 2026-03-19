@@ -82,7 +82,18 @@
     </script>
 
     <!-- Razorpay - deferred -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+    <!-- Razorpay - lazy loaded only when needed -->
+    <script>
+      window.loadRazorpay = function() {
+        if (window.Razorpay) return Promise.resolve();
+        return new Promise(function(resolve) {
+          var s = document.createElement('script');
+          s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          s.onload = resolve;
+          document.head.appendChild(s);
+        });
+      };
+    </script>
   </head>
 
   <body>

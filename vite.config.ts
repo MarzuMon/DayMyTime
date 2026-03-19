@@ -86,7 +86,7 @@ export default defineConfig(({ mode }) => ({
         categories: ["productivity", "education", "utilities"],
         icons: [
           { src: "/pwa-512.png", sizes: "512x512", type: "image/png" },
-          { src: "/images/logo-icon.png", sizes: "192x192", type: "image/png" },
+          { src: "/images/logo-icon.webp", sizes: "192x192", type: "image/webp" },
         ],
       },
     }),
