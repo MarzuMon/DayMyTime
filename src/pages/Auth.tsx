@@ -149,7 +149,7 @@ export default function Auth() {
 
         <div className="relative flex flex-col justify-center px-12 xl:px-20">
           <div className="flex items-center gap-3 mb-10">
-            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-11 w-11 rounded-xl shadow-glow" />
+            <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-11 w-11 rounded-xl shadow-glow" />
             <span className="font-display font-bold text-2xl">DayMyTime</span>
           </div>
 
@@ -196,7 +196,7 @@ export default function Auth() {
         >
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2.5 mb-3 lg:hidden">
-              <img src="/images/logo-icon.png" alt="DayMyTime" className="h-10 w-10 rounded-xl shadow-glow" />
+              <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-10 w-10 rounded-xl shadow-glow" />
               <h1 className="font-display text-2xl font-bold">DayMyTime</h1>
             </div>
             <h1 className="hidden lg:block font-display text-2xl font-bold mb-1">

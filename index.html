@@ -1,4 +1,6 @@
 <!doctype html>
+<!-- Preload critical font -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" as="style" />
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -26,10 +28,10 @@
     <meta name="revisit-after" content="3 days" />
     <meta name="google-adsense-account" content="ca-pub-4393861879798471" />
 
-    <link rel="apple-touch-icon" href="/images/logo-icon.png" />
+    <link rel="apple-touch-icon" href="/images/logo-icon.webp" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/logo-icon.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/logo-icon.png" />
+    <link rel="icon" type="image/webp" sizes="32x32" href="/images/logo-icon.webp" />
+    <link rel="icon" type="image/webp" sizes="16x16" href="/images/logo-icon.webp" />
     <link rel="canonical" href="https://daymytime.com/" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
@@ -66,15 +68,32 @@
     <meta name="twitter:image" content="https://daymytime.com/images/logo_D-full.png" />
     <meta name="twitter:image:alt" content="DayMyTime Smart Visual Scheduler" />
 
-    <!-- AdSense - single instance -->
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4393861879798471"
-      crossorigin="anonymous"
-    ></script>
+    <!-- AdSense - deferred to reduce TBT -->
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var s = document.createElement('script');
+          s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4393861879798471';
+          s.async = true;
+          s.crossOrigin = 'anonymous';
+          document.head.appendChild(s);
+        }, 3000);
+      });
+    </script>
 
     <!-- Razorpay - deferred -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+    <!-- Razorpay - lazy loaded only when needed -->
+    <script>
+      window.loadRazorpay = function() {
+        if (window.Razorpay) return Promise.resolve();
+        return new Promise(function(resolve) {
+          var s = document.createElement('script');
+          s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          s.onload = resolve;
+          document.head.appendChild(s);
+        });
+      };
+    </script>
   </head>
 
   <body>

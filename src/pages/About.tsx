@@ -29,7 +29,7 @@ export default function About() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2">
-            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" />
+            <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" />
             <span className="font-display font-bold">About DayMyTime</span>
           </div>
         </div>

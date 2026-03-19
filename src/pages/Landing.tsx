@@ -24,10 +24,10 @@ const howItWorks = [
 ];
 
 const screenshots = [
-  { title: 'Dashboard', desc: 'Your daily overview with stats, schedules, and quick actions.', image: '/images/screenshot-dashboard.jpg' },
-  { title: 'Task Planner', desc: 'Create and manage tasks with categories, duration, and repeats.', image: '/images/screenshot-planner.jpg' },
-  { title: 'Meeting Alerts', desc: 'Smart notifications with one-tap join for video meetings.', image: '/images/screenshot-alerts.jpg' },
-  { title: 'Mobile View', desc: 'Fully responsive design optimized for on-the-go scheduling.', image: '/images/screenshot-mobile.jpg' },
+  { title: 'Dashboard', desc: 'Your daily overview with stats, schedules, and quick actions.', image: '/images/screenshot-dashboard.webp' },
+  { title: 'Task Planner', desc: 'Create and manage tasks with categories, duration, and repeats.', image: '/images/screenshot-planner.webp' },
+  { title: 'Meeting Alerts', desc: 'Smart notifications with one-tap join for video meetings.', image: '/images/screenshot-alerts.webp' },
+  { title: 'Mobile View', desc: 'Fully responsive design optimized for on-the-go scheduling.', image: '/images/screenshot-mobile.webp' },
 ];
 
 const testimonials = [
@@ -174,7 +174,7 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50" role="navigation" aria-label="Main navigation">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" loading="eager" fetchPriority="high" width="36" height="36" />
+            <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" loading="eager" fetchPriority="high" width="36" height="36" />
             <span className="font-display font-bold text-lg tracking-tight">DayMyTime</span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
@@ -623,7 +623,7 @@ export default function Landing() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-3">
-                <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" width="32" height="32" />
+                <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" width="32" height="32" />
                 <span className="font-display font-bold">DayMyTime</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">Smart Visual Scheduler with productivity tips, daily inspiration, and history facts for students and professionals.</p>
