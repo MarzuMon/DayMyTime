@@ -86,6 +86,20 @@ const categories: Record<string, {
       { heading: 'Work-Life Balance', text: 'Achieve harmony between professional ambitions and personal fulfillment. Learn boundaries, recovery strategies, and sustainable success practices.' },
     ],
   },
+  'life-hacks': {
+    title: 'Life Hacks',
+    seoTitle: 'Life Hacks – Clever Tips & Smart Shortcuts | DayMyTime',
+    description: 'Discover clever life hacks, everyday shortcuts, and smart solutions that simplify your routine and save you time, money, and effort.',
+    metaDescription: 'Clever life hacks, everyday tricks, and smart shortcuts to simplify your daily routine. Save time and boost efficiency with practical tips from DayMyTime.',
+    table: 'daily_tips',
+    basePath: '/todaytip',
+    icon: '💡',
+    pillarContent: [
+      { heading: 'Time-Saving Shortcuts', text: 'Cut hours from your weekly routine with clever shortcuts for cooking, cleaning, commuting, and digital workflows that compound over time.' },
+      { heading: 'Money-Smart Living', text: 'Practical tricks to reduce expenses without sacrificing quality of life. From subscription audits to DIY solutions that pay for themselves.' },
+      { heading: 'Digital Productivity Hacks', text: 'Master your devices and apps with power-user tips, automation recipes, and tool combinations that make technology work harder for you.' },
+    ],
+  },
 };
 
 export default function CategoryPage() {

@@ -32,6 +32,7 @@ Deno.serve(async (req) => {
     { loc: "https://daymytime.com/topics/daily-motivation", priority: "0.8", changefreq: "weekly" },
     { loc: "https://daymytime.com/topics/today-in-history", priority: "0.8", changefreq: "weekly" },
     { loc: "https://daymytime.com/topics/self-improvement", priority: "0.8", changefreq: "weekly" },
+    { loc: "https://daymytime.com/topics/life-hacks", priority: "0.8", changefreq: "weekly" },
     { loc: "https://daymytime.com/auth", priority: "0.7", changefreq: "monthly" },
     { loc: "https://daymytime.com/about", priority: "0.7", changefreq: "monthly" },
     { loc: "https://daymytime.com/contact", priority: "0.6", changefreq: "monthly" },
