@@ -181,7 +181,7 @@ export default function TodayTip() {
             <Button size="sm" variant="ghost" onClick={() => navigate('/')}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Home
             </Button>
-            <img src="/images/logo-icon.png" alt="DayMyTime" className="h-7 w-7 rounded-lg" />
+            <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-7 w-7 rounded-lg" />
             <span className="font-display font-bold text-sm">DayMyTime</span>
           </div>
           <div className="flex items-center gap-2">

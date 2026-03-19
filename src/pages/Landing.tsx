@@ -623,7 +623,7 @@ export default function Landing() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-3">
-                <img src="/images/logo-icon.png" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" width="32" height="32" />
+                <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-8 w-8 rounded-lg" loading="lazy" width="32" height="32" />
                 <span className="font-display font-bold">DayMyTime</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">Smart Visual Scheduler with productivity tips, daily inspiration, and history facts for students and professionals.</p>
