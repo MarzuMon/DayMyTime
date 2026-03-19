@@ -51,6 +51,14 @@ const categories: CategoryMeta[] = [
     table: 'daily_tips',
     basePath: '/topics/self-improvement',
   },
+  {
+    key: 'life-hacks',
+    title: 'Life Hacks',
+    description: 'Clever shortcuts, everyday tricks, and smart solutions to simplify your life and save time.',
+    icon: '💡',
+    table: 'daily_tips',
+    basePath: '/topics/life-hacks',
+  },
 ];
 
 export default function Topics() {
