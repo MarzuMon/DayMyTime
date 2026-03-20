@@ -58,7 +58,7 @@ export default function History() {
   const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [email, setEmail] = useState('');
+  
   const PAGE_SIZE = 9;
 
   // Load specific post by slug

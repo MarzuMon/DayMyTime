@@ -46,7 +46,7 @@ export default function TodayTip() {
   const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [email, setEmail] = useState('');
+  
   const PAGE_SIZE = 9;
 
   useEffect(() => {

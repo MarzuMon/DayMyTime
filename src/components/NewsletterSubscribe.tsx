@@ -80,7 +80,7 @@ export default function NewsletterSubscribe({
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-2"
             >
-              <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
+              <CheckCircle2 className="h-8 w-8 text-primary mx-auto mb-2" />
               <p className="font-display font-bold text-sm">✅ Subscribed successfully!</p>
               <p className="text-xs text-muted-foreground mt-1">You'll receive our latest updates.</p>
             </motion.div>
