@@ -253,6 +253,15 @@ export default function CategoryPage() {
         </div>
       </section>
 
+      {/* Newsletter */}
+      <section className="max-w-xl mx-auto px-4 pb-12">
+        <NewsletterSubscribe
+          title={`📬 Subscribe to ${cat.title}`}
+          description="Get the latest articles and tips delivered to your inbox."
+          variant="primary"
+        />
+      </section>
+
       {/* Internal Links */}
       <section className="max-w-4xl mx-auto px-4 pb-16">
         <h2 className="font-display text-xl font-bold mb-4">Explore More Topics</h2>
