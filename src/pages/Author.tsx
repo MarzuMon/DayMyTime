@@ -31,6 +31,7 @@ import PromotionManagementTab from '@/components/author/PromotionManagementTab';
 
 import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 import ContentManagementTab from '@/components/author/ContentManagementTab';
+import SubscriberManagementTab from '@/components/author/SubscriberManagementTab';
 
 interface AdPlacement {
   id: string;
