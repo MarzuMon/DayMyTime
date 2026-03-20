@@ -5,13 +5,13 @@ import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
 import BreadcrumbNav from '@/components/BreadcrumbNav';
 import RelatedPosts from '@/components/RelatedPosts';
+import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Sun, Moon, Lightbulb, Heart, Share2,
+  ArrowLeft, Sun, Moon, Lightbulb, Heart,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar,
   Instagram, Copy
 } from 'lucide-react';
@@ -46,7 +46,7 @@ export default function TodayTip() {
   const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [email, setEmail] = useState('');
+  
   const PAGE_SIZE = 9;
 
   useEffect(() => {
@@ -120,13 +120,6 @@ export default function TodayTip() {
     }
   };
 
-  const subscribe = async () => {
-    if (!email.trim()) return;
-    const { error } = await supabase.from('newsletter_followers').insert({ email: email.trim() });
-    if (error?.code === '23505') toast.info('Already subscribed!');
-    else if (error) toast.error('Failed to subscribe');
-    else { toast.success('Subscribed!'); setEmail(''); }
-  };
 
   const getShareUrl = () => {
     if (!selectedTip) return '';
@@ -270,16 +263,13 @@ export default function TodayTip() {
             <RelatedPosts currentPostId={todayTip.id} type="tips" keywords={todayTip.keywords} />
 
             {/* Newsletter */}
-            <Card className="bg-accent/5 border-accent/20 mt-8">
-              <CardContent className="pt-6">
-                <h3 className="font-display font-bold mb-2">💡 Get daily productivity tips</h3>
-                <p className="text-sm text-muted-foreground mb-3">Subscribe for actionable time management advice.</p>
-                <div className="flex gap-2">
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="flex-1" />
-                  <Button onClick={subscribe}>Subscribe</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mt-8">
+              <NewsletterSubscribe
+                title="💡 Get daily productivity tips"
+                description="Subscribe for actionable time management advice."
+                variant="accent"
+              />
+            </div>
           </motion.article>
         ) : (
           <div className="text-center py-20">

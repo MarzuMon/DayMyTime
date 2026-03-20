@@ -5,14 +5,14 @@ import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
 import BreadcrumbNav from '@/components/BreadcrumbNav';
 import RelatedPosts from '@/components/RelatedPosts';
+import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Sun, Moon, Calendar, Heart, Share2, MessageSquare,
+  ArrowLeft, Sun, Moon, Calendar, Heart, MessageSquare,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Send, Clock, User,
   Instagram, Copy
 } from 'lucide-react';
@@ -58,7 +58,7 @@ export default function History() {
   const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [email, setEmail] = useState('');
+  
   const PAGE_SIZE = 9;
 
   // Load specific post by slug
@@ -183,13 +183,6 @@ export default function History() {
     }
   };
 
-  const subscribe = async () => {
-    if (!email.trim()) return;
-    const { error } = await supabase.from('newsletter_followers').insert({ email: email.trim() });
-    if (error?.code === '23505') toast.info('Already subscribed!');
-    else if (error) toast.error('Failed to subscribe');
-    else { toast.success('Subscribed!'); setEmail(''); }
-  };
 
   const getShareUrl = () => {
     if (!selectedPost) return '';
@@ -362,16 +355,13 @@ export default function History() {
             <RelatedPosts currentPostId={todayPost.id} type="history" keywords={todayPost.keywords} />
 
             {/* Newsletter */}
-            <Card className="bg-primary/5 border-primary/20 mt-8">
-              <CardContent className="pt-6">
-                <h3 className="font-display font-bold mb-2">📬 Get daily history updates</h3>
-                <p className="text-sm text-muted-foreground mb-3">Subscribe to receive articles directly in your inbox.</p>
-                <div className="flex gap-2">
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="flex-1" />
-                  <Button onClick={subscribe}>Subscribe</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mt-8">
+              <NewsletterSubscribe
+                title="📬 Get daily history updates"
+                description="Subscribe to receive articles directly in your inbox."
+                variant="primary"
+              />
+            </div>
           </motion.article>
         ) : (
           <div className="text-center py-20">

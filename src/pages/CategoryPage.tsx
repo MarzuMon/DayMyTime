@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
 import BreadcrumbNav from '@/components/BreadcrumbNav';
@@ -250,6 +251,15 @@ export default function CategoryPage() {
             Browse All {cat.title} <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="max-w-xl mx-auto px-4 pb-12">
+        <NewsletterSubscribe
+          title={`📬 Subscribe to ${cat.title}`}
+          description="Get the latest articles and tips delivered to your inbox."
+          variant="primary"
+        />
       </section>
 
       {/* Internal Links */}
