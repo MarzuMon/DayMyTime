@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
 import BreadcrumbNav from '@/components/BreadcrumbNav';
