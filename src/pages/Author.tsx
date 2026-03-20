@@ -524,6 +524,10 @@ export default function Author() {
             <SeoKeywordsTab />
           </TabsContent>
 
+          <TabsContent value="subscribers" className="space-y-4">
+            <SubscriberManagementTab />
+          </TabsContent>
+
           <TabsContent value="content" className="space-y-4">
             <ContentManagementTab />
           </TabsContent>
