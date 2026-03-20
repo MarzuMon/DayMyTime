@@ -20,7 +20,7 @@ import {
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
   Settings, CreditCard, Megaphone, IndianRupee, Search,
-  Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound, FileText
+  Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound, FileText, Mail
 } from 'lucide-react';
 import { toast } from 'sonner';
 import UserManagementTab from '@/components/author/UserManagementTab';
@@ -31,6 +31,7 @@ import PromotionManagementTab from '@/components/author/PromotionManagementTab';
 
 import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 import ContentManagementTab from '@/components/author/ContentManagementTab';
+import SubscriberManagementTab from '@/components/author/SubscriberManagementTab';
 
 interface AdPlacement {
   id: string;
@@ -273,8 +274,7 @@ export default function Author() {
             <TabsTrigger value="referrals"><Trophy className="h-4 w-4 mr-1.5" /> Referrals</TabsTrigger>
             <TabsTrigger value="promotions"><Gift className="h-4 w-4 mr-1.5" /> Promos</TabsTrigger>
             <TabsTrigger value="monetization"><CreditCard className="h-4 w-4 mr-1.5" /> Monetize</TabsTrigger>
-
-
+            <TabsTrigger value="subscribers"><Mail className="h-4 w-4 mr-1.5" /> Subscribers</TabsTrigger>
             <TabsTrigger value="seo"><Search className="h-4 w-4 mr-1.5" /> SEO</TabsTrigger>
             <TabsTrigger value="content"><FileText className="h-4 w-4 mr-1.5" /> Content</TabsTrigger>
           </TabsList>
@@ -522,6 +522,10 @@ export default function Author() {
 
           <TabsContent value="seo" className="space-y-4">
             <SeoKeywordsTab />
+          </TabsContent>
+
+          <TabsContent value="subscribers" className="space-y-4">
+            <SubscriberManagementTab />
           </TabsContent>
 
           <TabsContent value="content" className="space-y-4">
