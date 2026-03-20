@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Sun, Moon, Calendar, Heart, Share2, MessageSquare,
+  ArrowLeft, Sun, Moon, Calendar, Heart, MessageSquare,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Send, Clock, User,
   Instagram, Copy
 } from 'lucide-react';
