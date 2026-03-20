@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Sun, Moon, Lightbulb, Heart, Share2,
+  ArrowLeft, Sun, Moon, Lightbulb, Heart,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar,
   Instagram, Copy
 } from 'lucide-react';
