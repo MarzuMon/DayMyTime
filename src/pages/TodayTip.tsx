@@ -263,16 +263,13 @@ export default function TodayTip() {
             <RelatedPosts currentPostId={todayTip.id} type="tips" keywords={todayTip.keywords} />
 
             {/* Newsletter */}
-            <Card className="bg-accent/5 border-accent/20 mt-8">
-              <CardContent className="pt-6">
-                <h3 className="font-display font-bold mb-2">💡 Get daily productivity tips</h3>
-                <p className="text-sm text-muted-foreground mb-3">Subscribe for actionable time management advice.</p>
-                <div className="flex gap-2">
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="flex-1" />
-                  <Button onClick={subscribe}>Subscribe</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mt-8">
+              <NewsletterSubscribe
+                title="💡 Get daily productivity tips"
+                description="Subscribe for actionable time management advice."
+                variant="accent"
+              />
+            </div>
           </motion.article>
         ) : (
           <div className="text-center py-20">

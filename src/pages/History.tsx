@@ -355,16 +355,13 @@ export default function History() {
             <RelatedPosts currentPostId={todayPost.id} type="history" keywords={todayPost.keywords} />
 
             {/* Newsletter */}
-            <Card className="bg-primary/5 border-primary/20 mt-8">
-              <CardContent className="pt-6">
-                <h3 className="font-display font-bold mb-2">📬 Get daily history updates</h3>
-                <p className="text-sm text-muted-foreground mb-3">Subscribe to receive articles directly in your inbox.</p>
-                <div className="flex gap-2">
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="flex-1" />
-                  <Button onClick={subscribe}>Subscribe</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mt-8">
+              <NewsletterSubscribe
+                title="📬 Get daily history updates"
+                description="Subscribe to receive articles directly in your inbox."
+                variant="primary"
+              />
+            </div>
           </motion.article>
         ) : (
           <div className="text-center py-20">
