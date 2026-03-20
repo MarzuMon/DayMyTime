@@ -5,9 +5,9 @@ import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
 import BreadcrumbNav from '@/components/BreadcrumbNav';
 import RelatedPosts from '@/components/RelatedPosts';
+import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
