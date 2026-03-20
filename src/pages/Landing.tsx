@@ -610,9 +610,15 @@ export default function Landing() {
             <Sparkles className="h-8 w-8 text-primary mx-auto mb-4" />
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Ready to take control of your time?</h2>
             <p className="text-muted-foreground text-lg mb-8">Join thousands of users who plan smarter every day.</p>
-            <Button size="lg" onClick={() => navigate('/auth')} className="h-12 px-8 text-base rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90">
+            <Button size="lg" onClick={() => navigate('/auth')} className="h-12 px-8 text-base rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 mb-8">
               Get Started for Free <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
+            <div className="max-w-md mx-auto">
+              <NewsletterSubscribe
+                title="📬 Or subscribe for updates"
+                description="Get productivity tips, history facts, and app updates in your inbox."
+              />
+            </div>
           </motion.div>
         </div>
       </section>
