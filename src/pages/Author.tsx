@@ -20,7 +20,7 @@ import {
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
   Settings, CreditCard, Megaphone, IndianRupee, Search,
-  Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound, FileText
+  Crown, TrendingUp, ShieldCheck, MessageSquare, Trophy, Gift, UsersRound, FileText, Mail
 } from 'lucide-react';
 import { toast } from 'sonner';
 import UserManagementTab from '@/components/author/UserManagementTab';
