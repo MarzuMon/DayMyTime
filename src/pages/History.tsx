@@ -183,13 +183,6 @@ export default function History() {
     }
   };
 
-  const subscribe = async () => {
-    if (!email.trim()) return;
-    const { error } = await supabase.from('newsletter_followers').insert({ email: email.trim() });
-    if (error?.code === '23505') toast.info('Already subscribed!');
-    else if (error) toast.error('Failed to subscribe');
-    else { toast.success('Subscribed!'); setEmail(''); }
-  };
 
   const getShareUrl = () => {
     if (!selectedPost) return '';
