@@ -3,7 +3,7 @@ import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useCallback } from 'react';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import SEOHead from '@/components/SEOHead';
 
@@ -84,16 +84,16 @@ const pricingRows = [
 ];
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 16 },
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.08, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
+    transition: { delay: i * 0.05, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
   }),
 };
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
+  visible: { transition: { staggerChildren: 0.04 } },
 };
 
 const jsonLd = {
@@ -158,9 +158,9 @@ export default function Landing() {
     setShowScrollTop(latest > 400);
   });
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -198,9 +198,9 @@ export default function Landing() {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28" aria-label="Hero">
-        <div className="absolute inset-0 gradient-hero" />
-        <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl" />
+        <div className="absolute inset-0 gradient-hero" aria-hidden="true" />
+        <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl will-change-auto" aria-hidden="true" />
+        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl will-change-auto" aria-hidden="true" />
 
         <motion.div
           className="relative max-w-5xl mx-auto px-4 sm:px-6"
@@ -312,17 +312,11 @@ export default function Landing() {
               { value: '500K+', label: 'Schedules Created' },
               { value: '99.9%', label: 'Uptime' },
               { value: '4.9★', label: 'User Rating' },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
-              >
+            ].map((stat) => (
+              <div key={stat.label}>
                 <p className="font-display text-2xl sm:text-3xl font-bold text-gradient">{stat.value}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -614,10 +608,12 @@ export default function Landing() {
               Get Started for Free <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
             <div className="max-w-md mx-auto">
-              <NewsletterSubscribe
-                title="📬 Or subscribe for updates"
-                description="Get productivity tips, history facts, and app updates in your inbox."
-              />
+              <Suspense fallback={<div className="h-40 rounded-xl bg-muted/30 animate-pulse" />}>
+                <NewsletterSubscribe
+                  title="📬 Or subscribe for updates"
+                  description="Get productivity tips, history facts, and app updates in your inbox."
+                />
+              </Suspense>
             </div>
           </motion.div>
         </div>
