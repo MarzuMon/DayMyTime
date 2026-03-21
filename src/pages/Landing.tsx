@@ -3,7 +3,7 @@ import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useCallback } from 'react';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import SEOHead from '@/components/SEOHead';
 
