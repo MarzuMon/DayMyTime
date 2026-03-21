@@ -38,14 +38,27 @@ export default function Contact() {
     }
 
     setSubmitting(true);
+    const id = crypto.randomUUID();
     const { error } = await supabase.from('contact_messages').insert({
+      id,
       name: result.data.name,
       email: result.data.email,
       message: result.data.message,
     });
 
+    // Send admin notification
     supabase.functions.invoke('send-contact-email', {
       body: { name: result.data.name, email: result.data.email, message: result.data.message },
+    }).catch(() => {});
+
+    // Send confirmation to user
+    supabase.functions.invoke('send-transactional-email', {
+      body: {
+        templateName: 'contact-confirmation',
+        recipientEmail: result.data.email,
+        idempotencyKey: `contact-confirm-${id}`,
+        templateData: { name: result.data.name },
+      },
     }).catch(() => {});
 
     setSubmitting(false);
