@@ -614,10 +614,12 @@ export default function Landing() {
               Get Started for Free <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
             <div className="max-w-md mx-auto">
-              <NewsletterSubscribe
-                title="📬 Or subscribe for updates"
-                description="Get productivity tips, history facts, and app updates in your inbox."
-              />
+              <Suspense fallback={<div className="h-40 rounded-xl bg-muted/30 animate-pulse" />}>
+                <NewsletterSubscribe
+                  title="📬 Or subscribe for updates"
+                  description="Get productivity tips, history facts, and app updates in your inbox."
+                />
+              </Suspense>
             </div>
           </motion.div>
         </div>
