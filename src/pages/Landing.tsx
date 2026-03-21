@@ -312,17 +312,11 @@ export default function Landing() {
               { value: '500K+', label: 'Schedules Created' },
               { value: '99.9%', label: 'Uptime' },
               { value: '4.9★', label: 'User Rating' },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
-              >
+            ].map((stat) => (
+              <div key={stat.label}>
                 <p className="font-display text-2xl sm:text-3xl font-bold text-gradient">{stat.value}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
