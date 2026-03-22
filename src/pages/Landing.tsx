@@ -183,6 +183,7 @@ export default function Landing() {
             <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
             <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
             <button onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">FAQ</button>
+            <button onClick={() => navigate('/giveaway')} className="text-primary font-semibold hover:text-primary/80 transition-colors">🎁 Giveaway</button>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="rounded-xl">
@@ -248,6 +249,9 @@ export default function Landing() {
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => navigate('/about')} className="rounded-xl glass gap-1.5">
                   📖 Learn More
+                </Button>
+                <Button size="sm" onClick={() => navigate('/giveaway')} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 gap-1.5">
+                  🎁 Join Giveaway
                 </Button>
               </motion.div>
 
@@ -651,6 +655,7 @@ export default function Landing() {
                 <a href="/topics/self-improvement" className="block text-muted-foreground hover:text-foreground transition-colors">Self Improvement</a>
                 <a href="/about" className="block text-muted-foreground hover:text-foreground transition-colors">About</a>
                 <a href="/contact" className="block text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+                <a href="/giveaway" className="block text-primary font-semibold hover:text-primary/80 transition-colors">🎁 Giveaway</a>
               </nav>
             </div>
             {/* Legal */}

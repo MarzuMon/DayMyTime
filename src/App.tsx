@@ -29,6 +29,7 @@ const Topics = lazy(() => import("./pages/Topics"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const Giveaway = lazy(() => import("./pages/Giveaway"));
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ function AnimatedRoutes() {
         <Route path="/topics" element={<PageTransition><Topics /></PageTransition>} />
         <Route path="/topics/:category" element={<PageTransition><CategoryPage /></PageTransition>} />
         <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
+        <Route path="/giveaway" element={<PageTransition><Giveaway /></PageTransition>} />
 
         {/* Protected routes */}
         <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />

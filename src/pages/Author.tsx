@@ -28,6 +28,7 @@ import UserManagementTab from '@/components/author/UserManagementTab';
 import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
 import PromotionManagementTab from '@/components/author/PromotionManagementTab';
+import GiveawayAdminSection from '@/components/author/GiveawayAdminSection';
 
 import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 import ContentManagementTab from '@/components/author/ContentManagementTab';
@@ -514,8 +515,12 @@ export default function Author() {
             <ReferralLeaderboardTab />
           </TabsContent>
 
-          <TabsContent value="promotions" className="space-y-4">
+          <TabsContent value="promotions" className="space-y-6">
             <PromotionManagementTab />
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-lg flex items-center gap-2 mb-4"><Gift className="h-5 w-5 text-primary" /> Giveaway Management</h3>
+              <GiveawayAdminSection />
+            </div>
           </TabsContent>
 
 
