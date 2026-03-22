@@ -655,6 +655,7 @@ export default function Landing() {
                 <a href="/topics/self-improvement" className="block text-muted-foreground hover:text-foreground transition-colors">Self Improvement</a>
                 <a href="/about" className="block text-muted-foreground hover:text-foreground transition-colors">About</a>
                 <a href="/contact" className="block text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+                <a href="/giveaway" className="block text-primary font-semibold hover:text-primary/80 transition-colors">🎁 Giveaway</a>
               </nav>
             </div>
             {/* Legal */}
