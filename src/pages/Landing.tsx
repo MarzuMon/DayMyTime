@@ -250,6 +250,9 @@ export default function Landing() {
                 <Button size="sm" variant="outline" onClick={() => navigate('/about')} className="rounded-xl glass gap-1.5">
                   📖 Learn More
                 </Button>
+                <Button size="sm" onClick={() => navigate('/giveaway')} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 gap-1.5">
+                  🎁 Join Giveaway
+                </Button>
               </motion.div>
 
               {/* Social proof */}
