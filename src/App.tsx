@@ -64,6 +64,7 @@ function AnimatedRoutes() {
         <Route path="/topics" element={<PageTransition><Topics /></PageTransition>} />
         <Route path="/topics/:category" element={<PageTransition><CategoryPage /></PageTransition>} />
         <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
+        <Route path="/giveaway" element={<PageTransition><Giveaway /></PageTransition>} />
 
         {/* Protected routes */}
         <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
