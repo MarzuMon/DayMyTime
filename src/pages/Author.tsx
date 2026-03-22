@@ -28,6 +28,7 @@ import UserManagementTab from '@/components/author/UserManagementTab';
 import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import ReferralLeaderboardTab from '@/components/author/ReferralLeaderboardTab';
 import PromotionManagementTab from '@/components/author/PromotionManagementTab';
+import GiveawayAdminSection from '@/components/author/GiveawayAdminSection';
 
 import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 import ContentManagementTab from '@/components/author/ContentManagementTab';
