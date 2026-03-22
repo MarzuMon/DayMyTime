@@ -29,6 +29,7 @@ const Topics = lazy(() => import("./pages/Topics"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const Giveaway = lazy(() => import("./pages/Giveaway"));
 
 const queryClient = new QueryClient();
 
