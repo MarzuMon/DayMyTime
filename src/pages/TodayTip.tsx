@@ -316,6 +316,7 @@ export default function TodayTip() {
           <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground mb-4" aria-label="Footer navigation">
             <a href="/" className="hover:text-foreground transition-colors">Home</a>
             <a href="/history" className="hover:text-foreground transition-colors">This Day in History</a>
+            <a href="/giveaway" className="text-primary font-semibold hover:text-primary/80 transition-colors">🎁 Giveaway</a>
             <a href="/about" className="hover:text-foreground transition-colors">About</a>
             <a href="/contact" className="hover:text-foreground transition-colors">Contact</a>
             <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
