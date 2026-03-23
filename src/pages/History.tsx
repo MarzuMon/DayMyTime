@@ -242,6 +242,7 @@ export default function History() {
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="ghost" onClick={() => navigate('/todaytip')} className="text-xs">Today's Tip</Button>
+            <Button size="sm" variant="ghost" onClick={() => navigate('/giveaway')} className="text-xs text-primary font-semibold">🎁 Giveaway</Button>
             <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
