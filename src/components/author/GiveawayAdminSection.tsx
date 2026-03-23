@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Copy, Trash2, Users, Trophy, Upload, Eye, RotateCcw, Image as ImageIcon, CalendarX, Flag, Send, Bell } from 'lucide-react';
+import { Copy, Trash2, Users, Trophy, Upload, RotateCcw, Image as ImageIcon, CalendarX, Flag, Send, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { sendPushNotification } from '@/lib/onesignal';
 

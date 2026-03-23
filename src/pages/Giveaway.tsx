@@ -97,13 +97,20 @@ export default function Giveaway() {
 
   const fetchRandomLink = async () => {
     try {
-      const tables = ['daily_tips', 'history_posts'];
-      const table = tables[Math.floor(Math.random() * 2)];
-      const { data } = await supabase.from(table).select('slug').eq('status', 'published').order('publish_date', { ascending: false }).limit(10);
-      if (data && data.length > 0) {
-        const item = data[Math.floor(Math.random() * data.length)];
-        const prefix = table === 'daily_tips' ? '/todaytip' : '/history';
-        setRandomLink(`https://daymytime.com${prefix}/${item.slug}`);
+      // Randomly pick tips or history
+      const usesTips = Math.random() > 0.5;
+      if (usesTips) {
+        const { data } = await supabase.from('daily_tips').select('slug').eq('status', 'published').order('publish_date', { ascending: false }).limit(10);
+        if (data && data.length > 0) {
+          const item = data[Math.floor(Math.random() * data.length)];
+          setRandomLink(`https://daymytime.com/todaytip/${item.slug}`);
+        }
+      } else {
+        const { data } = await supabase.from('history_posts').select('slug').eq('status', 'published').order('publish_date', { ascending: false }).limit(10);
+        if (data && data.length > 0) {
+          const item = data[Math.floor(Math.random() * data.length)];
+          setRandomLink(`https://daymytime.com/history/${item.slug}`);
+        }
       }
     } catch { /* silent */ }
   };
