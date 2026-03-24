@@ -445,7 +445,9 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          image_url: string | null
           is_active: boolean
+          is_finished: boolean
           reward_days: number
           target_signups: number
           title: string
@@ -456,7 +458,9 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          is_finished?: boolean
           reward_days?: number
           target_signups?: number
           title: string
@@ -467,7 +471,9 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          is_finished?: boolean
           reward_days?: number
           target_signups?: number
           title?: string
