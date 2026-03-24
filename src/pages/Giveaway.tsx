@@ -224,7 +224,7 @@ export default function Giveaway() {
 
 വേഗം join ചെയ്യൂ! 🚀`;
 
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (
