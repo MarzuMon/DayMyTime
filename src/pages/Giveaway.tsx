@@ -354,8 +354,13 @@ export default function Giveaway() {
                         {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                       </div>
 
-                      <Button type="submit" disabled={submitting} className="w-full h-12 rounded-xl gradient-primary border-0 text-primary-foreground">
-                        {submitting ? 'Submitting...' : 'Submit Entry 🎯'}
+                      <Button type="submit" disabled={submitting || !image} className="w-full h-12 rounded-xl gradient-primary border-0 text-primary-foreground font-semibold">
+                        {submitting ? (
+                          <span className="flex items-center gap-2">
+                            <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                            Submitting...
+                          </span>
+                        ) : 'Submit Entry 🎯'}
                       </Button>
                     </form>
                   )}
@@ -430,9 +435,9 @@ export default function Giveaway() {
             </h2>
             {isSubscriber && user ? (
               <div className="flex gap-2 mb-4">
-                <Textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Write a comment..." rows={2} className="rounded-xl" />
-                <Button onClick={addComment} size="icon" className="h-auto rounded-xl gradient-primary border-0 text-primary-foreground">
-                  <Send className="h-4 w-4" />
+                <Textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Write a comment..." rows={2} className="rounded-xl flex-1" />
+                <Button onClick={addComment} className="rounded-xl gradient-primary border-0 text-primary-foreground px-4 self-end">
+                  <Send className="h-4 w-4 mr-1" /> Send
                 </Button>
               </div>
             ) : (
