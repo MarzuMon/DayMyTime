@@ -11,6 +11,7 @@ interface Promotion {
   title: string;
   description: string;
   type: string;
+  image_url: string | null;
 }
 
 const POPUP_KEY = 'promo_popup_last_shown';
@@ -29,7 +30,7 @@ export default function PromoPopup({ isPro }: { isPro: boolean }) {
 
     supabase
       .from('promotions')
-      .select('id, title, description, type')
+      .select('id, title, description, type, image_url')
       .eq('is_active', true)
       .limit(1)
       .then(({ data }) => {
@@ -77,22 +78,26 @@ export default function PromoPopup({ isPro }: { isPro: boolean }) {
                     <X className="h-3.5 w-3.5 text-primary-foreground" />
                   </button>
 
-                  {/* Icon and title */}
+                  {/* Image or Icon */}
                   <div className="relative z-10 px-6 pt-8 pb-6 text-center">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', delay: 0.15, damping: 12 }}
-                      className="mx-auto mb-4"
-                    >
-                      <div className="h-16 w-16 rounded-2xl bg-primary-foreground/15 backdrop-blur-sm flex items-center justify-center mx-auto ring-2 ring-primary-foreground/20 shadow-lg">
-                        {isReferral ? (
-                          <Gift className="h-8 w-8 text-primary-foreground" />
-                        ) : (
-                          <Star className="h-8 w-8 text-primary-foreground" />
-                        )}
-                      </div>
-                    </motion.div>
+                    {promo.image_url ? (
+                      <img src={promo.image_url} alt={promo.title} className="w-full max-h-40 object-cover rounded-xl mb-4 mx-auto" />
+                    ) : (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', delay: 0.15, damping: 12 }}
+                        className="mx-auto mb-4"
+                      >
+                        <div className="h-16 w-16 rounded-2xl bg-primary-foreground/15 backdrop-blur-sm flex items-center justify-center mx-auto ring-2 ring-primary-foreground/20 shadow-lg">
+                          {isReferral ? (
+                            <Gift className="h-8 w-8 text-primary-foreground" />
+                          ) : (
+                            <Star className="h-8 w-8 text-primary-foreground" />
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
                     <h2 className="font-display text-xl font-bold text-primary-foreground tracking-tight">
                       {promo.title}
                     </h2>
