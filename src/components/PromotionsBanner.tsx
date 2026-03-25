@@ -10,6 +10,7 @@ interface Promotion {
   description: string;
   target_signups: number;
   reward_days: number;
+  image_url: string | null;
 }
 
 export default function PromotionsBanner() {
@@ -19,7 +20,7 @@ export default function PromotionsBanner() {
   useEffect(() => {
     supabase
       .from('promotions')
-      .select('id, title, description, target_signups, reward_days')
+      .select('id, title, description, target_signups, reward_days, image_url')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(3)
@@ -59,6 +60,9 @@ export default function PromotionsBanner() {
                 className="rounded-xl border-2 border-primary/20 bg-card p-5 shadow-card hover:border-primary/40 transition-colors cursor-pointer"
                 onClick={() => navigate('/auth')}
               >
+                {promo.image_url && (
+                  <img src={promo.image_url} alt={promo.title} className="w-full h-32 object-cover rounded-lg mb-3" loading="lazy" />
+                )}
                 <div className="flex items-start gap-3">
                   <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <Gift className="h-4.5 w-4.5 text-primary" />
