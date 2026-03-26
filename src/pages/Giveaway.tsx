@@ -68,7 +68,9 @@ export default function Giveaway() {
       const metaRef = doc(db, 'giveaway_meta', 'config');
       const metaSnap = await getDoc(metaRef);
       if (metaSnap.exists()) setConfig(metaSnap.data() as GiveawayConfig);
-    } catch { /* silent */ }
+    } catch (err) {
+      console.warn('Firebase config fetch failed - ensure Cloud Firestore API is enabled:', (err as Error).message);
+    }
   };
 
   const fetchCount = async () => {
@@ -78,21 +80,33 @@ export default function Giveaway() {
       const startCount = metaSnap.exists() ? (metaSnap.data().startCount || 0) : 0;
       const snap = await getDocs(collection(db, 'contributions'));
       setParticipantCount(startCount + snap.size);
-    } catch { setParticipantCount(0); }
+    } catch (err) {
+      console.warn('Firebase count fetch failed:', (err as Error).message);
+      setParticipantCount(0);
+    }
   };
 
   const fetchWinners = async () => {
     try {
       const snap = await getDocs(query(collection(db, 'winners'), orderBy('createdAt', 'desc')));
       setWinners(snap.docs.map(d => ({ id: d.id, ...d.data() } as Winner)));
-    } catch { /* silent */ }
+    } catch (err) {
+      console.warn('Firebase winners fetch failed:', (err as Error).message);
+    }
   };
 
   const fetchComments = async () => {
     try {
-      const snap = await getDocs(query(collection(db, 'comments'), where('pageId', '==', 'giveaway'), orderBy('createdAt', 'desc')));
-      setComments(snap.docs.map(d => ({ id: d.id, ...d.data() } as GiveawayComment)));
-    } catch { /* silent */ }
+      // Simple query without composite index requirement
+      const snap = await getDocs(collection(db, 'comments'));
+      const allComments = snap.docs
+        .map(d => ({ id: d.id, ...d.data() } as GiveawayComment & { pageId?: string }))
+        .filter(c => (c as any).pageId === 'giveaway')
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setComments(allComments);
+    } catch (err) {
+      console.warn('Firebase comments fetch failed:', (err as Error).message);
+    }
   };
 
   const fetchRandomLink = async () => {
