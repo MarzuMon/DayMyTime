@@ -82,7 +82,9 @@ export default function PromotionManagementTab() {
       }
       const snap = await getDocs(collection(db, 'contributions'));
       setActualCount(snap.size);
-    } catch { /* silent */ }
+    } catch (err) {
+      console.warn('Firebase giveaway data fetch failed:', (err as Error).message);
+    }
   };
 
   const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setDialogOpen(true); };
