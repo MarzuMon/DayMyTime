@@ -56,7 +56,10 @@ export default function GiveawayAdminSection() {
         setExpiryDate(data.expiryDate || '');
         setIsFinished(data.isFinished || false);
       }
-    } catch { toast.error('Failed to load giveaway data'); }
+    } catch (err) {
+      console.warn('Firebase giveaway admin fetch failed - ensure Cloud Firestore API is enabled:', (err as Error).message);
+      toast.error('Failed to load giveaway data. Ensure Cloud Firestore API is enabled in your Firebase project.');
+    }
     finally { setLoading(false); }
   };
 
