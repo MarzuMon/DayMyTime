@@ -1,8 +1,11 @@
 // OneSignal Web SDK integration
 const ONESIGNAL_APP_ID = '6f0e29ca-2132-4e05-abe5-2767f8be0f80';
 
+let oneSignalInitialized = false;
+
 export function initOneSignal() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || oneSignalInitialized) return;
+  oneSignalInitialized = true;
 
   const script = document.createElement('script');
   script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
@@ -10,11 +13,16 @@ export function initOneSignal() {
   script.onload = () => {
     (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
     (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-      await OneSignal.init({
-        appId: ONESIGNAL_APP_ID,
-        notifyButton: { enable: true },
-        allowLocalhostAsSecureOrigin: true,
-      });
+      try {
+        await OneSignal.init({
+          appId: ONESIGNAL_APP_ID,
+          notifyButton: { enable: true },
+          allowLocalhostAsSecureOrigin: true,
+        });
+      } catch (e) {
+        // SDK may already be initialized in some environments
+        console.warn('OneSignal init skipped:', (e as Error).message);
+      }
     });
   };
   document.head.appendChild(script);
