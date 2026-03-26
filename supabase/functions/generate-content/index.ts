@@ -53,9 +53,7 @@ serve(async (req) => {
 
     // For cron/scheduled calls, check admin_settings for auto_publish config
     if (cron) {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const db = createClient(supabaseUrl, supabaseKey);
+      const db = serviceClient;
 
       const { data: setting } = await db
         .from("admin_settings")
