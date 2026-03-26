@@ -106,9 +106,7 @@ serve(async (req) => {
 
     // Manual schedule: generate and auto-publish for a specific date
     if (schedule && auto_publish) {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const db = createClient(supabaseUrl, supabaseKey);
+      const db = serviceClient;
       const targetDate = publish_date || new Date().toISOString().split("T")[0];
       const results: string[] = [];
 
