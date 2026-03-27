@@ -1,23 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Gift,
-  Upload,
-  Phone,
-  Mail,
-  ArrowLeft,
-  Moon,
-  Sun,
-  Trophy,
-  Users,
-  CheckCircle2,
-  X,
-  Heart,
-  MessageSquare,
-  Send,
-  Share2,
-  Award,
-  Star,
+  Gift, Upload, Phone, Mail, ArrowLeft, Moon, Sun, Trophy, Users,
+  CheckCircle2, X, Heart, MessageSquare, Send, Share2, Award, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,9 +11,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { db, storage } from "@/lib/firebase";
-import { collection, addDoc, getDocs, query, orderBy, where, deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -37,33 +19,12 @@ import { motion } from "framer-motion";
 
 const formSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
-  phone: z
-    .string()
-    .trim()
-    .min(10, "Phone must be at least 10 digits")
-    .max(15, "Phone is too long")
-    .regex(/^[+\d\s-]+$/, "Invalid phone number"),
+  phone: z.string().trim().min(10, "Phone must be at least 10 digits").max(15, "Phone is too long").regex(/^[+\d\s-]+$/, "Invalid phone number"),
 });
 
-interface Winner {
-  id: string;
-  imageURL: string;
-  videoURL?: string;
-  name?: string;
-  createdAt: string;
-}
-interface GiveawayComment {
-  id: string;
-  userEmail: string;
-  commentText: string;
-  createdAt: string;
-}
-interface GiveawayConfig {
-  startCount?: number;
-  activeImageURL?: string;
-  expiryDate?: string;
-  isFinished?: boolean;
-}
+interface Winner { id: string; image_url: string | null; video_url: string | null; name: string; created_at: string; }
+interface GiveawayComment { id: string; userEmail: string; commentText: string; createdAt: string; }
+interface GiveawayConfig { start_count: number; active_image_url: string | null; expiry_date: string | null; is_finished: boolean; }
 
 export default function Giveaway() {
   const navigate = useNavigate();
@@ -84,95 +45,50 @@ export default function Giveaway() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [config, setConfig] = useState<GiveawayConfig>({});
+  const [config, setConfig] = useState<GiveawayConfig>({ start_count: 0, active_image_url: null, expiry_date: null, is_finished: false });
   const [randomLink, setRandomLink] = useState("");
 
   useEffect(() => {
+    fetchConfig();
     fetchCount();
     fetchWinners();
     fetchComments();
-    fetchConfig();
     fetchRandomLink();
     checkSubscriber();
     checkLiked();
   }, [user]);
 
   const fetchConfig = async () => {
-    try {
-      const metaRef = doc(db, "giveaway_meta", "config");
-      const metaSnap = await getDoc(metaRef);
-      if (metaSnap.exists()) setConfig(metaSnap.data() as GiveawayConfig);
-    } catch (err) {
-      console.warn("Firebase config fetch failed - ensure Cloud Firestore API is enabled:", (err as Error).message);
-    }
+    const { data } = await supabase.from("giveaway_config").select("*").limit(1).maybeSingle();
+    if (data) setConfig(data as unknown as GiveawayConfig);
   };
 
   const fetchCount = async () => {
-    try {
-      const metaRef = doc(db, "giveaway_meta", "config");
-      const metaSnap = await getDoc(metaRef);
-      const startCount = metaSnap.exists() ? metaSnap.data().startCount || 0 : 0;
-      const snap = await getDocs(collection(db, "contributions"));
-      setParticipantCount(startCount + snap.size);
-    } catch (err) {
-      console.warn("Firebase count fetch failed:", (err as Error).message);
-      setParticipantCount(0);
-    }
+    const { data, error } = await supabase.rpc("get_giveaway_count");
+    if (!error && data !== null) setParticipantCount(data);
   };
 
   const fetchWinners = async () => {
-    try {
-      const snap = await getDocs(query(collection(db, "winners"), orderBy("createdAt", "desc")));
-      setWinners(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Winner));
-    } catch (err) {
-      console.warn("Firebase winners fetch failed:", (err as Error).message);
-    }
+    const { data } = await supabase.from("giveaway_winners").select("*").order("created_at", { ascending: false });
+    if (data) setWinners(data as unknown as Winner[]);
   };
 
   const fetchComments = async () => {
-    try {
-      // Simple query without composite index requirement
-      const snap = await getDocs(collection(db, "comments"));
-      const allComments = snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }) as GiveawayComment & { pageId?: string })
-        .filter((c) => (c as any).pageId === "giveaway")
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      setComments(allComments);
-    } catch (err) {
-      console.warn("Firebase comments fetch failed:", (err as Error).message);
-    }
+    const { data } = await supabase.from("post_comments").select("*").eq("post_type", "giveaway").eq("post_id", "00000000-0000-0000-0000-000000000000").order("created_at", { ascending: false });
+    if (data) setComments(data.map(c => ({ id: c.id, userEmail: c.user_name, commentText: c.content, createdAt: c.created_at })));
   };
 
   const fetchRandomLink = async () => {
     try {
-      // Randomly pick tips or history
       const usesTips = Math.random() > 0.5;
-      if (usesTips) {
-        const { data } = await supabase
-          .from("daily_tips")
-          .select("slug")
-          .eq("status", "published")
-          .order("publish_date", { ascending: false })
-          .limit(10);
-        if (data && data.length > 0) {
-          const item = data[Math.floor(Math.random() * data.length)];
-          setRandomLink(`https://daymytime.com/todaytip/${item.slug}`);
-        }
-      } else {
-        const { data } = await supabase
-          .from("history_posts")
-          .select("slug")
-          .eq("status", "published")
-          .order("publish_date", { ascending: false })
-          .limit(10);
-        if (data && data.length > 0) {
-          const item = data[Math.floor(Math.random() * data.length)];
-          setRandomLink(`https://daymytime.com/history/${item.slug}`);
-        }
+      const table = usesTips ? "daily_tips" : "history_posts";
+      const { data } = await supabase.from(table).select("slug").eq("status", "published").order("publish_date", { ascending: false }).limit(10);
+      if (data && data.length > 0) {
+        const item = data[Math.floor(Math.random() * data.length)];
+        const prefix = usesTips ? "todaytip" : "history";
+        setRandomLink(`https://daymytime.com/${prefix}/${item.slug}`);
       }
-    } catch {
-      /* silent */
-    }
+    } catch { /* silent */ }
   };
 
   const checkSubscriber = async () => {
@@ -183,35 +99,21 @@ export default function Giveaway() {
 
   const checkLiked = async () => {
     if (!user) return;
-    try {
-      const likeRef = doc(db, "likes", `giveaway_${user.id}`);
-      const snap = await getDoc(likeRef);
-      setLiked(snap.exists());
-    } catch {
-      /* */
-    }
-    try {
-      const snap = await getDocs(query(collection(db, "likes"), where("pageId", "==", "giveaway")));
-      setLikeCount(snap.size);
-    } catch {
-      /* */
-    }
+    const { data } = await supabase.from("post_likes").select("id").eq("post_type", "giveaway").eq("post_id", "00000000-0000-0000-0000-000000000000").eq("user_id", user.id).maybeSingle();
+    setLiked(!!data);
+    const { count } = await supabase.from("post_likes").select("id", { count: "exact", head: true }).eq("post_type", "giveaway").eq("post_id", "00000000-0000-0000-0000-000000000000");
+    setLikeCount(count || 0);
   };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
     try {
       const compressed = await imageCompression(file, { maxSizeMB: 0.2, maxWidthOrHeight: 1920, useWebWorker: true });
       setImage(compressed);
       setImagePreview(URL.createObjectURL(compressed));
-    } catch {
-      toast.error("Failed to compress image");
-    }
+    } catch { toast.error("Failed to compress image"); }
   };
 
   const removeImage = () => {
@@ -220,157 +122,96 @@ export default function Giveaway() {
     setImagePreview(null);
   };
 
-  const isExpired = config.expiryDate ? new Date(config.expiryDate) < new Date() : false;
-  const isFinished = config.isFinished || isExpired;
+  const isExpired = config.expiry_date ? new Date(config.expiry_date) < new Date() : false;
+  const isFinished = config.is_finished || isExpired;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    if (isFinished) {
-      toast.error("This giveaway has ended");
-      return;
-    }
-
+    if (isFinished) { toast.error("This giveaway has ended"); return; }
     const result = formSchema.safeParse({ email, phone });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        fieldErrors[err.path[0] as string] = err.message;
-      });
+      result.error.errors.forEach(err => { fieldErrors[err.path[0] as string] = err.message; });
       setErrors(fieldErrors);
       return;
     }
-    if (!image) {
-      toast.error("Please upload a WhatsApp status screenshot");
-      return;
-    }
+    if (!image) { toast.error("Please upload a WhatsApp status screenshot"); return; }
 
     setSubmitting(true);
     try {
-      const fileName = `contributions/${Date.now()}_${image.name}`;
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, image);
-      const imageURL = await getDownloadURL(storageRef);
+      const fileName = `giveaway/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${image.type.split("/")[1] || "jpg"}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage.from("images").upload(fileName, image, { contentType: image.type });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("images").getPublicUrl(uploadData.path);
 
-      await addDoc(collection(db, "contributions"), {
+      const { error: insertError } = await supabase.from("giveaway_contributions").insert({
         email: result.data.email,
         phone: result.data.phone,
-        imageURL,
-        createdAt: new Date().toISOString(),
+        image_url: urlData.publicUrl,
       });
+      if (insertError) throw insertError;
 
       setSubmitted(true);
-      setEmail("");
-      setPhone("");
-      removeImage();
+      setEmail(""); setPhone(""); removeImage();
       fetchCount();
       toast.success("🎉 Entry submitted successfully!");
-    } catch {
+    } catch (err) {
+      console.error("Submission error:", err);
       toast.error("Submission failed. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    } finally { setSubmitting(false); }
   };
 
   const toggleLike = async () => {
-    if (!user) {
-      toast.error("Please sign in to like");
-      return;
-    }
-    if (!isSubscriber) {
-      toast.error("Subscribe to the newsletter to like");
-      return;
-    }
-    try {
-      const likeRef = doc(db, "likes", `giveaway_${user.id}`);
-      if (liked) {
-        await deleteDoc(likeRef);
-        setLiked(false);
-        setLikeCount((c) => c - 1);
-      } else {
-        await setDoc(likeRef, {
-          pageId: "giveaway",
-          userId: user.id,
-          userEmail: user.email,
-          liked: true,
-          createdAt: new Date().toISOString(),
-        });
-        setLiked(true);
-        setLikeCount((c) => c + 1);
-      }
-    } catch {
-      toast.error("Failed to update like");
+    if (!user) { toast.error("Please sign in to like"); return; }
+    if (!isSubscriber) { toast.error("Subscribe to the newsletter to like"); return; }
+    const postId = "00000000-0000-0000-0000-000000000000";
+    if (liked) {
+      await supabase.from("post_likes").delete().eq("post_type", "giveaway").eq("post_id", postId).eq("user_id", user.id);
+      setLiked(false); setLikeCount(c => c - 1);
+    } else {
+      await supabase.from("post_likes").insert({ post_type: "giveaway", post_id: postId, user_id: user.id });
+      setLiked(true); setLikeCount(c => c + 1);
     }
   };
 
   const addComment = async () => {
-    if (!user) {
-      toast.error("Please sign in to comment");
-      return;
-    }
-    if (!isSubscriber) {
-      toast.error("Subscribe to the newsletter to comment");
-      return;
-    }
+    if (!user) { toast.error("Please sign in to comment"); return; }
+    if (!isSubscriber) { toast.error("Subscribe to the newsletter to comment"); return; }
     if (!commentText.trim()) return;
-    try {
-      await addDoc(collection(db, "comments"), {
-        pageId: "giveaway",
-        userEmail: user.email || "Anonymous",
-        commentText: commentText.trim(),
-        createdAt: new Date().toISOString(),
-      });
-      setCommentText("");
-      fetchComments();
-      toast.success("Comment added!");
-    } catch {
-      toast.error("Failed to add comment");
-    }
+    const { error } = await supabase.from("post_comments").insert({
+      post_type: "giveaway",
+      post_id: "00000000-0000-0000-0000-000000000000",
+      user_id: user.id,
+      user_name: user.email || "Anonymous",
+      content: commentText.trim(),
+    });
+    if (error) { toast.error("Failed to add comment"); return; }
+    setCommentText("");
+    fetchComments();
+    toast.success("Comment added!");
   };
 
   const shareOnWhatsApp = () => {
-    const msg = `🔥 DayMyTime Giveaway!
-₹500 Amazon Voucher നേടാനുള്ള അവസരം! 🎁
-
-ഞാൻ ഇതിനകം പങ്കെടുത്തു 😍
-നിങ്ങളും ഉടൻ join ചെയ്യൂ 👇
-
-👉 https://daymytime.com/giveaway
-
-ഇന്ന് ഒരു സ്പെഷ്യൽ ടിപ്പ് കൂടി നോക്കൂ:
-👉 ${randomLink || "https://daymytime.com/todaytip"}
-
-വേഗം join ചെയ്യൂ! 🚀`;
-
+    const msg = `🔥 DayMyTime Giveaway!\n₹500 Amazon Voucher നേടാനുള്ള അവസരം! 🎁\n\nഞാൻ ഇതിനകം പങ്കെടുത്തു 😍\nനിങ്ങളും ഉടൻ join ചെയ്യൂ 👇\n\n👉 https://daymytime.com/giveaway\n\nഇന്ന് ഒരു സ്പെഷ്യൽ ടിപ്പ് കൂടി നോക്കൂ:\n👉 ${randomLink || "https://daymytime.com/todaytip"}\n\nവേഗം join ചെയ്യൂ! 🚀`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SEOHead
-        title="Giveaway – DayMyTime | Win Exciting Prizes"
-        description="Participate in the DayMyTime giveaway. Upload your WhatsApp status screenshot to enter and win exciting prizes!"
-        canonical="https://daymytime.com/giveaway"
-        image={config.activeImageURL || undefined}
-      />
+      <SEOHead title="Giveaway – DayMyTime | Win Exciting Prizes" description="Participate in the DayMyTime giveaway. Upload your WhatsApp status screenshot to enter and win exciting prizes!" canonical="https://daymytime.com/giveaway" image={config.active_image_url || undefined} />
 
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button size="sm" variant="ghost" onClick={() => navigate("/")}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Home
-            </Button>
+            <Button size="sm" variant="ghost" onClick={() => navigate("/")}><ArrowLeft className="h-4 w-4 mr-1" /> Home</Button>
             <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-7 w-7 rounded-lg" width="28" height="28" />
             <span className="font-display font-bold text-sm">DayMyTime</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" onClick={() => navigate("/todaytip")} className="text-xs">
-              Tips
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => navigate("/history")} className="text-xs">
-              History
-            </Button>
+            <Button size="sm" variant="ghost" onClick={() => navigate("/todaytip")} className="text-xs">Tips</Button>
+            <Button size="sm" variant="ghost" onClick={() => navigate("/history")} className="text-xs">History</Button>
             <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
@@ -380,15 +221,9 @@ export default function Giveaway() {
 
       <div className="pt-16">
         {/* 1. Active Giveaway Banner */}
-        {config.activeImageURL && (
+        {config.active_image_url && (
           <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
-            <img
-              src={config.activeImageURL}
-              alt="Active Giveaway"
-              className="w-full max-h-[400px] object-cover"
-              loading="eager"
-              fetchPriority="high"
-            />
+            <img src={config.active_image_url} alt="Active Giveaway" className="w-full max-h-[400px] object-cover" loading="eager" fetchPriority="high" />
             {isFinished && (
               <div className="bg-destructive/90 text-destructive-foreground text-center py-2 text-sm font-semibold">
                 🏁 This giveaway has ended. Stay tuned for the next one!
@@ -399,11 +234,7 @@ export default function Giveaway() {
 
         {/* 2. WhatsApp Share + Participant Count */}
         <section className="max-w-4xl mx-auto px-4 py-6">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#25D366]/10 border border-[#25D366]/30"
-          >
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#25D366]/10 border border-[#25D366]/30">
             <div className="flex items-center gap-3">
               <Users className="h-6 w-6 text-primary" />
               <div>
@@ -411,10 +242,7 @@ export default function Giveaway() {
                 <span className="text-sm text-muted-foreground ml-2">Participants</span>
               </div>
             </div>
-            <Button
-              onClick={shareOnWhatsApp}
-              className="bg-[#25D366] hover:bg-[#25D366]/90 text-white rounded-xl gap-2 px-6"
-            >
+            <Button onClick={shareOnWhatsApp} className="bg-[#25D366] hover:bg-[#25D366]/90 text-white rounded-xl gap-2 px-6">
               <Share2 className="h-4 w-4" /> Share on WhatsApp
             </Button>
           </motion.div>
@@ -431,17 +259,10 @@ export default function Giveaway() {
                     <div className="text-center py-12 space-y-4">
                       <CheckCircle2 className="h-16 w-16 text-primary mx-auto" />
                       <h2 className="font-display text-2xl font-bold">Entry Submitted! 🎉</h2>
-                      <p className="text-muted-foreground">
-                        Thank you for participating. Winners will be announced soon!
-                      </p>
+                      <p className="text-muted-foreground">Thank you for participating. Winners will be announced soon!</p>
                       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Button onClick={() => setSubmitted(false)} variant="outline" className="rounded-xl">
-                          Submit Another Entry
-                        </Button>
-                        <Button
-                          onClick={shareOnWhatsApp}
-                          className="bg-[#25D366] hover:bg-[#25D366]/90 text-white rounded-xl gap-2"
-                        >
+                        <Button onClick={() => setSubmitted(false)} variant="outline" className="rounded-xl">Submit Another Entry</Button>
+                        <Button onClick={shareOnWhatsApp} className="bg-[#25D366] hover:bg-[#25D366]/90 text-white rounded-xl gap-2">
                           <Share2 className="h-4 w-4" /> Share & Earn More Chances
                         </Button>
                       </div>
@@ -451,20 +272,14 @@ export default function Giveaway() {
                       <h2 className="font-display text-xl font-bold flex items-center gap-2">
                         <Gift className="h-5 w-5 text-primary" /> Submit Your Entry
                       </h2>
-                      <p className="text-sm text-muted-foreground">
-                        Share DayMyTime on your WhatsApp Status, take a screenshot, and submit it below.
-                      </p>
+                      <p className="text-sm text-muted-foreground">Share DayMyTime on your WhatsApp Status, take a screenshot, and submit it below.</p>
 
                       <div>
                         <label className="text-sm font-medium mb-2 block">WhatsApp Status Screenshot *</label>
                         {imagePreview ? (
                           <div className="relative inline-block">
                             <img src={imagePreview} alt="Preview" className="max-h-48 rounded-xl border" />
-                            <button
-                              type="button"
-                              onClick={removeImage}
-                              className="absolute -top-2 -right-2 h-6 w-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center"
-                            >
+                            <button type="button" onClick={removeImage} className="absolute -top-2 -right-2 h-6 w-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
                               <X className="h-3 w-3" />
                             </button>
                           </div>
@@ -482,12 +297,7 @@ export default function Giveaway() {
                         <label className="text-sm font-medium mb-1.5 block">Email *</label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="your@email.com"
-                            className="pl-10 rounded-xl"
-                          />
+                          <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="pl-10 rounded-xl" />
                         </div>
                         {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
                       </div>
@@ -496,29 +306,18 @@ export default function Giveaway() {
                         <label className="text-sm font-medium mb-1.5 block">Mobile Number *</label>
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="+91 9876543210"
-                            className="pl-10 rounded-xl"
-                          />
+                          <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 9876543210" className="pl-10 rounded-xl" />
                         </div>
                         {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                       </div>
 
-                      <Button
-                        type="submit"
-                        disabled={submitting || !image}
-                        className="w-full h-12 rounded-xl gradient-primary border-0 text-primary-foreground font-semibold"
-                      >
+                      <Button type="submit" disabled={submitting || !image} className="w-full h-12 rounded-xl gradient-primary border-0 text-primary-foreground font-semibold">
                         {submitting ? (
                           <span className="flex items-center gap-2">
                             <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                             Submitting...
                           </span>
-                        ) : (
-                          "Submit 🎯"
-                        )}
+                        ) : "Submit 🎯"}
                       </Button>
                     </form>
                   )}
@@ -527,35 +326,21 @@ export default function Giveaway() {
             </motion.div>
           )}
 
-          {/* 4. Recently Win Prizes */}
+          {/* 4. Recently Won Prizes */}
           {winners.length > 0 && (
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
+            <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
               <h2 className="font-display text-2xl font-bold flex items-center gap-2 mb-6">
                 <Trophy className="h-6 w-6 text-yellow-500" /> Recently Won Prizes
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {winners.map((w) => (
+                {winners.map(w => (
                   <Card key={w.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
                     <CardContent className="p-0">
-                      {w.videoURL ? (
-                        <video
-                          src={w.videoURL}
-                          controls
-                          className="w-full aspect-video object-cover"
-                          preload="metadata"
-                        />
-                      ) : (
-                        <img
-                          src={w.imageURL}
-                          alt={w.name || "Winner"}
-                          className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      )}
+                      {w.video_url ? (
+                        <video src={w.video_url} controls className="w-full aspect-video object-cover" preload="metadata" />
+                      ) : w.image_url ? (
+                        <img src={w.image_url} alt={w.name || "Winner"} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                      ) : null}
                       {w.name && (
                         <div className="p-3 flex items-center gap-2">
                           <Award className="h-4 w-4 text-yellow-500" />
@@ -570,41 +355,20 @@ export default function Giveaway() {
           )}
 
           {/* 5. All Win Exciting Prizes */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 border border-primary/20"
-          >
+          <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 border border-primary/20">
             <Star className="h-10 w-10 text-yellow-500 mx-auto mb-4" />
             <h2 className="font-display text-2xl font-bold mb-3">All Win Exciting Prizes! 🎁</h2>
-            <p className="text-muted-foreground max-w-md mx-auto mb-6">
-              Amazon vouchers, exclusive DayMyTime Pro memberships, and surprise gifts await! Every participation
-              counts.
-            </p>
+            <p className="text-muted-foreground max-w-md mx-auto mb-6">Amazon vouchers, exclusive DayMyTime Pro memberships, and surprise gifts await! Every participation counts.</p>
             <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-              <div className="p-3 rounded-xl bg-background/80 border">
-                <p className="text-lg font-bold text-primary">₹500</p>
-                <p className="text-xs text-muted-foreground">Amazon</p>
-              </div>
-              <div className="p-3 rounded-xl bg-background/80 border">
-                <p className="text-lg font-bold text-primary">Pro</p>
-                <p className="text-xs text-muted-foreground">1 Year Free</p>
-              </div>
-              <div className="p-3 rounded-xl bg-background/80 border">
-                <p className="text-lg font-bold text-primary">🎁</p>
-                <p className="text-xs text-muted-foreground">Surprise</p>
-              </div>
+              <div className="p-3 rounded-xl bg-background/80 border"><p className="text-lg font-bold text-primary">₹500</p><p className="text-xs text-muted-foreground">Amazon</p></div>
+              <div className="p-3 rounded-xl bg-background/80 border"><p className="text-lg font-bold text-primary">Pro</p><p className="text-xs text-muted-foreground">1 Year Free</p></div>
+              <div className="p-3 rounded-xl bg-background/80 border"><p className="text-lg font-bold text-primary">🎁</p><p className="text-xs text-muted-foreground">Surprise</p></div>
             </div>
           </motion.section>
 
           {/* Like */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={toggleLike}
-              className={`rounded-xl gap-2 ${liked ? "text-destructive" : ""}`}
-            >
+            <Button variant="ghost" onClick={toggleLike} className={`rounded-xl gap-2 ${liked ? "text-destructive" : ""}`}>
               <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likeCount}
             </Button>
           </div>
@@ -616,17 +380,8 @@ export default function Giveaway() {
             </h2>
             {isSubscriber && user ? (
               <div className="flex gap-2 mb-4">
-                <Textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Write a comment..."
-                  rows={2}
-                  className="rounded-xl flex-1"
-                />
-                <Button
-                  onClick={addComment}
-                  className="rounded-xl gradient-primary border-0 text-primary-foreground px-4 self-end"
-                >
+                <Textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Write a comment..." rows={2} className="rounded-xl flex-1" />
+                <Button onClick={addComment} className="rounded-xl gradient-primary border-0 text-primary-foreground px-4 self-end">
                   <Send className="h-4 w-4 mr-1" /> Send
                 </Button>
               </div>
@@ -636,22 +391,18 @@ export default function Giveaway() {
               </p>
             )}
             <div className="space-y-3">
-              {comments.map((c) => (
+              {comments.map(c => (
                 <Card key={c.id}>
                   <CardContent className="py-3 px-4">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-medium">{c.userEmail}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </span>
+                      <span className="text-xs text-muted-foreground">{new Date(c.createdAt).toLocaleDateString()}</span>
                     </div>
                     <p className="text-sm">{c.commentText}</p>
                   </CardContent>
                 </Card>
               ))}
-              {comments.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">No comments yet. Be the first!</p>
-              )}
+              {comments.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No comments yet. Be the first!</p>}
             </div>
           </section>
         </div>
@@ -660,25 +411,13 @@ export default function Giveaway() {
         <footer className="border-t bg-card/50 py-8">
           <div className="max-w-6xl mx-auto px-4 text-center">
             <div className="flex flex-wrap items-center justify-center gap-4 mb-4 text-sm">
-              <a href="/" className="text-muted-foreground hover:text-foreground transition-colors">
-                Home
-              </a>
-              <a href="/todaytip" className="text-muted-foreground hover:text-foreground transition-colors">
-                Tips
-              </a>
-              <a href="/history" className="text-muted-foreground hover:text-foreground transition-colors">
-                History
-              </a>
-              <a href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
-                Contact
-              </a>
-              <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
-                Privacy
-              </a>
+              <a href="/" className="text-muted-foreground hover:text-foreground transition-colors">Home</a>
+              <a href="/todaytip" className="text-muted-foreground hover:text-foreground transition-colors">Tips</a>
+              <a href="/history" className="text-muted-foreground hover:text-foreground transition-colors">History</a>
+              <a href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+              <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
             </div>
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} DayMyTime. All rights reserved.
-            </p>
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} DayMyTime. All rights reserved.</p>
           </div>
         </footer>
       </div>
