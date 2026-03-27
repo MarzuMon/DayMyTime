@@ -251,6 +251,81 @@ export type Database = {
         }
         Relationships: []
       }
+      giveaway_config: {
+        Row: {
+          active_image_url: string | null
+          expiry_date: string | null
+          id: string
+          is_finished: boolean
+          start_count: number
+          updated_at: string
+        }
+        Insert: {
+          active_image_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_finished?: boolean
+          start_count?: number
+          updated_at?: string
+        }
+        Update: {
+          active_image_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_finished?: boolean
+          start_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      giveaway_contributions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          image_url: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          image_url: string
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          image_url?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      giveaway_winners: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       history_posts: {
         Row: {
           author_name: string
@@ -851,6 +926,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_giveaway_count: { Args: never; Returns: number }
       get_invitation_by_token: {
         Args: { invite_token: string }
         Returns: {
