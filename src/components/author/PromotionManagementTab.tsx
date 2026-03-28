@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2, Megaphone, Gift, Upload, CheckCircle, ImageIcon, Users, RotateCcw, CalendarX, Flag, Copy } from 'lucide-react';
+import { Plus, Pencil, Trash2, Megaphone, Upload, CheckCircle, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import imageCompression from 'browser-image-compression';
 
@@ -18,9 +18,6 @@ interface Promotion {
   is_finished: boolean; image_url: string | null; created_at: string;
 }
 
-interface Contribution {
-  id: string; email: string; phone: string; image_url: string; created_at: string;
-}
 
 const EMPTY_FORM = {
   title: '', description: '', type: 'referral', target_signups: 20,
@@ -36,19 +33,8 @@ export default function PromotionManagementTab() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // Giveaway state
-  const [startCount, setStartCount] = useState(0);
-  const [actualCount, setActualCount] = useState(0);
-  const [newStartCount, setNewStartCount] = useState('');
-  const [activeImageURL, setActiveImageURL] = useState('');
-  const [activeImageFile, setActiveImageFile] = useState<File | null>(null);
-  const [uploadingActive, setUploadingActive] = useState(false);
-  const [expiryDate, setExpiryDate] = useState('');
-  const [isGiveawayFinished, setIsGiveawayFinished] = useState(false);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [configId, setConfigId] = useState<string | null>(null);
 
-  useEffect(() => { fetchPromotions(); fetchGiveawayData(); }, []);
+  useEffect(() => { fetchPromotions(); }, []);
 
   const fetchPromotions = async () => {
     const { data } = await supabase.from('promotions').select('*').order('created_at', { ascending: false });
@@ -56,29 +42,6 @@ export default function PromotionManagementTab() {
     setLoading(false);
   };
 
-  const fetchGiveawayData = async () => {
-    // Config
-    const { data: cfgData } = await supabase.from('giveaway_config').select('*').limit(1).maybeSingle();
-    if (cfgData) {
-      const cfg = cfgData as any;
-      setConfigId(cfg.id);
-      setStartCount(cfg.start_count || 0);
-      setActiveImageURL(cfg.active_image_url || '');
-      setExpiryDate(cfg.expiry_date ? new Date(cfg.expiry_date).toISOString().slice(0, 16) : '');
-      setIsGiveawayFinished(cfg.is_finished || false);
-    }
-    // Contributions
-    const { data: contribs } = await supabase.from('giveaway_contributions').select('*').order('created_at', { ascending: false });
-    if (contribs) {
-      setContributions(contribs as unknown as Contribution[]);
-      setActualCount(contribs.length);
-    }
-  };
-
-  const updateConfig = async (updates: Record<string, unknown>) => {
-    if (!configId) return;
-    await supabase.from('giveaway_config').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', configId);
-  };
 
   const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setDialogOpen(true); };
   const openEdit = (p: Promotion) => {
@@ -137,61 +100,6 @@ export default function PromotionManagementTab() {
     toast.success(!current ? 'Promotion finished' : 'Promotion reopened');
   };
 
-  // Giveaway controls
-  const handleUpdateStartCount = async () => {
-    const val = parseInt(newStartCount);
-    if (isNaN(val) || val < 0) { toast.error('Enter a valid number'); return; }
-    await updateConfig({ start_count: val });
-    setStartCount(val); setNewStartCount('');
-    toast.success(`Start count set to ${val}`);
-  };
-
-  const resetCount = async () => {
-    await updateConfig({ start_count: 0 });
-    setStartCount(0); toast.success('Count reset to 0');
-  };
-
-  const uploadActiveImage = async () => {
-    if (!activeImageFile) return;
-    setUploadingActive(true);
-    try {
-      const compressed = await imageCompression(activeImageFile, { maxSizeMB: 0.3, maxWidthOrHeight: 1920, useWebWorker: true });
-      const fileName = `giveaway/banner-${Date.now()}.${compressed.type.split('/')[1] || 'jpg'}`;
-      const { data, error } = await supabase.storage.from('images').upload(fileName, compressed, { contentType: compressed.type });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('images').getPublicUrl(data.path);
-      await updateConfig({ active_image_url: urlData.publicUrl });
-      setActiveImageURL(urlData.publicUrl); setActiveImageFile(null);
-      toast.success('Active giveaway image updated!');
-    } catch { toast.error('Upload failed'); }
-    finally { setUploadingActive(false); }
-  };
-
-  const handleUpdateExpiry = async () => {
-    await updateConfig({ expiry_date: expiryDate ? new Date(expiryDate).toISOString() : null });
-    toast.success('Expiry date updated');
-  };
-
-  const toggleGiveawayFinished = async () => {
-    const newVal = !isGiveawayFinished;
-    await updateConfig({ is_finished: newVal });
-    setIsGiveawayFinished(newVal);
-    toast.success(newVal ? 'Giveaway marked as finished' : 'Giveaway reactivated');
-  };
-
-  const copyEmails = () => {
-    const emails = contributions.map(c => c.email).join('\n');
-    navigator.clipboard.writeText(emails);
-    toast.success(`${contributions.length} emails copied!`);
-  };
-
-  const clearAllContributions = async () => {
-    for (const c of contributions) {
-      await supabase.from('giveaway_contributions').delete().eq('id', c.id);
-    }
-    setContributions([]); setActualCount(0);
-    toast.success('All submissions cleared');
-  };
 
   if (loading) return <div className="text-center py-8 text-muted-foreground text-sm">Loading...</div>;
 
@@ -236,71 +144,6 @@ export default function PromotionManagementTab() {
         </div>
       )}
 
-      {/* Giveaway Controls */}
-      <div className="border-t pt-6">
-        <h3 className="font-semibold flex items-center gap-2 mb-4"><Gift className="h-4 w-4 text-primary" /> Giveaway Controls</h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <Card><CardContent className="pt-4 text-center"><Users className="h-5 w-5 text-primary mx-auto mb-1" /><p className="text-xl font-bold">{startCount + actualCount}</p><p className="text-xs text-muted-foreground">Total Participants</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-xl font-bold">{actualCount}</p><p className="text-xs text-muted-foreground">Actual Submissions</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-xl font-bold">{startCount}</p><p className="text-xs text-muted-foreground">Start Count</p></CardContent></Card>
-        </div>
-
-        <Card className="mb-4"><CardContent className="pt-4 space-y-3">
-          <h4 className="text-sm font-semibold">Participant Count Controls</h4>
-          <div className="flex gap-2">
-            <Input type="number" value={newStartCount} onChange={e => setNewStartCount(e.target.value)} placeholder="Set start count" className="flex-1" />
-            <Button size="sm" onClick={handleUpdateStartCount}>Set</Button>
-            <Button size="sm" variant="outline" onClick={resetCount}><RotateCcw className="h-4 w-4 mr-1" /> Reset</Button>
-          </div>
-        </CardContent></Card>
-
-        <Card className="mb-4"><CardContent className="pt-4 space-y-3">
-          <h4 className="text-sm font-semibold flex items-center gap-2"><ImageIcon className="h-4 w-4 text-primary" /> Active Giveaway Image</h4>
-          {activeImageURL && <img src={activeImageURL} alt="Active giveaway" className="w-full max-h-40 object-cover rounded-lg border" />}
-          <div className="flex gap-2">
-            <label className="cursor-pointer flex-1">
-              <Button size="sm" variant="outline" asChild className="w-full"><span><Upload className="h-4 w-4 mr-1" /> {activeImageFile ? activeImageFile.name.slice(0, 20) : 'Choose Image'}</span></Button>
-              <input type="file" accept="image/*" onChange={e => setActiveImageFile(e.target.files?.[0] || null)} className="hidden" />
-            </label>
-            <Button size="sm" onClick={uploadActiveImage} disabled={!activeImageFile || uploadingActive}>{uploadingActive ? '...' : 'Upload'}</Button>
-          </div>
-        </CardContent></Card>
-
-        <Card className="mb-4"><CardContent className="pt-4 space-y-3">
-          <h4 className="text-sm font-semibold flex items-center gap-2"><CalendarX className="h-4 w-4" /> Giveaway Lifecycle</h4>
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <label className="text-xs text-muted-foreground">Expiry Date</label>
-              <Input type="datetime-local" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} />
-            </div>
-            <Button size="sm" onClick={handleUpdateExpiry}>Set</Button>
-          </div>
-          <Button size="sm" variant={isGiveawayFinished ? "default" : "destructive"} onClick={toggleGiveawayFinished} className="gap-1.5">
-            <Flag className="h-4 w-4" /> {isGiveawayFinished ? 'Reactivate Giveaway' : 'Finish Giveaway'}
-          </Button>
-        </CardContent></Card>
-
-        {/* Submissions */}
-        <div className="flex gap-2 mb-3">
-          <Button size="sm" onClick={copyEmails} disabled={contributions.length === 0}><Copy className="h-4 w-4 mr-1" /> Copy Emails ({contributions.length})</Button>
-          <Button size="sm" variant="destructive" onClick={clearAllContributions} disabled={contributions.length === 0}><Trash2 className="h-4 w-4 mr-1" /> Clear All</Button>
-        </div>
-        <div className="space-y-2 max-h-[400px] overflow-y-auto">
-          {contributions.map(c => (
-            <Card key={c.id}>
-              <CardContent className="py-3 px-4 flex items-center gap-3">
-                <img src={c.image_url} alt="" className="h-12 w-12 rounded-lg object-cover border" loading="lazy" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{c.email}</p>
-                  <p className="text-xs text-muted-foreground">{c.phone} · {new Date(c.created_at).toLocaleDateString()}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          {contributions.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No submissions yet.</p>}
-        </div>
-      </div>
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
