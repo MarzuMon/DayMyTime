@@ -116,9 +116,10 @@ export default function Giveaway() {
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
     try {
-      const compressed = await imageCompression(file, { maxSizeMB: 0.2, maxWidthOrHeight: 1920, useWebWorker: true });
-      setImage(compressed);
-      setImagePreview(URL.createObjectURL(compressed));
+      const compress = await imageCompression();
+      const compressed = await compress(file, { maxSizeMB: 0.2, maxWidthOrHeight: 1920, useWebWorker: true });
+      setImage(compressed as unknown as File);
+      setImagePreview(URL.createObjectURL(compressed as Blob));
     } catch { toast.error("Failed to compress image"); }
   };
 
