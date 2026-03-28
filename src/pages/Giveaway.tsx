@@ -26,6 +26,12 @@ interface Winner { id: string; image_url: string | null; video_url: string | nul
 interface GiveawayComment { id: string; userEmail: string; commentText: string; createdAt: string; }
 interface GiveawayConfig { start_count: number; active_image_url: string | null; expiry_date: string | null; is_finished: boolean; }
 
+const formatCount = (n: number): string => {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return n.toString();
+};
+
 export default function Giveaway() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -222,8 +228,8 @@ export default function Giveaway() {
       <div className="pt-16">
         {/* 1. Active Giveaway Banner */}
         {config.active_image_url && (
-          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
-            <img src={config.active_image_url} alt="Active Giveaway" className="w-full max-h-[400px] object-cover" loading="eager" fetchPriority="high" />
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full flex justify-center bg-background">
+            <img src={config.active_image_url} alt="Active Giveaway" className="w-full max-w-4xl h-auto max-h-[50vh] object-contain" loading="eager" fetchPriority="high" />
             {isFinished && (
               <div className="bg-destructive/90 text-destructive-foreground text-center py-2 text-sm font-semibold">
                 🏁 This giveaway has ended. Stay tuned for the next one!
@@ -238,7 +244,7 @@ export default function Giveaway() {
             <div className="flex items-center gap-3">
               <Users className="h-6 w-6 text-primary" />
               <div>
-                <span className="font-display text-2xl font-bold">{participantCount}</span>
+                <span className="font-display text-2xl font-bold">{formatCount(participantCount)}</span>
                 <span className="text-sm text-muted-foreground ml-2">Participants</span>
               </div>
             </div>
@@ -354,17 +360,6 @@ export default function Giveaway() {
             </motion.section>
           )}
 
-          {/* 5. All Win Exciting Prizes */}
-          <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center p-8 rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 border border-primary/20">
-            <Star className="h-10 w-10 text-yellow-500 mx-auto mb-4" />
-            <h2 className="font-display text-2xl font-bold mb-3">All Win Exciting Prizes! 🎁</h2>
-            <p className="text-muted-foreground max-w-md mx-auto mb-6">Amazon vouchers, exclusive DayMyTime Pro memberships, and surprise gifts await! Every participation counts.</p>
-            <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-              <div className="p-3 rounded-xl bg-background/80 border"><p className="text-lg font-bold text-primary">₹500</p><p className="text-xs text-muted-foreground">Amazon</p></div>
-              <div className="p-3 rounded-xl bg-background/80 border"><p className="text-lg font-bold text-primary">Pro</p><p className="text-xs text-muted-foreground">1 Year Free</p></div>
-              <div className="p-3 rounded-xl bg-background/80 border"><p className="text-lg font-bold text-primary">🎁</p><p className="text-xs text-muted-foreground">Surprise</p></div>
-            </div>
-          </motion.section>
 
           {/* Like */}
           <div className="flex items-center gap-4">
