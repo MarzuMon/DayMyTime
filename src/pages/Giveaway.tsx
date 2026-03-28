@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import imageCompression from "browser-image-compression";
+const imageCompression = () => import("browser-image-compression").then(m => m.default);
 import { toast } from "sonner";
 import { z } from "zod";
 import SEOHead from "@/components/SEOHead";
