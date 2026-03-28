@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import imageCompression from "browser-image-compression";
+const imageCompression = () => import("browser-image-compression").then(m => m.default);
 import { toast } from "sonner";
 import { z } from "zod";
 import SEOHead from "@/components/SEOHead";
@@ -116,9 +116,10 @@ export default function Giveaway() {
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
     try {
-      const compressed = await imageCompression(file, { maxSizeMB: 0.2, maxWidthOrHeight: 1920, useWebWorker: true });
-      setImage(compressed);
-      setImagePreview(URL.createObjectURL(compressed));
+      const compress = await imageCompression();
+      const compressed = await compress(file, { maxSizeMB: 0.2, maxWidthOrHeight: 1920, useWebWorker: true });
+      setImage(compressed as unknown as File);
+      setImagePreview(URL.createObjectURL(compressed as Blob));
     } catch { toast.error("Failed to compress image"); }
   };
 
@@ -229,7 +230,7 @@ export default function Giveaway() {
         {/* 1. Active Giveaway Banner */}
         {config.active_image_url && (
           <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full flex justify-center bg-background">
-            <img src={config.active_image_url} alt="Active Giveaway" className="w-full max-w-4xl h-auto max-h-[50vh] object-contain" loading="eager" fetchPriority="high" />
+            <img src={config.active_image_url} alt="Active Giveaway" className="w-full max-w-4xl h-auto max-h-[50vh] object-contain" loading="eager" />
             {isFinished && (
               <div className="bg-destructive/90 text-destructive-foreground text-center py-2 text-sm font-semibold">
                 🏁 This giveaway has ended. Stay tuned for the next one!

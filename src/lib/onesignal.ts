@@ -7,25 +7,35 @@ export function initOneSignal() {
   if (typeof window === 'undefined' || oneSignalInitialized) return;
   oneSignalInitialized = true;
 
-  const script = document.createElement('script');
-  script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
-  script.defer = true;
-  script.onload = () => {
-    (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
-    (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-      try {
-        await OneSignal.init({
-          appId: ONESIGNAL_APP_ID,
-          notifyButton: { enable: true },
-          allowLocalhostAsSecureOrigin: true,
+  // Defer OneSignal to after page is interactive (5s delay)
+  const load = () => {
+    setTimeout(() => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+      script.defer = true;
+      script.onload = () => {
+        (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
+        (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+          try {
+            await OneSignal.init({
+              appId: ONESIGNAL_APP_ID,
+              notifyButton: { enable: true },
+              allowLocalhostAsSecureOrigin: true,
+            });
+          } catch (e) {
+            console.warn('OneSignal init skipped:', (e as Error).message);
+          }
         });
-      } catch (e) {
-        // SDK may already be initialized in some environments
-        console.warn('OneSignal init skipped:', (e as Error).message);
-      }
-    });
+      };
+      document.head.appendChild(script);
+    }, 5000);
   };
-  document.head.appendChild(script);
+
+  if (document.readyState === 'complete') {
+    load();
+  } else {
+    window.addEventListener('load', load, { once: true });
+  }
 }
 
 export async function sendPushNotification(title: string, message: string, url?: string) {
