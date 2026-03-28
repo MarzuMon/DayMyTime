@@ -230,7 +230,7 @@ export default function Giveaway() {
         {/* 1. Active Giveaway Banner */}
         {config.active_image_url && (
           <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full flex justify-center bg-background">
-            <img src={config.active_image_url} alt="Active Giveaway" className="w-full max-w-4xl h-auto max-h-[50vh] object-contain" loading="eager" fetchPriority="high" />
+            <img src={config.active_image_url} alt="Active Giveaway" className="w-full max-w-4xl h-auto max-h-[50vh] object-contain" loading="eager" />
             {isFinished && (
               <div className="bg-destructive/90 text-destructive-foreground text-center py-2 text-sm font-semibold">
                 🏁 This giveaway has ended. Stay tuned for the next one!
