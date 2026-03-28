@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Gift, Upload, Phone, Mail, ArrowLeft, Moon, Sun, Trophy, Users,
-  CheckCircle2, X, Heart, MessageSquare, Send, Share2, Award, Star,
+  CheckCircle2, X, Heart, MessageSquare, Send, Share2, Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
