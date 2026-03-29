@@ -306,8 +306,8 @@ export default function Giveaway() {
   };
 
   const shareOnWhatsApp = () => {
-    const ogUrl = `https://ddgnulotktdstycyjsuj.supabase.co/functions/v1/giveaway-og`;
-    const msg = `🔥 DayMyTime Mega Giveaway! 🎁\nStatus വെക്കൂ ₹500 Amazon Voucher നേടൂ ! 😍\n\nതിരഞ്ഞെടുക്കുന്ന 3 പേർക്ക് ₹500 Amazon Voucher ✅\n ഇപ്പോൾ തന്നെ Join ചെയ്യൂ  👇\n\n👉 ${https://daymytime.com/giveaway}\n\n━━━━━━━━━━━━━━━\n\n🎯 Giveawayയിൽ എങ്ങനെ പങ്കെടുക്കാം :\n\n1️⃣ Page open ചെയ്ത് Like ഉം  Comment ഉം Subscribe ഉം  ചെയ്യൂ \n2️⃣ WhatsApp Status വെക്കൂ (50+ Views Required) 📲\n3️⃣ Upload Your Screenshot , Subscribed Email ID and Your Mobail Number  🔥\n4️⃣ Daily tip check ചെയ്യാൻ മറക്കരുത് 👇\n\n👉 ${randomLink || "https://daymytime.com/todaytip"}\n\n━━━━━━━━━━━━━━━\n\n⏳ Limited time only!\n⚡ Winners will be announced soon!\n വേഗം join ചെയ്യൂ... 😱🚀`;
+    const ogUrl = `https://daymytime.com/giveaway`;
+    const msg = `🔥 DayMyTime Mega Giveaway! 🎁\nStatus വെക്കൂ ₹500 Amazon Voucher നേടൂ ! 😍\n\nതിരഞ്ഞെടുക്കുന്ന 3 പേർക്ക് ₹500 Amazon Voucher ✅\n ഇപ്പോൾ തന്നെ Join ചെയ്യൂ  👇\n\n👉 ${ogUrl}\n\n━━━━━━━━━━━━━━━\n\n🎯 Giveawayയിൽ എങ്ങനെ പങ്കെടുക്കാം :\n\n1️⃣ Page open ചെയ്ത് Like ഉം  Comment ഉം Subscribe ഉം  ചെയ്യൂ \n2️⃣ WhatsApp Status വെക്കൂ (50+ Views Required) 📲\n3️⃣ Upload Your Screenshot , Subscribed Email ID and Your Mobail Number  🔥\n4️⃣ Daily tip check ചെയ്യാൻ മറക്കരുത് 👇\n\n👉 ${randomLink || "https://daymytime.com/todaytip"}\n\n━━━━━━━━━━━━━━━\n\n⏳ Limited time only!\n⚡ Winners will be announced soon!\n വേഗം join ചെയ്യൂ... 😱🚀`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
