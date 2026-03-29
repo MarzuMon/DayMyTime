@@ -200,7 +200,8 @@ export default function Giveaway() {
   };
 
   const shareOnWhatsApp = () => {
-    const msg = `🔥 DayMyTime Giveaway!\n₹500 Amazon Voucher നേടാനുള്ള അവസരം! 🎁\n\nഞാൻ ഇതിനകം പങ്കെടുത്തു 😍\nനിങ്ങളും ഉടൻ join ചെയ്യൂ 👇\n\n👉 https://daymytime.com/giveaway\n\nഇന്ന് ഒരു സ്പെഷ്യൽ ടിപ്പ് കൂടി നോക്കൂ:\n👉 ${randomLink || "https://daymytime.com/todaytip"}\n\nവേഗം join ചെയ്യൂ! 🚀`;
+    const ogUrl = `https://ddgnulotktdstycyjsuj.supabase.co/functions/v1/giveaway-og`;
+    const msg = `🔥 DayMyTime Giveaway!\n₹500 Amazon Voucher നേടാനുള്ള അവസരം! 🎁\n\nഞാൻ ഇതിനകം പങ്കെടുത്തു 😍\nനിങ്ങളും ഉടൻ join ചെയ്യൂ 👇\n\n👉 ${ogUrl}\n\nഇന്ന് ഒരു സ്പെഷ്യൽ ടിപ്പ് കൂടി നോക്കൂ:\n👉 ${randomLink || "https://daymytime.com/todaytip"}\n\nവേഗം join ചെയ്യൂ! 🚀`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
