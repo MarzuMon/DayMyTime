@@ -496,6 +496,7 @@ export default function Giveaway() {
             </motion.div>
           )}
 
+
           {/* 4. Recently Won Prizes */}
           {winners.length > 0 && (
             <motion.section
@@ -537,6 +538,17 @@ export default function Giveaway() {
               </div>
             </motion.section>
           )}
+
+           {/* Newsletter */}
+            <div className="mt-8">
+              <NewsletterSubscribe
+                title="💡 Get New Giveaway Post"
+                description="Subscribe for New Giveaway."
+                variant="accent"
+              />
+            </div>
+          </motion.article>
+        ) : (
 
           {/* Like */}
           <div className="flex items-center gap-4">
