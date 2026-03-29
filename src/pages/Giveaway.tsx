@@ -18,6 +18,7 @@ import {
   Share2,
   Award,
 } from "lucide-react";
+import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
