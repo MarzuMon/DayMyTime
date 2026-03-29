@@ -548,7 +548,7 @@ export default function Giveaway() {
               />
             </div>
           </motion.article>
-        ) : (
+       
 
           {/* Like */}
           <div className="flex items-center gap-4">
