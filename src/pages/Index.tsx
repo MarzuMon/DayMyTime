@@ -173,7 +173,7 @@ const Index = () => {
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
               {isAdmin && (
-                <Button size="icon" variant="ghost" <Button size="icon" variant="ghost" onClick={() => navigate('/marzooq-dashboard')} className="h-8 w-8 rounded-xl" aria-label="Admin"> className="h-8 w-8 rounded-xl" aria-label="Admin">
+                <Button size="icon" variant="ghost" onClick={() => navigate('/marzooq-dashboard')} className="h-8 w-8 rounded-xl" aria-label="Admin">
                   <Crown className="h-4 w-4 text-accent" />
                 </Button>
               )}
