@@ -203,7 +203,7 @@ export default function Author() {
             </Button>
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              <h1 className="font-display text-xl font-bold">Author Dashboard</h1>
+              <h1 className="font-display text-xl font-bold">MARZOOQ Dashboard</h1>
               <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground flex items-center gap-1">
                 <Crown className="h-3 w-3" /> Admin
               </span>
