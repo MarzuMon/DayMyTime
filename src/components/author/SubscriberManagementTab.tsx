@@ -1,61 +1,70 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
-import { Search, Download, Trash2, Mail, Loader2, RefreshCw } from 'lucide-react';
-import { format } from 'date-fns';
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { Search, Download, Trash2, Mail, Loader2, RefreshCw } from "lucide-react";
+import { format } from "date-fns";
 
 interface Subscriber {
   id: string;
   email: string;
   created_at: string;
 }
+export const isSubscribed = () => {
+  return localStorage.getItem("subscribed") === "true";
+};
 
+export const setSubscribed = () => {
+  localStorage.setItem("subscribed", "true");
+};
 export default function SubscriberManagementTab() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchSubscribers = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('newsletter_followers')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("newsletter_followers")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error('Failed to load subscribers');
+      toast.error("Failed to load subscribers");
     } else {
       setSubscribers(data ?? []);
     }
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchSubscribers(); }, [fetchSubscribers]);
+  useEffect(() => {
+    fetchSubscribers();
+  }, [fetchSubscribers]);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
-    const { error } = await supabase
-      .from('newsletter_followers')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("newsletter_followers").delete().eq("id", id);
 
     if (error) {
-      toast.error('Failed to delete subscriber');
+      toast.error("Failed to delete subscriber");
     } else {
-      setSubscribers(prev => prev.filter(s => s.id !== id));
-      toast.success('Subscriber removed');
+      setSubscribers((prev) => prev.filter((s) => s.id !== id));
+      toast.success("Subscriber removed");
     }
     setDeletingId(null);
   };
@@ -63,18 +72,16 @@ export default function SubscriberManagementTab() {
   const exportCSV = () => {
     const filtered = getFiltered();
     if (filtered.length === 0) {
-      toast.info('No subscribers to export');
+      toast.info("No subscribers to export");
       return;
     }
-    const header = 'Email,Subscribed At\n';
-    const rows = filtered
-      .map(s => `"${s.email}","${format(new Date(s.created_at), 'yyyy-MM-dd HH:mm')}"`)
-      .join('\n');
-    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const header = "Email,Subscribed At\n";
+    const rows = filtered.map((s) => `"${s.email}","${format(new Date(s.created_at), "yyyy-MM-dd HH:mm")}"`).join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `subscribers-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.download = `subscribers-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(`Exported ${filtered.length} subscribers`);
@@ -83,7 +90,7 @@ export default function SubscriberManagementTab() {
   const getFiltered = () => {
     if (!search.trim()) return subscribers;
     const q = search.toLowerCase();
-    return subscribers.filter(s => s.email.toLowerCase().includes(q));
+    return subscribers.filter((s) => s.email.toLowerCase().includes(q));
   };
 
   const filtered = getFiltered();
@@ -98,12 +105,12 @@ export default function SubscriberManagementTab() {
                 <Mail className="h-5 w-5" /> Newsletter Subscribers
               </CardTitle>
               <CardDescription>
-                {subscribers.length} total subscriber{subscribers.length !== 1 ? 's' : ''}
+                {subscribers.length} total subscriber{subscribers.length !== 1 ? "s" : ""}
               </CardDescription>
             </div>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={fetchSubscribers} disabled={loading}>
-                <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
+                <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} /> Refresh
               </Button>
               <Button size="sm" variant="outline" onClick={exportCSV}>
                 <Download className="h-4 w-4 mr-1" /> Export CSV
@@ -117,7 +124,7 @@ export default function SubscriberManagementTab() {
             <Input
               placeholder="Search by email..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
           </div>
@@ -128,7 +135,7 @@ export default function SubscriberManagementTab() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              {search ? 'No subscribers match your search.' : 'No subscribers yet.'}
+              {search ? "No subscribers match your search." : "No subscribers yet."}
             </div>
           ) : (
             <div className="rounded-md border">
@@ -141,11 +148,11 @@ export default function SubscriberManagementTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map(sub => (
+                  {filtered.map((sub) => (
                     <TableRow key={sub.id}>
                       <TableCell className="font-medium">{sub.email}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">
-                        {format(new Date(sub.created_at), 'MMM d, yyyy h:mm a')}
+                        {format(new Date(sub.created_at), "MMM d, yyyy h:mm a")}
                       </TableCell>
                       <TableCell>
                         <AlertDialog>
@@ -156,9 +163,11 @@ export default function SubscriberManagementTab() {
                               className="h-8 w-8 text-destructive hover:text-destructive"
                               disabled={deletingId === sub.id}
                             >
-                              {deletingId === sub.id
-                                ? <Loader2 className="h-4 w-4 animate-spin" />
-                                : <Trash2 className="h-4 w-4" />}
+                              {deletingId === sub.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -170,9 +179,7 @@ export default function SubscriberManagementTab() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(sub.id)}>
-                                Remove
-                              </AlertDialogAction>
+                              <AlertDialogAction onClick={() => handleDelete(sub.id)}>Remove</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
