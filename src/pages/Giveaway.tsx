@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -619,6 +619,16 @@ export default function Giveaway() {
               )}
             </div>
           </section>
+        </div>
+
+          {/* Newsletter Subscribe */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <NewsletterSubscribe
+              title="🎁 Get New Giveaway Posts"
+              description="Subscribe for new giveaway alerts. No spam, unsubscribe anytime."
+              variant="accent"
+            />
+          </motion.div>
         </div>
 
         {/* Footer */}
