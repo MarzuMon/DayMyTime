@@ -17,11 +17,13 @@ import {
   Send,
   Share2,
   Award,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +32,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import SEOHead from "@/components/SEOHead";
 import { motion } from "framer-motion";
+import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 
 const formSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
@@ -350,16 +353,38 @@ export default function Giveaway() {
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="w-full flex justify-center bg-background"
+            className="w-full flex flex-col items-center bg-background"
           >
-            <img
-              src={config.active_image_url}
-              alt="Active Giveaway"
-              className="w-full max-w-4xl h-auto max-h-[50vh] object-contain"
-              loading="eager"
-            />
+            <div className="relative w-full max-w-4xl">
+              <img
+                src={config.active_image_url}
+                alt="Active Giveaway"
+                className="w-full h-auto max-h-[50vh] object-contain"
+                loading="eager"
+              />
+              {!isFinished && (
+                <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-destructive text-destructive-foreground text-xs font-bold animate-pulse">
+                  🔥 Active Giveaway
+                </span>
+              )}
+            </div>
+            {!isFinished && (
+              <Button
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = config.active_image_url!;
+                  link.download = "DayMyTime-Giveaway.jpg";
+                  link.target = "_blank";
+                  link.click();
+                }}
+                variant="outline"
+                className="mt-3 rounded-xl gap-2"
+              >
+                <Download className="h-4 w-4" /> Download Giveaway Image
+              </Button>
+            )}
             {isFinished && (
-              <div className="bg-destructive/90 text-destructive-foreground text-center py-2 text-sm font-semibold">
+              <div className="bg-destructive/90 text-destructive-foreground text-center py-2 text-sm font-semibold w-full">
                 🏁 This giveaway has ended. Stay tuned for the next one!
               </div>
             )}
@@ -594,6 +619,15 @@ export default function Giveaway() {
               )}
             </div>
           </section>
+
+          {/* Newsletter Subscribe */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <NewsletterSubscribe
+              title="🎁 Get New Giveaway Posts"
+              description="Subscribe for new giveaway alerts. No spam, unsubscribe anytime."
+              variant="accent"
+            />
+          </motion.div>
         </div>
 
         {/* Footer */}
