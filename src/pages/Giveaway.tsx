@@ -103,8 +103,17 @@ export default function Giveaway() {
     fetchWinners();
     fetchComments();
     fetchRandomLink();
-    checkSubscriber();
-    checkLiked();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      checkSubscriber();
+      checkLiked();
+    } else {
+      setIsSubscriber(false);
+      setLiked(false);
+      setLikeCount(0);
+    }
   }, [user]);
 
   const fetchConfig = async () => {
