@@ -71,7 +71,6 @@ function AnimatedRoutes() {
         <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
         <Route path="/pro" element={<ProtectedRoute><PageTransition><ProUpgrade /></PageTransition></ProtectedRoute>} />
         <Route path="/marzooq-dashboard" element={<ProtectedRoute><PageTransition><Author /></PageTransition></ProtectedRoute>} />
-        <Route path="/author" element={<ProtectedRoute><PageTransition><Author /></PageTransition></ProtectedRoute>} />
         <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><PageTransition><Analytics /></PageTransition></ProtectedRoute>} />
         <Route path="/reports" element={<ProtectedRoute><PageTransition><Reports /></PageTransition></ProtectedRoute>} />
