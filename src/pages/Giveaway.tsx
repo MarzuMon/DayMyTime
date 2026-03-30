@@ -103,8 +103,17 @@ export default function Giveaway() {
     fetchWinners();
     fetchComments();
     fetchRandomLink();
-    checkSubscriber();
-    checkLiked();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      checkSubscriber();
+      checkLiked();
+    } else {
+      setIsSubscriber(false);
+      setLiked(false);
+      setLikeCount(0);
+    }
   }, [user]);
 
   const fetchConfig = async () => {
@@ -370,12 +379,22 @@ export default function Giveaway() {
             </div>
             {!isFinished && (
               <Button
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = config.active_image_url!;
-                  link.download = "DayMyTime-Giveaway.jpg";
-                  link.target = "_blank";
-                  link.click();
+                onClick={async () => {
+                  try {
+                    toast.info("Downloading image...");
+                    const response = await fetch(config.active_image_url!);
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "DayMyTime-Giveaway.jpg";
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    toast.success("Image downloaded!");
+                  } catch {
+                    // Fallback: open in new tab
+                    window.open(config.active_image_url!, "_blank");
+                  }
                 }}
                 variant="outline"
                 className="mt-3 rounded-xl gap-2"
