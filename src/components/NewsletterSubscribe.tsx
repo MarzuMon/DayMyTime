@@ -16,14 +16,6 @@ interface NewsletterSubscribeProps {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const isSubscribed = () => {
-  return localStorage.getItem("subscribed") === "true";
-};
-
-export const setSubscribed = () => {
-  localStorage.setItem("subscribed", "true");
-};
-
 export default function NewsletterSubscribe({
   title = "📬 Stay updated",
   description = "Get the latest tips and articles delivered to your inbox.",
