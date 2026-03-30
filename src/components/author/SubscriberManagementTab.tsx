@@ -24,13 +24,7 @@ interface Subscriber {
   email: string;
   created_at: string;
 }
-export const isSubscribed = () => {
-  return localStorage.getItem("subscribed") === "true";
-};
 
-export const setSubscribed = () => {
-  localStorage.setItem("subscribed", "true");
-};
 export default function SubscriberManagementTab() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
