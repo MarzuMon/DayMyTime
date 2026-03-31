@@ -233,9 +233,28 @@ export default function History() {
 
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
-              <Button size="sm" variant={liked ? "default" : "outline"} onClick={toggleLike} className="gap-1.5">
-                <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} /> {todayPost.likes_count}
+              <LikeButton postId={todayPost.id} postType="history" />
+              <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
+                <Twitter className="h-4 w-4" /> Tweet
               </Button>
+              <Button size="sm" variant="outline" onClick={() => share('facebook')} className="gap-1.5">
+                <Facebook className="h-4 w-4" /> Share
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => share('linkedin')} className="gap-1.5">
+                <Linkedin className="h-4 w-4" /> Post
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => share('instagram')} className="gap-1.5">
+                <Instagram className="h-4 w-4" /> Instagram
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => share('copy')} className="gap-1.5">
+                <Copy className="h-4 w-4" /> Copy Link
+              </Button>
+            </div>
+
+            {/* Comments */}
+            <div className="mb-8">
+              <CommentSection postId={todayPost.id} postType="history" />
+            </div>
               <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
                 <Twitter className="h-4 w-4" /> Tweet
               </Button>
