@@ -61,9 +61,8 @@ export default function TodayTip() {
   useEffect(() => {
     if (selectedTip) {
       trackView(selectedTip.id);
-      if (user) checkLiked();
     }
-  }, [selectedTip, user]);
+  }, [selectedTip]);
 
   const fetchBySlug = async (s: string) => {
     setLoading(true);
