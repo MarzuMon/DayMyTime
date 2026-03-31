@@ -63,14 +63,8 @@ export default function History() {
   useEffect(() => {
     if (selectedPost) {
       trackView(selectedPost.id);
-      if (user) {
-        checkLiked();
-        fetchComments();
-      } else {
-        fetchComments();
-      }
     }
-  }, [selectedPost, user]);
+  }, [selectedPost]);
 
   const fetchBySlug = async (s: string) => {
     setLoading(true);
