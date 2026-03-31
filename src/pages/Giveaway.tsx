@@ -75,7 +75,7 @@ export default function Giveaway() {
   const [submitted, setSubmitted] = useState(false);
   const [participantCount, setParticipantCount] = useState(0);
   const [winners, setWinners] = useState<Winner[]>([]);
-  const [isSubscriber, setIsSubscriber] = useState(false);
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [config, setConfig] = useState<GiveawayConfig>({
     start_count: 0,
