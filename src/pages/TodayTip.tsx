@@ -40,7 +40,7 @@ export default function TodayTip() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  
   const [tips, setTips] = useState<DailyTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTip, setSelectedTip] = useState<DailyTip | null>(null);
