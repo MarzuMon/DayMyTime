@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import LikeButton from '@/components/LikeButton';
+import CommentSection from '@/components/CommentSection';
 import {
-  ArrowLeft, Sun, Moon, Lightbulb, Heart,
+  ArrowLeft, Sun, Moon, Lightbulb,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar,
   Instagram, Copy
 } from 'lucide-react';

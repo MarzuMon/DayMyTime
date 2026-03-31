@@ -8,12 +8,13 @@ import RelatedPosts from '@/components/RelatedPosts';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import LikeButton from '@/components/LikeButton';
+import CommentSection from '@/components/CommentSection';
 import {
-  ArrowLeft, Sun, Moon, Calendar, Heart, MessageSquare,
-  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Send, Clock, User,
+  ArrowLeft, Sun, Moon, Calendar,
+  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User,
   Instagram, Copy
 } from 'lucide-react';
 import { motion } from 'framer-motion';

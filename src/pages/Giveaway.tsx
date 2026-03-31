@@ -92,14 +92,6 @@ export default function Giveaway() {
     fetchRandomLink();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      checkSubscriber();
-    } else {
-      setIsSubscriber(false);
-    }
-  }, [user]);
-
   const fetchConfig = async () => {
     const { data } = await supabase.from("giveaway_config").select("*").limit(1).maybeSingle();
     if (data) setConfig(data as unknown as GiveawayConfig);
