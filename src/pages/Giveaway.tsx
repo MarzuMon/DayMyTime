@@ -89,7 +89,6 @@ export default function Giveaway() {
     fetchConfig();
     fetchCount();
     fetchWinners();
-    fetchComments();
     fetchRandomLink();
   }, []);
 
