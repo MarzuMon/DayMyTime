@@ -95,11 +95,8 @@ export default function Giveaway() {
   useEffect(() => {
     if (user) {
       checkSubscriber();
-      checkLiked();
     } else {
       setIsSubscriber(false);
-      setLiked(false);
-      setLikeCount(0);
     }
   }, [user]);
 
