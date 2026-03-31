@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface LikeButtonProps {
   postId: string;
   postType: string;
-  variant?: 'default' | 'ghost';
+  variant?: 'default' | 'ghost' | 'outline';
   showCount?: boolean;
 }
 
