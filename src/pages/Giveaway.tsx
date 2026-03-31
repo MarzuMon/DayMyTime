@@ -115,19 +115,6 @@ export default function Giveaway() {
     if (data) setWinners(data as unknown as Winner[]);
   };
 
-  const fetchComments = async () => {
-    const { data } = await supabase
-      .from("post_comments")
-      .select("*")
-      .eq("post_type", "giveaway")
-      .eq("post_id", "00000000-0000-0000-0000-000000000000")
-      .order("created_at", { ascending: false });
-    if (data)
-      setComments(
-        data.map((c) => ({ id: c.id, userEmail: c.user_name, commentText: c.content, createdAt: c.created_at })),
-      );
-  };
-
   const fetchRandomLink = async () => {
     try {
       const usesTips = Math.random() > 0.5;
@@ -152,24 +139,6 @@ export default function Giveaway() {
     if (!user?.email) return;
     const { data } = await supabase.from("newsletter_followers").select("id").eq("email", user.email).maybeSingle();
     setIsSubscriber(!!data);
-  };
-
-  const checkLiked = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from("post_likes")
-      .select("id")
-      .eq("post_type", "giveaway")
-      .eq("post_id", "00000000-0000-0000-0000-000000000000")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    setLiked(!!data);
-    const { count } = await supabase
-      .from("post_likes")
-      .select("id", { count: "exact", head: true })
-      .eq("post_type", "giveaway")
-      .eq("post_id", "00000000-0000-0000-0000-000000000000");
-    setLikeCount(count || 0);
   };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,58 +216,6 @@ export default function Giveaway() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const toggleLike = async () => {
-    if (!user) {
-      toast.error("Please sign in to like");
-      return;
-    }
-    if (!isSubscriber) {
-      toast.error("Subscribe to the newsletter to like");
-      return;
-    }
-    const postId = "00000000-0000-0000-0000-000000000000";
-    if (liked) {
-      await supabase
-        .from("post_likes")
-        .delete()
-        .eq("post_type", "giveaway")
-        .eq("post_id", postId)
-        .eq("user_id", user.id);
-      setLiked(false);
-      setLikeCount((c) => c - 1);
-    } else {
-      await supabase.from("post_likes").insert({ post_type: "giveaway", post_id: postId, user_id: user.id });
-      setLiked(true);
-      setLikeCount((c) => c + 1);
-    }
-  };
-
-  const addComment = async () => {
-    if (!user) {
-      toast.error("Please sign in to comment");
-      return;
-    }
-    if (!isSubscriber) {
-      toast.error("Subscribe to the newsletter to comment");
-      return;
-    }
-    if (!commentText.trim()) return;
-    const { error } = await supabase.from("post_comments").insert({
-      post_type: "giveaway",
-      post_id: "00000000-0000-0000-0000-000000000000",
-      user_id: user.id,
-      user_name: user.email || "Anonymous",
-      content: commentText.trim(),
-    });
-    if (error) {
-      toast.error("Failed to add comment");
-      return;
-    }
-    setCommentText("");
-    fetchComments();
-    toast.success("Comment added!");
   };
 
   const shareOnWhatsApp = () => {
