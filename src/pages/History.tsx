@@ -38,14 +38,6 @@ interface HistoryPost {
   created_at: string;
 }
 
-interface Comment {
-  id: string;
-  user_name: string;
-  content: string;
-  created_at: string;
-  user_id: string;
-}
-
 export default function History() {
   const navigate = useNavigate();
   const { slug } = useParams();
@@ -54,9 +46,6 @@ export default function History() {
   const [posts, setPosts] = useState<HistoryPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<HistoryPost | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   
