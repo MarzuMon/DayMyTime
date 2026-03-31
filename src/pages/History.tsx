@@ -8,12 +8,12 @@ import RelatedPosts from '@/components/RelatedPosts';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import LikeButton from '@/components/LikeButton';
+import CommentSection from '@/components/CommentSection';
 import {
-  ArrowLeft, Sun, Moon, Calendar, Heart, MessageSquare,
-  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Send, Clock, User,
+  ArrowLeft, Sun, Moon, Calendar,
+  ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User,
   Instagram, Copy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -37,25 +37,14 @@ interface HistoryPost {
   created_at: string;
 }
 
-interface Comment {
-  id: string;
-  user_name: string;
-  content: string;
-  created_at: string;
-  user_id: string;
-}
-
 export default function History() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  
   const [posts, setPosts] = useState<HistoryPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<HistoryPost | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   
@@ -73,14 +62,8 @@ export default function History() {
   useEffect(() => {
     if (selectedPost) {
       trackView(selectedPost.id);
-      if (user) {
-        checkLiked();
-        fetchComments();
-      } else {
-        fetchComments();
-      }
     }
-  }, [selectedPost, user]);
+  }, [selectedPost]);
 
   const fetchBySlug = async (s: string) => {
     setLoading(true);
@@ -129,60 +112,6 @@ export default function History() {
       post_id: postId,
     } as any);
   };
-
-  const checkLiked = async () => {
-    if (!user || !selectedPost) return;
-    const { data } = await supabase
-      .from('post_likes')
-      .select('id')
-      .eq('post_id', selectedPost.id)
-      .eq('post_type', 'history')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    setLiked(!!data);
-  };
-
-  const fetchComments = async () => {
-    if (!selectedPost) return;
-    const { data } = await supabase
-      .from('post_comments')
-      .select('*')
-      .eq('post_id', selectedPost.id)
-      .eq('post_type', 'history')
-      .order('created_at', { ascending: true });
-    if (data) setComments(data as unknown as Comment[]);
-  };
-
-  const toggleLike = async () => {
-    if (!user) { toast.error('Please sign in to like'); return; }
-    if (!selectedPost) return;
-    if (liked) {
-      await supabase.from('post_likes').delete()
-        .eq('post_id', selectedPost.id).eq('post_type', 'history').eq('user_id', user.id);
-      setLiked(false);
-      setSelectedPost(p => p ? { ...p, likes_count: p.likes_count - 1 } : p);
-    } else {
-      await supabase.from('post_likes').insert({ post_id: selectedPost.id, post_type: 'history', user_id: user.id });
-      setLiked(true);
-      setSelectedPost(p => p ? { ...p, likes_count: p.likes_count + 1 } : p);
-    }
-  };
-
-  const addComment = async () => {
-    if (!user) { toast.error('Please sign in to comment'); return; }
-    if (!selectedPost || !newComment.trim()) return;
-    const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
-    const { error } = await supabase.from('post_comments').insert({
-      post_id: selectedPost.id, post_type: 'history', user_id: user.id,
-      user_name: profile?.display_name || 'Anonymous', content: newComment.trim()
-    });
-    if (!error) {
-      setNewComment('');
-      fetchComments();
-      toast.success('Comment posted!');
-    }
-  };
-
 
   const getShareUrl = () => {
     if (!selectedPost) return '';
@@ -303,9 +232,7 @@ export default function History() {
 
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
-              <Button size="sm" variant={liked ? "default" : "outline"} onClick={toggleLike} className="gap-1.5">
-                <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} /> {todayPost.likes_count}
-              </Button>
+              <LikeButton postId={todayPost.id} postType="history" />
               <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
                 <Twitter className="h-4 w-4" /> Tweet
               </Button>
@@ -325,31 +252,7 @@ export default function History() {
 
             {/* Comments */}
             <div className="mb-8">
-              <h3 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" /> Comments ({comments.length})
-              </h3>
-              {user ? (
-                <div className="flex gap-2 mb-4">
-                  <Textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Write a comment..." className="flex-1 min-h-[60px]" />
-                  <Button size="sm" onClick={addComment} disabled={!newComment.trim()}><Send className="h-4 w-4" /></Button>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground mb-4">
-                  <Button variant="link" onClick={() => navigate('/auth')} className="p-0 h-auto">Sign in</Button> to comment.
-                </p>
-              )}
-              <div className="space-y-3">
-                {comments.map(c => (
-                  <div key={c.id} className="p-3 rounded-lg bg-secondary/50">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm">{c.user_name}</span>
-                      <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), 'MMM d, h:mm a')}</span>
-                    </div>
-                    <p className="text-sm">{c.content}</p>
-                  </div>
-                ))}
-                {comments.length === 0 && <p className="text-sm text-muted-foreground">No comments yet. Be the first!</p>}
-              </div>
+              <CommentSection postId={todayPost.id} postType="history" />
             </div>
 
             {/* Related Posts */}

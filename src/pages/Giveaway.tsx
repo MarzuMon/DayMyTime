@@ -12,20 +12,18 @@ import {
   Users,
   CheckCircle2,
   X,
-  Heart,
-  MessageSquare,
-  Send,
   Share2,
   Award,
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import LikeButton from "@/components/LikeButton";
+import CommentSection from "@/components/CommentSection";
 
 import { useTheme } from "@/hooks/use-theme";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { supabase } from "@/integrations/supabase/client";
 const imageCompression = () => import("browser-image-compression").then((m) => m.default);
 import { toast } from "sonner";
@@ -51,12 +49,6 @@ interface Winner {
   name: string;
   created_at: string;
 }
-interface GiveawayComment {
-  id: string;
-  userEmail: string;
-  commentText: string;
-  createdAt: string;
-}
 interface GiveawayConfig {
   start_count: number;
   active_image_url: string | null;
@@ -73,7 +65,7 @@ const formatCount = (n: number): string => {
 export default function Giveaway() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -83,11 +75,7 @@ export default function Giveaway() {
   const [submitted, setSubmitted] = useState(false);
   const [participantCount, setParticipantCount] = useState(0);
   const [winners, setWinners] = useState<Winner[]>([]);
-  const [comments, setComments] = useState<GiveawayComment[]>([]);
-  const [commentText, setCommentText] = useState("");
-  const [isSubscriber, setIsSubscriber] = useState(false);
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [config, setConfig] = useState<GiveawayConfig>({
     start_count: 0,
@@ -101,20 +89,8 @@ export default function Giveaway() {
     fetchConfig();
     fetchCount();
     fetchWinners();
-    fetchComments();
     fetchRandomLink();
   }, []);
-
-  useEffect(() => {
-    if (user) {
-      checkSubscriber();
-      checkLiked();
-    } else {
-      setIsSubscriber(false);
-      setLiked(false);
-      setLikeCount(0);
-    }
-  }, [user]);
 
   const fetchConfig = async () => {
     const { data } = await supabase.from("giveaway_config").select("*").limit(1).maybeSingle();
@@ -129,19 +105,6 @@ export default function Giveaway() {
   const fetchWinners = async () => {
     const { data } = await supabase.from("giveaway_winners").select("*").order("created_at", { ascending: false });
     if (data) setWinners(data as unknown as Winner[]);
-  };
-
-  const fetchComments = async () => {
-    const { data } = await supabase
-      .from("post_comments")
-      .select("*")
-      .eq("post_type", "giveaway")
-      .eq("post_id", "00000000-0000-0000-0000-000000000000")
-      .order("created_at", { ascending: false });
-    if (data)
-      setComments(
-        data.map((c) => ({ id: c.id, userEmail: c.user_name, commentText: c.content, createdAt: c.created_at })),
-      );
   };
 
   const fetchRandomLink = async () => {
@@ -164,29 +127,6 @@ export default function Giveaway() {
     }
   };
 
-  const checkSubscriber = async () => {
-    if (!user?.email) return;
-    const { data } = await supabase.from("newsletter_followers").select("id").eq("email", user.email).maybeSingle();
-    setIsSubscriber(!!data);
-  };
-
-  const checkLiked = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from("post_likes")
-      .select("id")
-      .eq("post_type", "giveaway")
-      .eq("post_id", "00000000-0000-0000-0000-000000000000")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    setLiked(!!data);
-    const { count } = await supabase
-      .from("post_likes")
-      .select("id", { count: "exact", head: true })
-      .eq("post_type", "giveaway")
-      .eq("post_id", "00000000-0000-0000-0000-000000000000");
-    setLikeCount(count || 0);
-  };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -263,58 +203,6 @@ export default function Giveaway() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const toggleLike = async () => {
-    if (!user) {
-      toast.error("Please sign in to like");
-      return;
-    }
-    if (!isSubscriber) {
-      toast.error("Subscribe to the newsletter to like");
-      return;
-    }
-    const postId = "00000000-0000-0000-0000-000000000000";
-    if (liked) {
-      await supabase
-        .from("post_likes")
-        .delete()
-        .eq("post_type", "giveaway")
-        .eq("post_id", postId)
-        .eq("user_id", user.id);
-      setLiked(false);
-      setLikeCount((c) => c - 1);
-    } else {
-      await supabase.from("post_likes").insert({ post_type: "giveaway", post_id: postId, user_id: user.id });
-      setLiked(true);
-      setLikeCount((c) => c + 1);
-    }
-  };
-
-  const addComment = async () => {
-    if (!user) {
-      toast.error("Please sign in to comment");
-      return;
-    }
-    if (!isSubscriber) {
-      toast.error("Subscribe to the newsletter to comment");
-      return;
-    }
-    if (!commentText.trim()) return;
-    const { error } = await supabase.from("post_comments").insert({
-      post_type: "giveaway",
-      post_id: "00000000-0000-0000-0000-000000000000",
-      user_id: user.id,
-      user_name: user.email || "Anonymous",
-      content: commentText.trim(),
-    });
-    if (error) {
-      toast.error("Failed to add comment");
-      return;
-    }
-    setCommentText("");
-    fetchComments();
-    toast.success("Comment added!");
   };
 
   const shareOnWhatsApp = () => {
@@ -583,61 +471,14 @@ export default function Giveaway() {
           )}
 
           {/* Like */}
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={toggleLike}
-              className={`rounded-xl gap-2 ${liked ? "text-destructive" : ""}`}
-            >
-              <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likeCount}
-            </Button>
-          </div>
+          <LikeButton postId="00000000-0000-0000-0000-000000000000" postType="giveaway" variant="ghost" />
 
           {/* Comments */}
-          <section>
-            <h2 className="font-display text-xl font-bold flex items-center gap-2 mb-4">
-              <MessageSquare className="h-5 w-5 text-primary" /> Comments ({comments.length})
-            </h2>
-            {isSubscriber && user ? (
-              <div className="flex gap-2 mb-4">
-                <Textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Write a comment..."
-                  rows={2}
-                  className="rounded-xl flex-1"
-                />
-                <Button
-                  onClick={addComment}
-                  className="rounded-xl gradient-primary border-0 text-primary-foreground px-4 self-end"
-                >
-                  <Send className="h-4 w-4 mr-1" /> Send
-                </Button>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground mb-4 p-3 rounded-xl bg-muted/50">
-                {user ? "Subscribe to the newsletter to comment." : "Sign in and subscribe to comment."}
-              </p>
-            )}
-            <div className="space-y-3">
-              {comments.map((c) => (
-                <Card key={c.id}>
-                  <CardContent className="py-3 px-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-medium">{c.userEmail}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-sm">{c.commentText}</p>
-                  </CardContent>
-                </Card>
-              ))}
-              {comments.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">No comments yet. Be the first!</p>
-              )}
-            </div>
-          </section>
+          <CommentSection
+            postId="00000000-0000-0000-0000-000000000000"
+            postType="giveaway"
+            requireSubscription={true}
+          />
 
           {/* Newsletter Subscribe */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>

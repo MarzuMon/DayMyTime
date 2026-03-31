@@ -8,10 +8,11 @@ import RelatedPosts from '@/components/RelatedPosts';
 import NewsletterSubscribe from '@/components/NewsletterSubscribe';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import LikeButton from '@/components/LikeButton';
+import CommentSection from '@/components/CommentSection';
 import {
-  ArrowLeft, Sun, Moon, Lightbulb, Heart,
+  ArrowLeft, Sun, Moon, Lightbulb,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar,
   Instagram, Copy
 } from 'lucide-react';
@@ -39,11 +40,10 @@ export default function TodayTip() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  
   const [tips, setTips] = useState<DailyTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTip, setSelectedTip] = useState<DailyTip | null>(null);
-  const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   
@@ -60,9 +60,8 @@ export default function TodayTip() {
   useEffect(() => {
     if (selectedTip) {
       trackView(selectedTip.id);
-      if (user) checkLiked();
     }
-  }, [selectedTip, user]);
+  }, [selectedTip]);
 
   const fetchBySlug = async (s: string) => {
     setLoading(true);
@@ -99,26 +98,6 @@ export default function TodayTip() {
     } as any);
   };
 
-  const checkLiked = async () => {
-    if (!user || !selectedTip) return;
-    const { data } = await supabase.from('post_likes').select('id')
-      .eq('post_id', selectedTip.id).eq('post_type', 'tip').eq('user_id', user.id).maybeSingle();
-    setLiked(!!data);
-  };
-
-  const toggleLike = async () => {
-    if (!user) { toast.error('Please sign in to like'); return; }
-    if (!selectedTip) return;
-    if (liked) {
-      await supabase.from('post_likes').delete().eq('post_id', selectedTip.id).eq('post_type', 'tip').eq('user_id', user.id);
-      setLiked(false);
-      setSelectedTip(t => t ? { ...t, likes_count: t.likes_count - 1 } : t);
-    } else {
-      await supabase.from('post_likes').insert({ post_id: selectedTip.id, post_type: 'tip', user_id: user.id });
-      setLiked(true);
-      setSelectedTip(t => t ? { ...t, likes_count: t.likes_count + 1 } : t);
-    }
-  };
 
 
   const getShareUrl = () => {
@@ -240,9 +219,7 @@ export default function TodayTip() {
 
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
-              <Button size="sm" variant={liked ? "default" : "outline"} onClick={toggleLike} className="gap-1.5">
-                <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} /> {todayTip.likes_count}
-              </Button>
+              <LikeButton postId={todayTip.id} postType="tip" />
               <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
                 <Twitter className="h-4 w-4" /> Tweet
               </Button>
@@ -258,6 +235,11 @@ export default function TodayTip() {
               <Button size="sm" variant="outline" onClick={() => share('copy')} className="gap-1.5">
                 <Copy className="h-4 w-4" /> Copy Link
               </Button>
+            </div>
+
+            {/* Comments */}
+            <div className="mb-8">
+              <CommentSection postId={todayTip.id} postType="tip" />
             </div>
 
             {/* Related Posts */}
