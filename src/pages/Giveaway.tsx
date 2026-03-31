@@ -65,7 +65,7 @@ const formatCount = (n: number): string => {
 export default function Giveaway() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
