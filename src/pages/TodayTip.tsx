@@ -45,7 +45,6 @@ export default function TodayTip() {
   const [tips, setTips] = useState<DailyTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTip, setSelectedTip] = useState<DailyTip | null>(null);
-  const [liked, setLiked] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   
