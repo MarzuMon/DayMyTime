@@ -99,26 +99,6 @@ export default function TodayTip() {
     } as any);
   };
 
-  const checkLiked = async () => {
-    if (!user || !selectedTip) return;
-    const { data } = await supabase.from('post_likes').select('id')
-      .eq('post_id', selectedTip.id).eq('post_type', 'tip').eq('user_id', user.id).maybeSingle();
-    setLiked(!!data);
-  };
-
-  const toggleLike = async () => {
-    if (!user) { toast.error('Please sign in to like'); return; }
-    if (!selectedTip) return;
-    if (liked) {
-      await supabase.from('post_likes').delete().eq('post_id', selectedTip.id).eq('post_type', 'tip').eq('user_id', user.id);
-      setLiked(false);
-      setSelectedTip(t => t ? { ...t, likes_count: t.likes_count - 1 } : t);
-    } else {
-      await supabase.from('post_likes').insert({ post_id: selectedTip.id, post_type: 'tip', user_id: user.id });
-      setLiked(true);
-      setSelectedTip(t => t ? { ...t, likes_count: t.likes_count + 1 } : t);
-    }
-  };
 
 
   const getShareUrl = () => {
