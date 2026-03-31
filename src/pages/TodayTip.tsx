@@ -220,9 +220,7 @@ export default function TodayTip() {
 
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
-              <Button size="sm" variant={liked ? "default" : "outline"} onClick={toggleLike} className="gap-1.5">
-                <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} /> {todayTip.likes_count}
-              </Button>
+              <LikeButton postId={todayTip.id} postType="tip" />
               <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
                 <Twitter className="h-4 w-4" /> Tweet
               </Button>
@@ -238,6 +236,11 @@ export default function TodayTip() {
               <Button size="sm" variant="outline" onClick={() => share('copy')} className="gap-1.5">
                 <Copy className="h-4 w-4" /> Copy Link
               </Button>
+            </div>
+
+            {/* Comments */}
+            <div className="mb-8">
+              <CommentSection postId={todayTip.id} postType="tip" />
             </div>
 
             {/* Related Posts */}
