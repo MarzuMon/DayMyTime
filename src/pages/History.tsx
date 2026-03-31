@@ -255,28 +255,6 @@ export default function History() {
             <div className="mb-8">
               <CommentSection postId={todayPost.id} postType="history" />
             </div>
-              <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
-                <Twitter className="h-4 w-4" /> Tweet
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => share('facebook')} className="gap-1.5">
-                <Facebook className="h-4 w-4" /> Share
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => share('linkedin')} className="gap-1.5">
-                <Linkedin className="h-4 w-4" /> Post
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => share('instagram')} className="gap-1.5">
-                <Instagram className="h-4 w-4" /> Instagram
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => share('copy')} className="gap-1.5">
-                <Copy className="h-4 w-4" /> Copy Link
-              </Button>
-            </div>
-
-            {/* Comments */}
-            <div className="mb-8">
-              <h3 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" /> Comments ({comments.length})
-              </h3>
               {user ? (
                 <div className="flex gap-2 mb-4">
                   <Textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Write a comment..." className="flex-1 min-h-[60px]" />
