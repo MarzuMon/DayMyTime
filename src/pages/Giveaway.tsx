@@ -23,7 +23,7 @@ import LikeButton from "@/components/LikeButton";
 import CommentSection from "@/components/CommentSection";
 
 import { useTheme } from "@/hooks/use-theme";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { supabase } from "@/integrations/supabase/client";
 const imageCompression = () => import("browser-image-compression").then((m) => m.default);
 import { toast } from "sonner";
