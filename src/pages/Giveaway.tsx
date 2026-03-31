@@ -583,61 +583,14 @@ export default function Giveaway() {
           )}
 
           {/* Like */}
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={toggleLike}
-              className={`rounded-xl gap-2 ${liked ? "text-destructive" : ""}`}
-            >
-              <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} /> {likeCount}
-            </Button>
-          </div>
+          <LikeButton postId="00000000-0000-0000-0000-000000000000" postType="giveaway" variant="ghost" />
 
           {/* Comments */}
-          <section>
-            <h2 className="font-display text-xl font-bold flex items-center gap-2 mb-4">
-              <MessageSquare className="h-5 w-5 text-primary" /> Comments ({comments.length})
-            </h2>
-            {isSubscriber && user ? (
-              <div className="flex gap-2 mb-4">
-                <Textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Write a comment..."
-                  rows={2}
-                  className="rounded-xl flex-1"
-                />
-                <Button
-                  onClick={addComment}
-                  className="rounded-xl gradient-primary border-0 text-primary-foreground px-4 self-end"
-                >
-                  <Send className="h-4 w-4 mr-1" /> Send
-                </Button>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground mb-4 p-3 rounded-xl bg-muted/50">
-                {user ? "Subscribe to the newsletter to comment." : "Sign in and subscribe to comment."}
-              </p>
-            )}
-            <div className="space-y-3">
-              {comments.map((c) => (
-                <Card key={c.id}>
-                  <CardContent className="py-3 px-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-medium">{c.userEmail}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-sm">{c.commentText}</p>
-                  </CardContent>
-                </Card>
-              ))}
-              {comments.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">No comments yet. Be the first!</p>
-              )}
-            </div>
-          </section>
+          <CommentSection
+            postId="00000000-0000-0000-0000-000000000000"
+            postType="giveaway"
+            requireSubscription={true}
+          />
 
           {/* Newsletter Subscribe */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
