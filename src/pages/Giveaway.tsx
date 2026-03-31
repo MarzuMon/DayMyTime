@@ -49,12 +49,6 @@ interface Winner {
   name: string;
   created_at: string;
 }
-interface GiveawayComment {
-  id: string;
-  userEmail: string;
-  commentText: string;
-  createdAt: string;
-}
 interface GiveawayConfig {
   start_count: number;
   active_image_url: string | null;
