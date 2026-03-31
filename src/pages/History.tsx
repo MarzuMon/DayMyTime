@@ -255,29 +255,6 @@ export default function History() {
             <div className="mb-8">
               <CommentSection postId={todayPost.id} postType="history" />
             </div>
-              {user ? (
-                <div className="flex gap-2 mb-4">
-                  <Textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Write a comment..." className="flex-1 min-h-[60px]" />
-                  <Button size="sm" onClick={addComment} disabled={!newComment.trim()}><Send className="h-4 w-4" /></Button>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground mb-4">
-                  <Button variant="link" onClick={() => navigate('/auth')} className="p-0 h-auto">Sign in</Button> to comment.
-                </p>
-              )}
-              <div className="space-y-3">
-                {comments.map(c => (
-                  <div key={c.id} className="p-3 rounded-lg bg-secondary/50">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm">{c.user_name}</span>
-                      <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), 'MMM d, h:mm a')}</span>
-                    </div>
-                    <p className="text-sm">{c.content}</p>
-                  </div>
-                ))}
-                {comments.length === 0 && <p className="text-sm text-muted-foreground">No comments yet. Be the first!</p>}
-              </div>
-            </div>
 
             {/* Related Posts */}
             <RelatedPosts currentPostId={todayPost.id} type="history" keywords={todayPost.keywords} />
