@@ -12,17 +12,15 @@ import {
   Users,
   CheckCircle2,
   X,
-  Heart,
-  MessageSquare,
-  Send,
   Share2,
   Award,
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import LikeButton from "@/components/LikeButton";
+import CommentSection from "@/components/CommentSection";
 
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
