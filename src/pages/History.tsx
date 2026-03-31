@@ -41,7 +41,7 @@ export default function History() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  
   const [posts, setPosts] = useState<HistoryPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<HistoryPost | null>(null);
