@@ -127,11 +127,6 @@ export default function Giveaway() {
     }
   };
 
-  const checkSubscriber = async () => {
-    if (!user?.email) return;
-    const { data } = await supabase.from("newsletter_followers").select("id").eq("email", user.email).maybeSingle();
-    setIsSubscriber(!!data);
-  };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
