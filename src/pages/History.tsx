@@ -114,60 +114,6 @@ export default function History() {
     } as any);
   };
 
-  const checkLiked = async () => {
-    if (!user || !selectedPost) return;
-    const { data } = await supabase
-      .from('post_likes')
-      .select('id')
-      .eq('post_id', selectedPost.id)
-      .eq('post_type', 'history')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    setLiked(!!data);
-  };
-
-  const fetchComments = async () => {
-    if (!selectedPost) return;
-    const { data } = await supabase
-      .from('post_comments')
-      .select('*')
-      .eq('post_id', selectedPost.id)
-      .eq('post_type', 'history')
-      .order('created_at', { ascending: true });
-    if (data) setComments(data as unknown as Comment[]);
-  };
-
-  const toggleLike = async () => {
-    if (!user) { toast.error('Please sign in to like'); return; }
-    if (!selectedPost) return;
-    if (liked) {
-      await supabase.from('post_likes').delete()
-        .eq('post_id', selectedPost.id).eq('post_type', 'history').eq('user_id', user.id);
-      setLiked(false);
-      setSelectedPost(p => p ? { ...p, likes_count: p.likes_count - 1 } : p);
-    } else {
-      await supabase.from('post_likes').insert({ post_id: selectedPost.id, post_type: 'history', user_id: user.id });
-      setLiked(true);
-      setSelectedPost(p => p ? { ...p, likes_count: p.likes_count + 1 } : p);
-    }
-  };
-
-  const addComment = async () => {
-    if (!user) { toast.error('Please sign in to comment'); return; }
-    if (!selectedPost || !newComment.trim()) return;
-    const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
-    const { error } = await supabase.from('post_comments').insert({
-      post_id: selectedPost.id, post_type: 'history', user_id: user.id,
-      user_name: profile?.display_name || 'Anonymous', content: newComment.trim()
-    });
-    if (!error) {
-      setNewComment('');
-      fetchComments();
-      toast.success('Comment posted!');
-    }
-  };
-
-
   const getShareUrl = () => {
     if (!selectedPost) return '';
     return `https://daymytime.com/history/${selectedPost.slug}`;
