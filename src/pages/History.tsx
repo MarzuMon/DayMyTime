@@ -11,10 +11,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import LikeButton from '@/components/LikeButton';
 import CommentSection from '@/components/CommentSection';
+import { useCommentCounts } from '@/hooks/use-comment-counts';
 import {
   ArrowLeft, Sun, Moon, Calendar,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User,
-  Instagram, Copy
+  Instagram, Copy, MessageSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
