@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from '@/hooks/use-theme';
@@ -11,10 +11,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import LikeButton from '@/components/LikeButton';
 import CommentSection from '@/components/CommentSection';
+import { useCommentCounts } from '@/hooks/use-comment-counts';
 import {
   ArrowLeft, Sun, Moon, Calendar,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User,
-  Instagram, Copy
+  Instagram, Copy, MessageSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -49,6 +50,8 @@ export default function History() {
   const [hasMore, setHasMore] = useState(true);
   
   const PAGE_SIZE = 9;
+  const postIds = useMemo(() => posts.map(p => p.id), [posts]);
+  const commentCounts = useCommentCounts(postIds, 'history');
 
   // Load specific post by slug
   useEffect(() => {
@@ -288,7 +291,12 @@ export default function History() {
                     <CardContent className="pt-4">
                       <h3 className="font-display font-bold text-sm mb-1 line-clamp-2">{post.title}</h3>
                       <p className="text-xs text-muted-foreground mb-2">{format(new Date(post.publish_date), 'MMM d, yyyy')}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{post.excerpt}</p>
+                      {(commentCounts[post.id] || 0) > 0 && (
+                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <MessageSquare className="h-3 w-3" /> {commentCounts[post.id]}
+                        </span>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
