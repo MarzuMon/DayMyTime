@@ -49,6 +49,8 @@ export default function TodayTip() {
   const [hasMore, setHasMore] = useState(true);
   
   const PAGE_SIZE = 9;
+  const tipIds = useMemo(() => tips.map(t => t.id), [tips]);
+  const commentCounts = useCommentCounts(tipIds, 'tip');
 
   useEffect(() => {
     if (slug) {

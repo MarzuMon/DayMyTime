@@ -50,6 +50,8 @@ export default function History() {
   const [hasMore, setHasMore] = useState(true);
   
   const PAGE_SIZE = 9;
+  const postIds = useMemo(() => posts.map(p => p.id), [posts]);
+  const commentCounts = useCommentCounts(postIds, 'history');
 
   // Load specific post by slug
   useEffect(() => {
