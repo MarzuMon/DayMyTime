@@ -278,7 +278,12 @@ export default function TodayTip() {
                     <CardContent className="pt-4">
                       <h3 className="font-display font-bold text-sm mb-1 line-clamp-2">{tip.title}</h3>
                       <p className="text-xs text-muted-foreground mb-2">{format(new Date(tip.publish_date), 'MMM d, yyyy')}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{tip.excerpt}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{tip.excerpt}</p>
+                      {(commentCounts[tip.id] || 0) > 0 && (
+                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <MessageSquare className="h-3 w-3" /> {commentCounts[tip.id]}
+                        </span>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>

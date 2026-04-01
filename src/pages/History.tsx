@@ -291,7 +291,12 @@ export default function History() {
                     <CardContent className="pt-4">
                       <h3 className="font-display font-bold text-sm mb-1 line-clamp-2">{post.title}</h3>
                       <p className="text-xs text-muted-foreground mb-2">{format(new Date(post.publish_date), 'MMM d, yyyy')}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{post.excerpt}</p>
+                      {(commentCounts[post.id] || 0) > 0 && (
+                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                          <MessageSquare className="h-3 w-3" /> {commentCounts[post.id]}
+                        </span>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
