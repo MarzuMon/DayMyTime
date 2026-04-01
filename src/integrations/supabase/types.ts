@@ -926,6 +926,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_auth_email: { Args: never; Returns: string }
       get_giveaway_count: { Args: never; Returns: number }
       get_invitation_by_token: {
         Args: { invite_token: string }
