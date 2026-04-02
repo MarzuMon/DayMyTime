@@ -350,10 +350,12 @@ const Index = () => {
             </Button>
           </div>
         ) : viewMode === 'timeline' ? (
-          <div className="space-y-6">
-            <TimelineView schedules={filtered} selectedDate={new Date()} onEdit={handleEdit} />
-            <TimelineView schedules={filtered} selectedDate={addDays(new Date(), 1)} onEdit={handleEdit} />
-          </div>
+          <Suspense fallback={<div className="h-96 animate-pulse bg-secondary/50 rounded-2xl" />}>
+            <div className="space-y-6">
+              <TimelineView schedules={filtered} selectedDate={new Date()} onEdit={handleEdit} />
+              <TimelineView schedules={filtered} selectedDate={addDays(new Date(), 1)} onEdit={handleEdit} />
+            </div>
+          </Suspense>
         ) : (
           <>
             {renderSection('Today', todaySchedules)}
