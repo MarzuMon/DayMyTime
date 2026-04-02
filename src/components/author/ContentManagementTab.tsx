@@ -218,7 +218,7 @@ export default function ContentManagementTab() {
 
   const publishPost = async (id: string) => {
     const { error } = await supabase.from(table).update({ status: 'published' } as any).eq('id', id);
-    if (error) toast.error(error.message);
+    if (error) { console.error('Publish error:', error); toast.error('Failed to publish post.'); }
     else { toast.success('Published!'); fetchAll(); }
   };
 
