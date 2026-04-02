@@ -15,6 +15,7 @@ import { useCommentCounts } from '@/hooks/use-comment-counts';
 import { useEngagementTriggers } from '@/hooks/use-engagement-triggers';
 import { LikeNudge, EngagementPopup } from '@/components/EngagementNudge';
 import SocialProofToast from '@/components/SocialProofToast';
+import LiveJoinNotification from '@/components/LiveJoinNotification';
 import {
   ArrowLeft, Sun, Moon, Lightbulb,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar,
