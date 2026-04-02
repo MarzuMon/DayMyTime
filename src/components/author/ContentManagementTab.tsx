@@ -110,11 +110,39 @@ export default function ContentManagementTab() {
   const [scheduleType, setScheduleType] = useState<'history' | 'tips' | 'both'>('both');
   const [scheduling, setScheduling] = useState(false);
 
+  // GOD MODE stats
+  const [godModeStats, setGodModeStats] = useState<{
+    recentHistoryCount: number;
+    recentTipCount: number;
+    topPages: { path: string; views: number }[];
+    lastHistoryDate: string | null;
+    lastTipDate: string | null;
+  }>({ recentHistoryCount: 0, recentTipCount: 0, topPages: [], lastHistoryDate: null, lastTipDate: null });
+
   const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
 
-  useEffect(() => { fetchAll(); fetchAnalytics(); }, []);
+  useEffect(() => { fetchAll(); fetchAnalytics(); fetchGodModeStats(); }, []);
+
+  const fetchGodModeStats = async () => {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+    const [hRes, tRes, pvRes] = await Promise.all([
+      supabase.from('history_posts').select('title, publish_date').gte('publish_date', thirtyDaysAgo).order('publish_date', { ascending: false }).limit(30),
+      supabase.from('daily_tips').select('title, publish_date').gte('publish_date', thirtyDaysAgo).order('publish_date', { ascending: false }).limit(30),
+      supabase.from('page_views').select('page_path').order('created_at', { ascending: false }).limit(100),
+    ]);
+    const pathCounts: Record<string, number> = {};
+    (pvRes.data || []).forEach((v: any) => { pathCounts[v.page_path] = (pathCounts[v.page_path] || 0) + 1; });
+    const topPages = Object.entries(pathCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([path, views]) => ({ path, views }));
+    setGodModeStats({
+      recentHistoryCount: hRes.data?.length || 0,
+      recentTipCount: tRes.data?.length || 0,
+      topPages,
+      lastHistoryDate: hRes.data?.[0]?.publish_date || null,
+      lastTipDate: tRes.data?.[0]?.publish_date || null,
+    });
+  };
 
   const fetchAll = async () => {
     setLoading(true);
