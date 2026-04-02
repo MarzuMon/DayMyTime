@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import {
   Plus, Edit, Trash2, Eye, Sparkles, Loader2, Calendar, FileText, Lightbulb, Send,
   Upload, Image, AlignLeft, AlignCenter, AlignRight, Clock, Timer,
-  Twitter, Facebook, Linkedin, Instagram, Copy, ExternalLink, BarChart3, Heart
+  Twitter, Facebook, Linkedin, Instagram, Copy, ExternalLink, BarChart3, Heart, RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
 
