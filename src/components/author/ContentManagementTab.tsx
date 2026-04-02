@@ -204,7 +204,7 @@ export default function ContentManagementTab() {
       ({ error } = await supabase.from(table).insert(payload as any));
     }
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { console.error('Save post error:', error); toast.error('Failed to save post. Please try again.'); return; }
     toast.success(status === 'published' ? 'Published!' : status === 'scheduled' ? 'Scheduled!' : 'Draft saved!');
     setDialogOpen(false);
     fetchAll();
