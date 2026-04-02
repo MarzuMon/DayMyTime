@@ -71,7 +71,8 @@ export default function ProUpgrade() {
             },
           });
           if (verifyError) {
-            toast({ title: 'Verification failed', description: verifyError.message, variant: 'destructive' });
+            console.error('Payment verification error:', verifyError);
+            toast({ title: 'Verification failed', description: 'Payment verification failed. Please contact support.', variant: 'destructive' });
           } else {
             setIsPro(true);
             toast({ title: '🎉 Welcome to Pro!', description: 'Your account has been upgraded.' });
