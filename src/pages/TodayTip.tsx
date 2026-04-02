@@ -12,6 +12,9 @@ import { toast } from 'sonner';
 import LikeButton from '@/components/LikeButton';
 import CommentSection from '@/components/CommentSection';
 import { useCommentCounts } from '@/hooks/use-comment-counts';
+import { useEngagementTriggers } from '@/hooks/use-engagement-triggers';
+import { LikeNudge, EngagementPopup } from '@/components/EngagementNudge';
+import SocialProofToast from '@/components/SocialProofToast';
 import {
   ArrowLeft, Sun, Moon, Lightbulb,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User, Calendar,
