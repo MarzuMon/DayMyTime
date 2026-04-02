@@ -263,11 +263,7 @@ export default function History() {
 
             {/* Newsletter */}
             <div className="mt-8">
-              <NewsletterSubscribe
-                title="📬 Get daily history updates"
-                description="Subscribe to receive articles directly in your inbox."
-                variant="primary"
-              />
+              <NewsletterSubscribe context="history" variant="primary" />
             </div>
           </motion.article>
         ) : (

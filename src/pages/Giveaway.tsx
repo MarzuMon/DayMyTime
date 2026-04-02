@@ -484,11 +484,7 @@ export default function Giveaway() {
 
           {/* Newsletter Subscribe */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <NewsletterSubscribe
-              title="🎁 Get New Giveaway Posts"
-              description="Subscribe for new giveaway alerts. No spam, unsubscribe anytime."
-              variant="accent"
-            />
+            <NewsletterSubscribe context="giveaway" variant="accent" />
           </motion.div>
         </div>
 

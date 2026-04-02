@@ -250,11 +250,7 @@ export default function TodayTip() {
 
             {/* Newsletter */}
             <div className="mt-8">
-              <NewsletterSubscribe
-                title="💡 Get daily productivity tips"
-                description="Subscribe for actionable time management advice."
-                variant="accent"
-              />
+              <NewsletterSubscribe context="tips" variant="accent" />
             </div>
           </motion.article>
         ) : (
