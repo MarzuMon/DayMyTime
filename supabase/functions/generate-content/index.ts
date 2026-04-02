@@ -103,14 +103,87 @@ async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
   throw lastError!;
 }
 
+// ─── AI Image Generation + Upload ───
+async function generateAndUploadImage(
+  apiKey: string,
+  db: any,
+  title: string,
+  type: string,
+  targetDate: string
+): Promise<string | null> {
+  try {
+    const imagePrompt = type === "history"
+      ? `Create a cinematic, dramatic historical illustration for a blog post titled "${title}". The image should be visually striking, colorful, and evoke the historical event. No text in the image. Professional quality, widescreen 16:9 aspect ratio.`
+      : `Create a modern, clean, inspiring productivity illustration for a blog post titled "${title}". Use soft gradients, minimal design elements like clocks, calendars, or focus icons. No text in the image. Professional quality, widescreen 16:9 aspect ratio.`;
+
+    log("INFO", `🎨 Generating image for: "${title}"`);
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3.1-flash-image-preview",
+        messages: [{ role: "user", content: imagePrompt }],
+        modalities: ["image", "text"],
+      }),
+    });
+
+    if (!response.ok) {
+      log("WARN", `Image generation failed: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!imageUrl || !imageUrl.startsWith("data:image/")) {
+      log("WARN", "No image returned from AI");
+      return null;
+    }
+
+    // Extract base64 data and upload to storage
+    const base64Data = imageUrl.split(",")[1];
+    const imageBytes = base64Decode(base64Data);
+    const mimeMatch = imageUrl.match(/data:(image\/\w+);/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+    const ext = mimeType === "image/jpeg" ? "jpg" : "png";
+
+    const folder = type === "history" ? "history" : "tips";
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+
+    const { error: uploadError } = await db.storage
+      .from("content-images")
+      .upload(fileName, imageBytes, { contentType: mimeType, upsert: false });
+
+    if (uploadError) {
+      log("WARN", `Image upload failed: ${uploadError.message}`);
+      return null;
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/content-images/${fileName}`;
+    log("INFO", `✅ Image uploaded: ${publicUrl}`);
+    return publicUrl;
+  } catch (e) {
+    log("WARN", `Image generation error: ${e instanceof Error ? e.message : e}`);
+    return null;
+  }
+}
+
 // ─── Insert post with validation ───
-async function insertPost(db: any, table: string, content: any, targetDate: string) {
+async function insertPost(db: any, table: string, content: any, targetDate: string, apiKey: string) {
   if (!content?.title || !content?.content) {
     log("ERROR", `Invalid content for ${table} – missing title or content`);
     throw new Error(`AI returned invalid content for ${table}`);
   }
 
   const slug = generateSlug(content.title, targetDate);
+  const type = table === "history_posts" ? "history" : "tip";
+
+  // Generate featured image
+  const featuredImage = await generateAndUploadImage(apiKey, db, content.title, type, targetDate);
 
   const { error } = await db.from(table).insert({
     title: content.title,
@@ -122,6 +195,7 @@ async function insertPost(db: any, table: string, content: any, targetDate: stri
     keywords: content.keywords || null,
     status: "published",
     publish_date: targetDate,
+    featured_image: featuredImage || null,
     social_instagram: content.social_instagram || null,
     social_twitter: content.social_twitter || null,
     social_linkedin: content.social_linkedin || null,
@@ -132,7 +206,7 @@ async function insertPost(db: any, table: string, content: any, targetDate: stri
     throw new Error(`Failed to insert into ${table}: ${error.message}`);
   }
 
-  log("INFO", `✅ Published to ${table}: "${content.title}"`);
+  log("INFO", `✅ Published to ${table}: "${content.title}" ${featuredImage ? '(with image)' : '(no image)'}`);
 }
 
 serve(async (req) => {
