@@ -249,8 +249,17 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const body = await req.json();
-    const { type, schedule, publish_date, auto_publish, cron } = body;
+    const { type, schedule, publish_date, auto_publish, cron, regenerate_image_only, post_title } = body;
     const db = serviceClient;
+
+    // ═══ REGENERATE IMAGE ONLY MODE ═══
+    if (regenerate_image_only && post_title) {
+      log("INFO", `🔄 Regenerating image for: "${post_title}"`);
+      const featuredImage = await generateAndUploadImage(LOVABLE_API_KEY, db, post_title, type || "history", new Date().toISOString().split("T")[0]);
+      return new Response(JSON.stringify({ featured_image: featuredImage }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // ─── Fetch memory + analytics for smarter generation ───
     const [memory, topTopics] = await Promise.all([

@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import {
   Plus, Edit, Trash2, Eye, Sparkles, Loader2, Calendar, FileText, Lightbulb, Send,
   Upload, Image, AlignLeft, AlignCenter, AlignRight, Clock, Timer,
-  Twitter, Facebook, Linkedin, Instagram, Copy, ExternalLink, BarChart3, Heart
+  Twitter, Facebook, Linkedin, Instagram, Copy, ExternalLink, BarChart3, Heart, RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -138,6 +138,28 @@ export default function ContentManagementTab() {
   const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
+  const [regeneratingImageId, setRegeneratingImageId] = useState<string | null>(null);
+
+  const regenerateImage = async (post: Post) => {
+    setRegeneratingImageId(post.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: { type: activeTab === 'history' ? 'history' : 'tip', regenerate_image_only: true, post_title: post.title }
+      });
+      if (error) throw error;
+      if (data?.featured_image) {
+        await supabase.from(table).update({ featured_image: data.featured_image } as any).eq('id', post.id);
+        toast.success('Image regenerated!');
+        fetchAll();
+      } else {
+        toast.error('No image was generated. Please try again.');
+      }
+    } catch (e: any) {
+      console.error('Regenerate image error:', e);
+      toast.error('Failed to regenerate image.');
+    }
+    setRegeneratingImageId(null);
+  };
 
   useEffect(() => { fetchAll(); fetchAnalytics(); fetchGodModeStats(); }, []);
 
@@ -507,12 +529,14 @@ export default function ContentManagementTab() {
           <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
             onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
             onCopySocials={(p) => { setSocialDialogPost(p); setSocialDialogOpen(true); }}
+            onRegenerateImage={regenerateImage} regeneratingImageId={regeneratingImageId}
             viewCounts={viewCounts} loading={loading} />
         </TabsContent>
         <TabsContent value="tips">
           <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
             onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
             onCopySocials={(p) => { setSocialDialogPost(p); setSocialDialogOpen(true); }}
+            onRegenerateImage={regenerateImage} regeneratingImageId={regeneratingImageId}
             viewCounts={viewCounts} loading={loading} />
         </TabsContent>
       </Tabs>
@@ -770,11 +794,12 @@ function ImageUploadField({ label, mode, onModeChange, value, onValueChange, upl
   );
 }
 
-function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCopyLink, onCopySocials, viewCounts, loading }: {
+function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCopyLink, onCopySocials, onRegenerateImage, regeneratingImageId, viewCounts, loading }: {
   posts: Post[]; onEdit: (p: Post) => void; onDelete: (id: string) => void;
   onPublish: (id: string) => void; onShare: (p: Post, platform: string) => void;
   onPreview: (p: Post) => void; onCopyLink: (p: Post) => void;
   onCopySocials: (p: Post) => void;
+  onRegenerateImage: (p: Post) => void; regeneratingImageId: string | null;
   viewCounts: Record<string, number>; loading: boolean;
 }) {
   if (loading) return <div className="text-center py-10 text-muted-foreground">Loading...</div>;
@@ -837,6 +862,9 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
                     📱
                   </Button>
                 )}
+                <Button size="sm" variant="ghost" onClick={() => onRegenerateImage(post)} disabled={regeneratingImageId === post.id} title="Regenerate Image">
+                  {regeneratingImageId === post.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                </Button>
                 <Button size="sm" variant="ghost" onClick={() => onPreview(post)} title="Preview">
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
