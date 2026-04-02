@@ -90,6 +90,9 @@ serve(async (req) => {
             excerpt: content.excerpt || content.content.slice(0, 160),
             seo_title: content.seo_title, meta_description: content.meta_description,
             keywords: content.keywords, status: "published", publish_date: today,
+            social_instagram: content.social_instagram || null,
+            social_twitter: content.social_twitter || null,
+            social_linkedin: content.social_linkedin || null,
           });
           results.push("history");
         }
@@ -104,6 +107,9 @@ serve(async (req) => {
             excerpt: content.excerpt || content.content.slice(0, 160),
             seo_title: content.seo_title, meta_description: content.meta_description,
             keywords: content.keywords, status: "published", publish_date: today,
+            social_instagram: content.social_instagram || null,
+            social_twitter: content.social_twitter || null,
+            social_linkedin: content.social_linkedin || null,
           });
           results.push("tip");
         }
@@ -131,6 +137,9 @@ serve(async (req) => {
             excerpt: content.excerpt || content.content.slice(0, 160),
             seo_title: content.seo_title, meta_description: content.meta_description,
             keywords: content.keywords, status: "published", publish_date: targetDate,
+            social_instagram: content.social_instagram || null,
+            social_twitter: content.social_twitter || null,
+            social_linkedin: content.social_linkedin || null,
           });
           results.push(t);
         }
