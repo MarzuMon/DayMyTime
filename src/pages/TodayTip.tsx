@@ -130,7 +130,6 @@ export default function TodayTip() {
     window.open(links[platform], '_blank', 'width=600,height=400');
   };
 
-  const todayTip = selectedTip;
   const jsonLd = todayTip ? {
     '@context': 'https://schema.org',
     '@type': 'Article',
