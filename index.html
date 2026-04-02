@@ -28,6 +28,8 @@
 
     <link rel="apple-touch-icon" href="/images/logo-icon.webp" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <!-- Preload critical above-the-fold image for mobile LCP -->
+    <link rel="preload" href="/images/logo-icon.webp" as="image" type="image/webp" />
     <link rel="icon" type="image/webp" sizes="32x32" href="/images/logo-icon.webp" />
     <link rel="icon" type="image/webp" sizes="16x16" href="/images/logo-icon.webp" />
     <link rel="canonical" href="https://daymytime.com/" />
@@ -62,8 +64,12 @@
       *,*::before,*::after{box-sizing:border-box;margin:0}
       body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;background:#f5f6f8;color:#1a1f2e}
       .dark body,body.dark{background:#111318;color:#e8eaf0}
-      #root{min-height:100vh}
+      #root{min-height:100vh;contain:layout style}
       @media(prefers-color-scheme:dark){body{background:#111318;color:#e8eaf0}}
+      /* Reserve space for bottom nav on mobile to prevent CLS */
+      @media(max-width:767px){#root{padding-bottom:56px}}
+      /* Prevent CLS from logo */
+      img[alt="DayMyTime"]{width:36px;height:36px}
     </style>
 
     <!-- Open Graph -->

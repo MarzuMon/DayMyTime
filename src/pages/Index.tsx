@@ -4,7 +4,6 @@ import { getSchedules, addSchedule, updateSchedule, deleteSchedule, toggleComple
 import { scheduleAllNotifications, requestNotificationPermission, getNotificationPermission } from '@/lib/notifications';
 import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
-import TimelineView from '@/components/TimelineView';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users, ChevronRight, Target, CheckCircle2, Timer } from 'lucide-react';
@@ -14,10 +13,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
-import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 import SEOHead from '@/components/SEOHead';
 import DashboardSkeleton from '@/components/DashboardSkeleton';
 
+// Lazy load all non-critical components
 const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
 const WeeklyPlanView = lazy(() => import('@/components/WeeklyPlanView'));
 const AdBanner = lazy(() => import('@/components/AdBanner'));
@@ -25,6 +25,7 @@ const ReferralSection = lazy(() => import('@/components/ReferralSection'));
 const InstallPrompt = lazy(() => import('@/components/InstallPrompt'));
 const BottomNav = lazy(() => import('@/components/BottomNav'));
 const PromoPopup = lazy(() => import('@/components/PromoPopup'));
+const TimelineView = lazy(() => import('@/components/TimelineView'));
 
 type ViewMode = 'list' | 'timeline';
 
@@ -41,6 +42,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { isAdmin } = useUserRole();
+  const isMobile = useIsMobile();
   const [teamMemberCount, setTeamMemberCount] = useState(0);
   const [displayName, setDisplayName] = useState('');
   const [isPro, setIsPro] = useState(false);
@@ -119,7 +121,7 @@ const Index = () => {
     const d = new Date(s.scheduledTime);
     return !isToday(d) && !isTomorrow(d) && isAfter(d, startOfToday()) && !s.isCompleted;
   });
-  const completedSchedules = filtered.filter(s => s.isCompleted);
+  const _completedSchedules = filtered.filter(s => s.isCompleted);
 
   // Quick stats
   const todayTotal = schedules.filter(s => isToday(new Date(s.scheduledTime))).length;
@@ -163,7 +165,7 @@ const Index = () => {
           {/* Top bar */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" />
+              <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" width={36} height={36} fetchPriority="high" />
               <div className="hidden sm:block">
                 <span className="font-display font-bold text-base">DayMyTime</span>
               </div>
@@ -187,33 +189,28 @@ const Index = () => {
           </div>
 
           {/* Greeting */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">
               {greeting}{displayName ? `, ${displayName}` : ''} 👋
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">Here's your schedule overview</p>
-          </motion.div>
+          </div>
 
           {/* Stats Grid */}
-          <motion.div
-            className="grid grid-cols-4 gap-2 mt-4"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
+          <div className="grid grid-cols-4 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100">
             {[
               { icon: CalendarDays, label: 'Today', value: todayTotal, color: 'text-primary' },
               { icon: Target, label: 'Remaining', value: todayRemaining, color: 'text-accent' },
               { icon: CheckCircle2, label: 'Done', value: todayDone, color: 'text-success' },
               { icon: Timer, label: 'Focus', value: `${Math.round(focusMinutes / 60)}h`, color: 'text-primary' },
             ].map(({ icon: Icon, label, value, color }) => (
-              <div key={label} className="rounded-xl glass p-3 text-center">
+              <div key={label} className="rounded-xl glass p-3 text-center" style={{ minHeight: '76px' }}>
                 <Icon className={`h-4 w-4 mx-auto mb-1 ${color}`} />
                 <p className="font-display font-bold text-lg leading-none">{value}</p>
                 <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">{label}</p>
               </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2 mt-4">
@@ -342,12 +339,7 @@ const Index = () => {
         </div>
 
         {filtered.length === 0 ? (
-          <motion.div
-            className="text-center py-16 sm:py-20"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
+          <div className="text-center py-16 sm:py-20 animate-in fade-in zoom-in-95 duration-300">
             <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4">
               <CalendarDays className="h-8 w-8 text-muted-foreground/40" />
             </div>
@@ -356,12 +348,14 @@ const Index = () => {
             <Button onClick={() => { setEditingSchedule(null); setFormOpen(true); }} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90">
               <Plus className="h-4 w-4 mr-1.5" /> Create your first schedule
             </Button>
-          </motion.div>
-        ) : viewMode === 'timeline' ? (
-          <div className="space-y-6">
-            <TimelineView schedules={filtered} selectedDate={new Date()} onEdit={handleEdit} />
-            <TimelineView schedules={filtered} selectedDate={addDays(new Date(), 1)} onEdit={handleEdit} />
           </div>
+        ) : viewMode === 'timeline' ? (
+          <Suspense fallback={<div className="h-96 animate-pulse bg-secondary/50 rounded-2xl" />}>
+            <div className="space-y-6">
+              <TimelineView schedules={filtered} selectedDate={new Date()} onEdit={handleEdit} />
+              <TimelineView schedules={filtered} selectedDate={addDays(new Date(), 1)} onEdit={handleEdit} />
+            </div>
+          </Suspense>
         ) : (
           <>
             {renderSection('Today', todaySchedules)}
@@ -370,11 +364,12 @@ const Index = () => {
           </>
         )}
 
-        <Suspense fallback={null}><ReferralSection /></Suspense>
-        <Suspense fallback={null}><AdBanner /></Suspense>
+        {/* Defer heavy below-fold components on mobile */}
+        {!isMobile && <Suspense fallback={null}><ReferralSection /></Suspense>}
+        {!isMobile && <Suspense fallback={null}><AdBanner /></Suspense>}
       </main>
 
-      <Suspense fallback={null}><InstallPrompt /></Suspense>
+      {!isMobile && <Suspense fallback={null}><InstallPrompt /></Suspense>}
       <Suspense fallback={null}><PromoPopup isPro={isPro} /></Suspense>
 
       {/* FAB */}
