@@ -474,6 +474,14 @@ export default function Giveaway() {
             </motion.section>
           )}
 
+          {/* Referral Viral Loop */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <h2 className="font-display text-xl font-bold flex items-center gap-2 mb-4">
+              🎯 Invite Friends to Increase Winning Chance
+            </h2>
+            <ReferralProgressCard />
+          </motion.div>
+
           {/* Like */}
           <LikeButton postId="00000000-0000-0000-0000-000000000000" postType="giveaway" variant="ghost" />
 
