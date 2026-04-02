@@ -64,8 +64,12 @@
       *,*::before,*::after{box-sizing:border-box;margin:0}
       body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;background:#f5f6f8;color:#1a1f2e}
       .dark body,body.dark{background:#111318;color:#e8eaf0}
-      #root{min-height:100vh}
+      #root{min-height:100vh;contain:layout style}
       @media(prefers-color-scheme:dark){body{background:#111318;color:#e8eaf0}}
+      /* Reserve space for bottom nav on mobile to prevent CLS */
+      @media(max-width:767px){#root{padding-bottom:56px}}
+      /* Prevent CLS from logo */
+      img[alt="DayMyTime"]{width:36px;height:36px}
     </style>
 
     <!-- Open Graph -->
