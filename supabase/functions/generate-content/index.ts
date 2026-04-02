@@ -286,7 +286,7 @@ serve(async (req) => {
             () => generateAI(LOVABLE_API_KEY, "history", memory, topTopics),
             "History generation"
           );
-          await insertPost(db, "history_posts", content, today);
+          await insertPost(db, "history_posts", content, today, LOVABLE_API_KEY);
           results.push("history");
         }
       }
