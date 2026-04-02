@@ -36,7 +36,7 @@ export default function CommentSection({ postId, postType, requireSubscription =
   };
 
   return (
-    <section>
+    <section data-comment-section>
       <h3 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
         <MessageSquare className="h-5 w-5 text-primary" /> Comments ({comments.length})
       </h3>
