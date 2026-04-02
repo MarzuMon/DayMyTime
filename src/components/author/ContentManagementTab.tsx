@@ -107,6 +107,10 @@ export default function ContentManagementTab() {
   const [scheduleType, setScheduleType] = useState<'history' | 'tips' | 'both'>('both');
   const [scheduling, setScheduling] = useState(false);
 
+  const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
+  const [socialDialogOpen, setSocialDialogOpen] = useState(false);
+  const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
+
   useEffect(() => { fetchAll(); fetchAnalytics(); }, []);
 
   const fetchAll = async () => {
@@ -239,7 +243,14 @@ export default function ContentManagementTab() {
           meta_description: data.meta_description || prev.meta_description,
           keywords: data.keywords || prev.keywords,
         }));
-        toast.success('Content generated! Review and publish.');
+        if (data.social_instagram || data.social_twitter || data.social_linkedin) {
+          setGeneratedSocials({
+            instagram: data.social_instagram || '',
+            twitter: data.social_twitter || '',
+            linkedin: data.social_linkedin || '',
+          });
+        }
+        toast.success('Content generated with social captions! Review and publish.');
       }
     } catch (e: any) {
       console.error('Generate content error:', e);
@@ -411,11 +422,13 @@ export default function ContentManagementTab() {
         <TabsContent value="history">
           <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
             onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
+            onCopySocials={(p) => { setSocialDialogPost(p); setSocialDialogOpen(true); }}
             viewCounts={viewCounts} loading={loading} />
         </TabsContent>
         <TabsContent value="tips">
           <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
             onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
+            onCopySocials={(p) => { setSocialDialogPost(p); setSocialDialogOpen(true); }}
             viewCounts={viewCounts} loading={loading} />
         </TabsContent>
       </Tabs>
@@ -532,6 +545,43 @@ export default function ContentManagementTab() {
               </div>
             </details>
           </div>
+
+            {/* Social Captions Preview */}
+            {generatedSocials && (
+              <details className="border rounded-lg p-3 border-primary/30" open>
+                <summary className="cursor-pointer font-medium text-sm flex items-center gap-2">📱 Generated Social Captions</summary>
+                <div className="space-y-3 mt-3">
+                  {generatedSocials.instagram && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="flex items-center gap-1"><Instagram className="h-3.5 w-3.5" /> Instagram</Label>
+                        <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(generatedSocials.instagram); toast.success('Instagram caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground bg-secondary p-2 rounded">{generatedSocials.instagram}</p>
+                    </div>
+                  )}
+                  {generatedSocials.twitter && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="flex items-center gap-1"><Twitter className="h-3.5 w-3.5" /> Twitter/X</Label>
+                        <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(generatedSocials.twitter); toast.success('Twitter caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground bg-secondary p-2 rounded">{generatedSocials.twitter}</p>
+                    </div>
+                  )}
+                  {generatedSocials.linkedin && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="flex items-center gap-1"><Linkedin className="h-3.5 w-3.5" /> LinkedIn</Label>
+                        <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(generatedSocials.linkedin); toast.success('LinkedIn caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground bg-secondary p-2 rounded">{generatedSocials.linkedin}</p>
+                    </div>
+                  )}
+                </div>
+              </details>
+            )}
+
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => savePost('draft')} disabled={saving}>
               <FileText className="h-4 w-4 mr-1" /> Save Draft
@@ -636,10 +686,11 @@ function ImageUploadField({ label, mode, onModeChange, value, onValueChange, upl
   );
 }
 
-function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCopyLink, viewCounts, loading }: {
+function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCopyLink, onCopySocials, viewCounts, loading }: {
   posts: Post[]; onEdit: (p: Post) => void; onDelete: (id: string) => void;
   onPublish: (id: string) => void; onShare: (p: Post, platform: string) => void;
   onPreview: (p: Post) => void; onCopyLink: (p: Post) => void;
+  onCopySocials: (p: Post) => void;
   viewCounts: Record<string, number>; loading: boolean;
 }) {
   if (loading) return <div className="text-center py-10 text-muted-foreground">Loading...</div>;
@@ -689,6 +740,11 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
                 <Button size="sm" variant="ghost" onClick={() => onCopyLink(post)} title="Copy Link">
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
+                {(post.social_instagram || post.social_twitter || post.social_linkedin) && (
+                  <Button size="sm" variant="ghost" onClick={() => onCopySocials(post)} title="Copy Social Captions" className="text-primary">
+                    📱
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" onClick={() => onPreview(post)} title="Preview">
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Button>

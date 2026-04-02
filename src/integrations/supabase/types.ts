@@ -118,6 +118,9 @@ export type Database = {
           publish_date: string
           seo_title: string | null
           slug: string
+          social_instagram: string | null
+          social_linkedin: string | null
+          social_twitter: string | null
           status: string
           title: string
           updated_at: string
@@ -138,6 +141,9 @@ export type Database = {
           publish_date?: string
           seo_title?: string | null
           slug: string
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -158,6 +164,9 @@ export type Database = {
           publish_date?: string
           seo_title?: string | null
           slug?: string
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -343,6 +352,9 @@ export type Database = {
           publish_date: string
           seo_title: string | null
           slug: string
+          social_instagram: string | null
+          social_linkedin: string | null
+          social_twitter: string | null
           status: string
           title: string
           updated_at: string
@@ -363,6 +375,9 @@ export type Database = {
           publish_date?: string
           seo_title?: string | null
           slug: string
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -383,6 +398,9 @@ export type Database = {
           publish_date?: string
           seo_title?: string | null
           slug?: string
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
           status?: string
           title?: string
           updated_at?: string
