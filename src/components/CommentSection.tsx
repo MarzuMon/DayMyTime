@@ -7,6 +7,7 @@ import { useComments } from '@/hooks/use-comments';
 import { useSubscription } from '@/hooks/use-subscription';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import SuggestedComments from '@/components/SuggestedComments';
 
 interface CommentSectionProps {
   postId: string;
@@ -35,12 +36,14 @@ export default function CommentSection({ postId, postType, requireSubscription =
   };
 
   return (
-    <section>
+    <section data-comment-section>
       <h3 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
         <MessageSquare className="h-5 w-5 text-primary" /> Comments ({comments.length})
       </h3>
 
       {canComment ? (
+        <>
+        <SuggestedComments onSelect={(s) => setText(s)} />
         <div className="flex gap-2 mb-4">
           <Textarea
             value={text}
@@ -63,6 +66,7 @@ export default function CommentSection({ postId, postType, requireSubscription =
             )}
           </Button>
         </div>
+        </>
       ) : (
         <p className="text-sm text-muted-foreground mb-4 p-3 rounded-xl bg-muted/50">
           {!user ? (

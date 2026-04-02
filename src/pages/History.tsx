@@ -12,6 +12,9 @@ import { toast } from 'sonner';
 import LikeButton from '@/components/LikeButton';
 import CommentSection from '@/components/CommentSection';
 import { useCommentCounts } from '@/hooks/use-comment-counts';
+import { useEngagementTriggers } from '@/hooks/use-engagement-triggers';
+import { LikeNudge, EngagementPopup } from '@/components/EngagementNudge';
+import SocialProofToast from '@/components/SocialProofToast';
 import {
   ArrowLeft, Sun, Moon, Calendar,
   ChevronLeft, ChevronRight, Twitter, Facebook, Linkedin, Clock, User,
@@ -52,8 +55,9 @@ export default function History() {
   const PAGE_SIZE = 9;
   const postIds = useMemo(() => posts.map(p => p.id), [posts]);
   const commentCounts = useCommentCounts(postIds, 'history');
+  const todayPost = selectedPost;
+  const engagement = useEngagementTriggers(todayPost?.id);
 
-  // Load specific post by slug
   useEffect(() => {
     if (slug) {
       fetchBySlug(slug);
@@ -138,7 +142,6 @@ export default function History() {
     window.open(links[platform], '_blank', 'width=600,height=400');
   };
 
-  const todayPost = selectedPost;
   const jsonLd = todayPost ? {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -234,7 +237,7 @@ export default function History() {
             <div className="prose prose-sm dark:prose-invert max-w-none mb-8" dangerouslySetInnerHTML={{ __html: todayPost.content.replace(/\n/g, '<br/>') }} />
 
             {/* Actions */}
-            <div className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
+            <div data-like-button className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
               <LikeButton postId={todayPost.id} postType="history" />
               <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
                 <Twitter className="h-4 w-4" /> Tweet
@@ -309,6 +312,22 @@ export default function History() {
           </section>
         )}
       </main>
+
+      {/* Engagement Overlays */}
+      {todayPost && (
+        <>
+          <LikeNudge
+            visible={engagement.showLikeNudge}
+            onDismiss={engagement.dismissLikeNudge}
+            onLikeClick={() => {
+              engagement.dismissLikeNudge();
+              document.querySelector('[data-like-button]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+          />
+          <EngagementPopup visible={engagement.showEngagementPopup} onDismiss={engagement.dismissEngagementPopup} />
+          <SocialProofToast postId={todayPost.id} postType="history" visible={engagement.showSocialProof} onDismiss={engagement.dismissSocialProof} />
+        </>
+      )}
 
       {/* Footer */}
       <footer className="border-t py-8" role="contentinfo">
