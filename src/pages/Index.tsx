@@ -189,12 +189,12 @@ const Index = () => {
           </div>
 
           {/* Greeting */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">
               {greeting}{displayName ? `, ${displayName}` : ''} 👋
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">Here's your schedule overview</p>
-          </motion.div>
+          </div>
 
           {/* Stats Grid */}
           <motion.div
