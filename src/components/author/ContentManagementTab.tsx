@@ -43,6 +43,9 @@ interface Post {
   status: string;
   likes_count: number;
   created_at: string;
+  social_instagram?: string | null;
+  social_twitter?: string | null;
+  social_linkedin?: string | null;
 }
 
 const emptyPost = {
