@@ -66,6 +66,7 @@ export default function CommentSection({ postId, postType, requireSubscription =
             )}
           </Button>
         </div>
+        </>
       ) : (
         <p className="text-sm text-muted-foreground mb-4 p-3 rounded-xl bg-muted/50">
           {!user ? (
