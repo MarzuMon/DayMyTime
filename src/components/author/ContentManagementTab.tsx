@@ -740,6 +740,11 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
                 <Button size="sm" variant="ghost" onClick={() => onCopyLink(post)} title="Copy Link">
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
+                {(post.social_instagram || post.social_twitter || post.social_linkedin) && (
+                  <Button size="sm" variant="ghost" onClick={() => onCopySocials(post)} title="Copy Social Captions" className="text-primary">
+                    📱
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" onClick={() => onPreview(post)} title="Preview">
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
