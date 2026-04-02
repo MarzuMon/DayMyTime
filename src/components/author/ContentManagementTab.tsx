@@ -242,7 +242,8 @@ export default function ContentManagementTab() {
         toast.success('Content generated! Review and publish.');
       }
     } catch (e: any) {
-      toast.error(e.message || 'Failed to generate content');
+      console.error('Generate content error:', e);
+      toast.error('Failed to generate content. Please try again.');
     }
     setGenerating(false);
   };
