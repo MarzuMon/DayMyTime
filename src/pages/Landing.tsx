@@ -186,7 +186,7 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-primary/20 text-xs font-semibold text-primary mb-6 tracking-wide">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-primary/20 text-xs font-semibold text-primary mb-4 sm:mb-6 tracking-wide">
                 <Sparkles className="h-3.5 w-3.5" />
                 Smart Visual Scheduler
               </div>
