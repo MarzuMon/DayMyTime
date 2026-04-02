@@ -339,12 +339,7 @@ const Index = () => {
         </div>
 
         {filtered.length === 0 ? (
-          <motion.div
-            className="text-center py-16 sm:py-20"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
+          <div className="text-center py-16 sm:py-20 animate-in fade-in zoom-in-95 duration-300">
             <div className="h-16 w-16 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4">
               <CalendarDays className="h-8 w-8 text-muted-foreground/40" />
             </div>
@@ -353,7 +348,7 @@ const Index = () => {
             <Button onClick={() => { setEditingSchedule(null); setFormOpen(true); }} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90">
               <Plus className="h-4 w-4 mr-1.5" /> Create your first schedule
             </Button>
-          </motion.div>
+          </div>
         ) : viewMode === 'timeline' ? (
           <div className="space-y-6">
             <TimelineView schedules={filtered} selectedDate={new Date()} onEdit={handleEdit} />
