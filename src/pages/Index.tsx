@@ -197,25 +197,20 @@ const Index = () => {
           </div>
 
           {/* Stats Grid */}
-          <motion.div
-            className="grid grid-cols-4 gap-2 mt-4"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
+          <div className="grid grid-cols-4 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100">
             {[
               { icon: CalendarDays, label: 'Today', value: todayTotal, color: 'text-primary' },
               { icon: Target, label: 'Remaining', value: todayRemaining, color: 'text-accent' },
               { icon: CheckCircle2, label: 'Done', value: todayDone, color: 'text-success' },
               { icon: Timer, label: 'Focus', value: `${Math.round(focusMinutes / 60)}h`, color: 'text-primary' },
             ].map(({ icon: Icon, label, value, color }) => (
-              <div key={label} className="rounded-xl glass p-3 text-center">
+              <div key={label} className="rounded-xl glass p-3 text-center" style={{ minHeight: '76px' }}>
                 <Icon className={`h-4 w-4 mx-auto mb-1 ${color}`} />
                 <p className="font-display font-bold text-lg leading-none">{value}</p>
                 <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">{label}</p>
               </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2 mt-4">
