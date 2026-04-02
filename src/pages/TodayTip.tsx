@@ -225,7 +225,7 @@ export default function TodayTip() {
             <div className="prose prose-sm dark:prose-invert max-w-none mb-8" dangerouslySetInnerHTML={{ __html: todayTip.content.replace(/\n/g, '<br/>') }} />
 
             {/* Actions */}
-            <div className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
+            <div data-like-button className="flex flex-wrap items-center gap-3 border-t border-b border-border py-4 mb-8">
               <LikeButton postId={todayTip.id} postType="tip" />
               <Button size="sm" variant="outline" onClick={() => share('twitter')} className="gap-1.5">
                 <Twitter className="h-4 w-4" /> Tweet
