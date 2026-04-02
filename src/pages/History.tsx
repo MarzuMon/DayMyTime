@@ -142,7 +142,6 @@ export default function History() {
     window.open(links[platform], '_blank', 'width=600,height=400');
   };
 
-  const todayPost = selectedPost;
   const jsonLd = todayPost ? {
     '@context': 'https://schema.org',
     '@type': 'Article',

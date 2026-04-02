@@ -57,6 +57,7 @@ export default function TodayTip() {
   const todayTip = selectedTip;
   const engagement = useEngagementTriggers(todayTip?.id);
 
+  useEffect(() => {
     if (slug) {
       fetchBySlug(slug);
     } else {
