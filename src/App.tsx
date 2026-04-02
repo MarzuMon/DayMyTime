@@ -1,11 +1,10 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PageTransition from "@/components/PageTransition";
-import { AnimatePresence } from "framer-motion";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 const Landing = lazyWithRetry(() => import("./pages/Landing"), "landing");
@@ -42,53 +41,43 @@ function LoadingFallback() {
   );
 }
 
-function AnimatedRoutes() {
-  const location = useLocation();
-
-  return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        {/* Public routes */}
-        <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
-        <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
-        <Route path="/accept-invite" element={<PageTransition><AcceptInvite /></PageTransition>} />
-        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
-        <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
-        <Route path="/terms" element={<PageTransition><TermsOfService /></PageTransition>} />
-        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
-        <Route path="/history" element={<PageTransition><History /></PageTransition>} />
-        <Route path="/history/:slug" element={<PageTransition><History /></PageTransition>} />
-        <Route path="/todaytip" element={<PageTransition><TodayTip /></PageTransition>} />
-        <Route path="/todaytip/:slug" element={<PageTransition><TodayTip /></PageTransition>} />
-        <Route path="/disclaimer" element={<PageTransition><Disclaimer /></PageTransition>} />
-        <Route path="/topics" element={<PageTransition><Topics /></PageTransition>} />
-        <Route path="/topics/:category" element={<PageTransition><CategoryPage /></PageTransition>} />
-        <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
-        <Route path="/giveaway" element={<PageTransition><Giveaway /></PageTransition>} />
-
-        {/* Protected routes */}
-        <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
-        <Route path="/pro" element={<ProtectedRoute><PageTransition><ProUpgrade /></PageTransition></ProtectedRoute>} />
-        <Route path="/marzooq-dashboard" element={<ProtectedRoute><PageTransition><Author /></PageTransition></ProtectedRoute>} />
-        <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
-        <Route path="/analytics" element={<ProtectedRoute><PageTransition><Analytics /></PageTransition></ProtectedRoute>} />
-        <Route path="/reports" element={<ProtectedRoute><PageTransition><Reports /></PageTransition></ProtectedRoute>} />
-
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-      </Routes>
-    </AnimatePresence>
-  );
-}
-
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
           <Suspense fallback={<LoadingFallback />}>
-            <AnimatedRoutes />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+              <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+              <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+              <Route path="/accept-invite" element={<PageTransition><AcceptInvite /></PageTransition>} />
+              <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+              <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+              <Route path="/terms" element={<PageTransition><TermsOfService /></PageTransition>} />
+              <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+              <Route path="/history" element={<PageTransition><History /></PageTransition>} />
+              <Route path="/history/:slug" element={<PageTransition><History /></PageTransition>} />
+              <Route path="/todaytip" element={<PageTransition><TodayTip /></PageTransition>} />
+              <Route path="/todaytip/:slug" element={<PageTransition><TodayTip /></PageTransition>} />
+              <Route path="/disclaimer" element={<PageTransition><Disclaimer /></PageTransition>} />
+              <Route path="/topics" element={<PageTransition><Topics /></PageTransition>} />
+              <Route path="/topics/:category" element={<PageTransition><CategoryPage /></PageTransition>} />
+              <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
+              <Route path="/giveaway" element={<PageTransition><Giveaway /></PageTransition>} />
+
+              {/* Protected routes */}
+              <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
+              <Route path="/pro" element={<ProtectedRoute><PageTransition><ProUpgrade /></PageTransition></ProtectedRoute>} />
+              <Route path="/marzooq-dashboard" element={<ProtectedRoute><PageTransition><Author /></PageTransition></ProtectedRoute>} />
+              <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><PageTransition><Analytics /></PageTransition></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute><PageTransition><Reports /></PageTransition></ProtectedRoute>} />
+
+              <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+            </Routes>
           </Suspense>
           <Toaster />
         </BrowserRouter>
