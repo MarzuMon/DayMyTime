@@ -139,6 +139,9 @@ export default function Profile() {
           Save Changes
         </Button>
 
+        {/* Referral Dashboard */}
+        <ReferralProgressCard />
+
         {!isPro && (
           <Button variant="outline" className="w-full" onClick={() => navigate('/pro')}>
             <Crown className="h-4 w-4 mr-2 text-accent" /> Upgrade to Pro
