@@ -73,6 +73,22 @@ function getPreviewUrl(post: Post, type: 'history' | 'tips'): string {
   return `${base}/${post.slug}`;
 }
 
+function getSeoScore(post: Post): { score: number; label: string; color: string } {
+  let score = 0;
+  if (post.title && post.title.length > 10) score += 20;
+  if (post.seo_title) score += 15;
+  if (post.meta_description && post.meta_description.length >= 50) score += 15;
+  if (post.keywords && post.keywords.split(',').length >= 3) score += 15;
+  if (post.excerpt && post.excerpt.length >= 30) score += 10;
+  if (post.social_instagram) score += 8;
+  if (post.social_twitter) score += 8;
+  if (post.social_linkedin) score += 9;
+  if (score >= 90) return { score, label: 'A+', color: 'text-green-500' };
+  if (score >= 70) return { score, label: 'B', color: 'text-yellow-500' };
+  if (score >= 50) return { score, label: 'C', color: 'text-orange-500' };
+  return { score, label: 'D', color: 'text-red-500' };
+}
+
 export default function ContentManagementTab() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('history');
@@ -785,6 +801,14 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
                     <Badge variant={post.status === 'published' ? 'default' : post.status === 'scheduled' ? 'outline' : 'secondary'} className="text-xs shrink-0">
                       {post.status}
                     </Badge>
+                    {(() => {
+                      const seo = getSeoScore(post);
+                      return (
+                        <span className={`text-[10px] font-bold ${seo.color} shrink-0`} title={`SEO Score: ${seo.score}%`}>
+                          {seo.label} {seo.score}%
+                        </span>
+                      );
+                    })()}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count} · 👁 {viewCounts[post.id] || 0}
