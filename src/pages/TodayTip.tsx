@@ -54,8 +54,9 @@ export default function TodayTip() {
   const PAGE_SIZE = 9;
   const tipIds = useMemo(() => tips.map(t => t.id), [tips]);
   const commentCounts = useCommentCounts(tipIds, 'tip');
+  const todayTip = selectedTip;
+  const engagement = useEngagementTriggers(todayTip?.id);
 
-  useEffect(() => {
     if (slug) {
       fetchBySlug(slug);
     } else {

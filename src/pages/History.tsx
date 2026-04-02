@@ -55,8 +55,9 @@ export default function History() {
   const PAGE_SIZE = 9;
   const postIds = useMemo(() => posts.map(p => p.id), [posts]);
   const commentCounts = useCommentCounts(postIds, 'history');
+  const todayPost = selectedPost;
+  const engagement = useEngagementTriggers(todayPost?.id);
 
-  // Load specific post by slug
   useEffect(() => {
     if (slug) {
       fetchBySlug(slug);
