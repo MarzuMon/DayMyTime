@@ -257,7 +257,7 @@ serve(async (req) => {
       log("INFO", `🔄 Regenerating image for: "${post_title}"`);
       const featuredImage = await generateAndUploadImage(LOVABLE_API_KEY, db, post_title, type || "history", new Date().toISOString().split("T")[0]);
       return new Response(JSON.stringify({ featured_image: featuredImage }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
       });
     }
 
