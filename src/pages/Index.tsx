@@ -4,7 +4,6 @@ import { getSchedules, addSchedule, updateSchedule, deleteSchedule, toggleComple
 import { scheduleAllNotifications, requestNotificationPermission, getNotificationPermission } from '@/lib/notifications';
 import ScheduleCard from '@/components/ScheduleCard';
 import ScheduleForm from '@/components/ScheduleForm';
-import TimelineView from '@/components/TimelineView';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, CalendarDays, Filter, Bell, LayoutList, Clock, LogOut, UserCircle, Moon, Sun, Crown, Users, ChevronRight, Target, CheckCircle2, Timer } from 'lucide-react';
@@ -14,10 +13,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserRole } from '@/hooks/use-user-role';
-import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 import SEOHead from '@/components/SEOHead';
 import DashboardSkeleton from '@/components/DashboardSkeleton';
 
+// Lazy load all non-critical components
 const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
 const WeeklyPlanView = lazy(() => import('@/components/WeeklyPlanView'));
 const AdBanner = lazy(() => import('@/components/AdBanner'));
@@ -25,6 +25,12 @@ const ReferralSection = lazy(() => import('@/components/ReferralSection'));
 const InstallPrompt = lazy(() => import('@/components/InstallPrompt'));
 const BottomNav = lazy(() => import('@/components/BottomNav'));
 const PromoPopup = lazy(() => import('@/components/PromoPopup'));
+const TimelineView = lazy(() => import('@/components/TimelineView'));
+
+// Lazy load motion only when needed (saves ~30KB on mobile initial load)
+const MotionDiv = lazy(() =>
+  import('framer-motion').then(m => ({ default: m.motion.div }))
+);
 
 type ViewMode = 'list' | 'timeline';
 
