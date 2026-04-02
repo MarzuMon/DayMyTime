@@ -12,17 +12,27 @@ const ALLOWED_ORIGINS = [
   "https://daymytime.lovable.app",
 ];
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 2000;
-
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("Origin") || "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  // Allow any lovable preview/project origin
+  if (
+    ALLOWED_ORIGINS.includes(origin) ||
+    origin.endsWith(".lovableproject.com") ||
+    origin.endsWith(".lovable.app")
+  ) {
+    return {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    };
+  }
   return {
-    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   };
 }
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
 
 function log(level: string, msg: string, data?: unknown) {
   const ts = new Date().toISOString();
