@@ -32,6 +32,8 @@ import SEOHead from "@/components/SEOHead";
 import { motion } from "framer-motion";
 import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 import NotificationBanner from "@/components/NotificationBanner";
+import ReferralProgressCard from "@/components/ReferralProgressCard";
+import LiveJoinNotification from "@/components/LiveJoinNotification";
 
 const formSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
