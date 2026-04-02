@@ -1,11 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// ═══════════════════════════════════════════════════════════════
+// GOD MODE – Autonomous AI Content Engine for DayMyTime
+// Features: Dedup, Memory, Retry, Analytics-Informed, Self-Learning
+// ═══════════════════════════════════════════════════════════════
+
 const ALLOWED_ORIGINS = [
   "https://daymytime.com",
   "https://www.daymytime.com",
   "https://daymytime.lovable.app",
 ];
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("Origin") || "";
@@ -16,11 +24,110 @@ function getCorsHeaders(req: Request) {
   };
 }
 
+function log(level: string, msg: string, data?: unknown) {
+  const ts = new Date().toISOString();
+  console.log(`[${ts}] [GOD-MODE] [${level}] ${msg}`, data ? JSON.stringify(data) : "");
+}
+
+// ─── Memory System: fetch past titles/keywords to avoid repetition ───
+async function fetchMemory(db: any) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+
+  const [historyRes, tipsRes] = await Promise.all([
+    db.from("history_posts").select("title, keywords, slug, publish_date")
+      .gte("publish_date", thirtyDaysAgo).order("publish_date", { ascending: false }).limit(30),
+    db.from("daily_tips").select("title, keywords, slug, publish_date")
+      .gte("publish_date", thirtyDaysAgo).order("publish_date", { ascending: false }).limit(30),
+  ]);
+
+  const pastHistoryTitles = (historyRes.data || []).map((p: any) => p.title);
+  const pastTipTitles = (tipsRes.data || []).map((p: any) => p.title);
+  const pastKeywords = [...(historyRes.data || []), ...(tipsRes.data || [])]
+    .map((p: any) => p.keywords).filter(Boolean);
+
+  return { pastHistoryTitles, pastTipTitles, pastKeywords };
+}
+
+// ─── Analytics Agent: find top-performing topics ───
+async function fetchTopPerformingTopics(db: any) {
+  const { data: topViews } = await db
+    .from("page_views")
+    .select("page_path")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (!topViews?.length) return [];
+
+  const pathCounts: Record<string, number> = {};
+  for (const v of topViews) {
+    pathCounts[v.page_path] = (pathCounts[v.page_path] || 0) + 1;
+  }
+  return Object.entries(pathCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([path, count]) => ({ path, views: count }));
+}
+
+// ─── Duplicate Prevention ───
+async function isDuplicate(db: any, table: string, targetDate: string): Promise<boolean> {
+  const { data } = await db.from(table).select("id").eq("publish_date", targetDate).limit(1);
+  return (data?.length || 0) > 0;
+}
+
+// ─── Retry wrapper for AI calls ───
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      log("INFO", `${label} attempt ${attempt}/${MAX_RETRIES}`);
+      return await fn();
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      log("WARN", `${label} attempt ${attempt} failed: ${lastError.message}`);
+      if (attempt < MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, RETRY_DELAY_MS * attempt));
+      }
+    }
+  }
+  throw lastError!;
+}
+
+// ─── Insert post with validation ───
+async function insertPost(db: any, table: string, content: any, targetDate: string) {
+  if (!content?.title || !content?.content) {
+    log("ERROR", `Invalid content for ${table} – missing title or content`);
+    throw new Error(`AI returned invalid content for ${table}`);
+  }
+
+  const slug = generateSlug(content.title, targetDate);
+
+  const { error } = await db.from(table).insert({
+    title: content.title,
+    slug,
+    content: content.content,
+    excerpt: (content.excerpt || content.content.slice(0, 160)).slice(0, 300),
+    seo_title: content.seo_title || null,
+    meta_description: content.meta_description || null,
+    keywords: content.keywords || null,
+    status: "published",
+    publish_date: targetDate,
+    social_instagram: content.social_instagram || null,
+    social_twitter: content.social_twitter || null,
+    social_linkedin: content.social_linkedin || null,
+  });
+
+  if (error) {
+    log("ERROR", `DB insert failed for ${table}`, error);
+    throw new Error(`Failed to insert into ${table}: ${error.message}`);
+  }
+
+  log("INFO", `✅ Published to ${table}: "${content.title}"`);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: getCorsHeaders(req) });
 
   try {
-    // Authenticate: require valid JWT and admin role
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -43,8 +150,6 @@ serve(async (req) => {
     }
 
     const userId = claimsData.claims.sub as string;
-
-    // Check admin role
     const serviceClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data: roleData } = await serviceClient
       .from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
@@ -60,16 +165,21 @@ serve(async (req) => {
 
     const body = await req.json();
     const { type, schedule, publish_date, auto_publish, cron } = body;
+    const db = serviceClient;
 
-    // For cron/scheduled calls, check admin_settings for auto_publish config
+    // ─── Fetch memory + analytics for smarter generation ───
+    const [memory, topTopics] = await Promise.all([
+      fetchMemory(db),
+      fetchTopPerformingTopics(db),
+    ]);
+
+    log("INFO", `Memory loaded: ${memory.pastHistoryTitles.length} history, ${memory.pastTipTitles.length} tips`);
+    log("INFO", `Top topics: ${topTopics.map(t => t.path).join(", ") || "none yet"}`);
+
+    // ═══ CRON / AUTO-PUBLISH MODE ═══
     if (cron) {
-      const db = serviceClient;
-
       const { data: setting } = await db
-        .from("admin_settings")
-        .select("value")
-        .eq("key", "auto_publish_content")
-        .maybeSingle();
+        .from("admin_settings").select("value").eq("key", "auto_publish_content").maybeSingle();
 
       const config = setting?.value as any;
       if (!config?.enabled) {
@@ -78,91 +188,91 @@ serve(async (req) => {
         });
       }
 
-      const results: string[] = [];
       const today = new Date().toISOString().split("T")[0];
+      const results: string[] = [];
+      const skipped: string[] = [];
 
       if (config.history) {
-        const content = await generateAI(LOVABLE_API_KEY, "history");
-        if (content) {
-          const slug = generateSlug(content.title, today);
-          await db.from("history_posts").insert({
-            title: content.title, slug, content: content.content,
-            excerpt: content.excerpt || content.content.slice(0, 160),
-            seo_title: content.seo_title, meta_description: content.meta_description,
-            keywords: content.keywords, status: "published", publish_date: today,
-            social_instagram: content.social_instagram || null,
-            social_twitter: content.social_twitter || null,
-            social_linkedin: content.social_linkedin || null,
-          });
+        if (await isDuplicate(db, "history_posts", today)) {
+          log("WARN", `⚠️ History post already exists for ${today} – skipping`);
+          skipped.push("history (duplicate)");
+        } else {
+          const content = await withRetry(
+            () => generateAI(LOVABLE_API_KEY, "history", memory, topTopics),
+            "History generation"
+          );
+          await insertPost(db, "history_posts", content, today);
           results.push("history");
         }
       }
 
       if (config.tips) {
-        const content = await generateAI(LOVABLE_API_KEY, "tip");
-        if (content) {
-          const slug = generateSlug(content.title, today);
-          await db.from("daily_tips").insert({
-            title: content.title, slug, content: content.content,
-            excerpt: content.excerpt || content.content.slice(0, 160),
-            seo_title: content.seo_title, meta_description: content.meta_description,
-            keywords: content.keywords, status: "published", publish_date: today,
-            social_instagram: content.social_instagram || null,
-            social_twitter: content.social_twitter || null,
-            social_linkedin: content.social_linkedin || null,
-          });
+        if (await isDuplicate(db, "daily_tips", today)) {
+          log("WARN", `⚠️ Tip already exists for ${today} – skipping`);
+          skipped.push("tip (duplicate)");
+        } else {
+          const content = await withRetry(
+            () => generateAI(LOVABLE_API_KEY, "tip", memory, topTopics),
+            "Tip generation"
+          );
+          await insertPost(db, "daily_tips", content, today);
           results.push("tip");
         }
       }
 
-      return new Response(JSON.stringify({ published: results }), {
+      log("INFO", `🏁 GOD MODE cron complete. Published: [${results}] Skipped: [${skipped}]`);
+      return new Response(JSON.stringify({ published: results, skipped }), {
         headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
       });
     }
 
-    // Manual schedule: generate and auto-publish for a specific date
+    // ═══ MANUAL SCHEDULE + AUTO-PUBLISH ═══
     if (schedule && auto_publish) {
-      const db = serviceClient;
       const targetDate = publish_date || new Date().toISOString().split("T")[0];
       const results: string[] = [];
+      const skipped: string[] = [];
 
       const types = type === "both" ? ["history", "tip"] : [type];
       for (const t of types) {
-        const content = await generateAI(LOVABLE_API_KEY, t);
-        if (content) {
-          const slug = generateSlug(content.title, targetDate);
-          const tableName = t === "history" ? "history_posts" : "daily_tips";
-          await db.from(tableName).insert({
-            title: content.title, slug, content: content.content,
-            excerpt: content.excerpt || content.content.slice(0, 160),
-            seo_title: content.seo_title, meta_description: content.meta_description,
-            keywords: content.keywords, status: "published", publish_date: targetDate,
-            social_instagram: content.social_instagram || null,
-            social_twitter: content.social_twitter || null,
-            social_linkedin: content.social_linkedin || null,
-          });
-          results.push(t);
+        const tableName = t === "history" ? "history_posts" : "daily_tips";
+        if (await isDuplicate(db, tableName, targetDate)) {
+          log("WARN", `⚠️ ${t} already exists for ${targetDate} – skipping`);
+          skipped.push(`${t} (duplicate)`);
+          continue;
         }
+        const content = await withRetry(
+          () => generateAI(LOVABLE_API_KEY, t, memory, topTopics),
+          `${t} generation`
+        );
+        await insertPost(db, tableName, content, targetDate);
+        results.push(t);
       }
 
-      return new Response(JSON.stringify({ published: results }), {
+      return new Response(JSON.stringify({ published: results, skipped }), {
         headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
       });
     }
 
-    // Standard: generate content and return for review
-    const content = await generateAI(LOVABLE_API_KEY, type === "history" ? "history" : "tip");
+    // ═══ STANDARD: generate content for review ═══
+    const content = await withRetry(
+      () => generateAI(LOVABLE_API_KEY, type === "history" ? "history" : "tip", memory, topTopics),
+      "Manual generation"
+    );
     return new Response(JSON.stringify(content), {
       headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("generate-content error:", e);
+    log("ERROR", "generate-content error", e instanceof Error ? e.message : e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
       status: 500,
       headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
     });
   }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
 
 function generateSlug(title: string, date: string): string {
   const d = new Date(date);
@@ -172,106 +282,145 @@ function generateSlug(title: string, date: string): string {
   return `${month}-${day}-${slug}`;
 }
 
-async function generateAI(apiKey: string, type: string) {
+// ═══════════════════════════════════════════════════════════════
+// GOD MODE AI GENERATION ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+interface Memory {
+  pastHistoryTitles: string[];
+  pastTipTitles: string[];
+  pastKeywords: string[];
+}
+
+interface TopTopic {
+  path: string;
+  views: number;
+}
+
+async function generateAI(apiKey: string, type: string, memory: Memory, topTopics: TopTopic[]) {
   const today = new Date();
   const month = today.toLocaleString("en-US", { month: "long" });
   const day = today.getDate();
   const year = today.getFullYear();
   const formattedDate = `${day.toString().padStart(2, "0")}/${(today.getMonth() + 1).toString().padStart(2, "0")}/${year}`;
 
+  // Build memory context for the AI
+  const pastTitles = type === "history" ? memory.pastHistoryTitles : memory.pastTipTitles;
+  const memoryBlock = pastTitles.length > 0
+    ? `\n\n🧠 MEMORY – AVOID THESE RECENT TITLES (do NOT repeat similar topics):\n${pastTitles.slice(0, 15).map(t => `• "${t}"`).join("\n")}`
+    : "";
+
+  const recentKeywords = memory.pastKeywords.slice(0, 10).join("; ");
+  const keywordBlock = recentKeywords
+    ? `\n\nRECENT KEYWORDS USED (diversify from these): ${recentKeywords}`
+    : "";
+
+  const analyticsBlock = topTopics.length > 0
+    ? `\n\n📊 ANALYTICS INSIGHT – Top performing pages recently:\n${topTopics.map(t => `• ${t.path} (${t.views} views)`).join("\n")}\nLean into similar themes that drive traffic.`
+    : "";
+
   let systemPrompt: string;
+
   if (type === "history") {
-    systemPrompt = `You are a world-class history writer and SEO content strategist for DayMyTime – Smart Visual Scheduler, a productivity website for students, professionals, entrepreneurs, and busy individuals.
+    systemPrompt = `You are the GOD MODE content engine for DayMyTime – Smart Visual Scheduler. You are a world-class historian, storyteller, SEO strategist, and viral content creator combined into one autonomous system.
 
 Today's date: ${month} ${day}, ${year} (${formattedDate})
+${memoryBlock}${keywordBlock}${analyticsBlock}
 
-SMART CONTENT SELECTION RULE:
-Before writing, SELECT a historical event from ${month} ${day} based on:
-• Trending relevance (AI, tech, leadership, innovation, science)
-• High curiosity factor (wars, discoveries, famous personalities, world-changing moments)
-• Strong modern connection to productivity, mindset, or technology
-• Emotional storytelling potential
-Avoid low-impact, boring, or obscure events.
+═══ DECISION ENGINE ═══
+Before writing, you MUST:
+1. SCAN all major historical events on ${month} ${day} across centuries
+2. SCORE each event on: Trending Relevance (AI, tech, leadership, innovation) × Curiosity Factor × Modern Connection × Emotional Impact × Monetization Potential
+3. SELECT the event with the HIGHEST composite score
+4. VERIFY it's not in the recent titles list above
 
-WRITE a 400-word "This Day in History" article following these rules:
+═══ CONTENT GENERATION ═══
+Write a 400-500 word "This Day in History" masterpiece:
 
-STYLE:
-• Simple, engaging English — mobile-first readability
-• Short paragraphs (2–3 lines max)
-• Storytelling style (NOT textbook)
-• Start with a powerful curiosity/emotion hook in the first line
-• Explain the event clearly with key people, dates, and context
-• Highlight WHY it matters today — connect to modern life (AI, productivity, mindset, innovation)
+STYLE RULES:
+• Cinematic storytelling — NOT textbook
+• Mobile-first: short paragraphs (2-3 lines max)
+• Power words in every paragraph
+• First sentence = irresistible curiosity hook
+• Every paragraph must pull the reader to the next
 
-STRUCTURE the content field as follows (use clear paragraph breaks with \\n\\n):
-1. 🔥 Curiosity hook opening line
-2. Event story (who, what, when, where, why)
-3. Key people involved and their impact
-4. "Modern Lesson" section — what readers can learn and apply today
-5. End with a thought-provoking question to boost comments (prefix with 👉)
-6. Add a share-trigger sentence: "Share this with a friend who loves history!"
-7. Include 2 natural internal links as text references:
-   - "Check out today's productivity tip at DayMyTime"
-   - "Join our giveaway for a chance to win exciting prizes"
+STRUCTURE (use \\n\\n for breaks):
+1. 🔥 HOOK — A jaw-dropping opening line that creates instant curiosity
+2. THE STORY — Vivid retelling with sensory details, dialogue if possible
+3. KEY PLAYERS — Who was involved and their lasting impact
+4. THE TURNING POINT — The dramatic moment that changed everything
+5. 💡 MODERN LESSON — Direct connection to today's productivity, AI, business, or mindset
+6. ⚡ ACTIONABLE TAKEAWAY — One thing the reader can do TODAY inspired by this event
+7. 👉 ENGAGEMENT QUESTION — Thought-provoking question to spark comments
+8. 🔗 INTERNAL LINKS (natural text):
+   - "Boost your productivity with today's tip on DayMyTime"
+   - "Join our giveaway for a chance to win exciting prizes!"
+9. SHARE TRIGGER — "Share this mind-blowing history with someone who needs to read it! 🚀"
 
-Return a JSON object with these fields:
-- title: Compelling, high-CTR article title (max 80 chars), format: "This Day in History – ${formattedDate}: [Event]"
-- content: The full 400-word article as described above. Use \\n\\n for paragraph breaks.
-- excerpt: A 2-sentence curiosity-driven summary (max 160 chars)
-- seo_title: SEO-optimized title with keyword front-loading (max 60 chars)
-- meta_description: Compelling meta description with call-to-action (150-160 chars)
-- keywords: 10-12 comma-separated SEO keywords including "this day in history", "today in history", date-specific terms, and topic keywords
-- slug_suggestion: URL-friendly slug
-- social_instagram: Instagram caption with emojis (engaging, 2-3 lines)
-- social_twitter: Twitter/X caption (short viral hook, max 280 chars)
-- social_linkedin: LinkedIn caption (professional insight, 2-3 lines)
+═══ SEO ENGINE ═══
+- Title must be < 80 chars, high-CTR, format: "This Day in History – ${formattedDate}: [Compelling Event]"
+- Front-load primary keyword in seo_title
+- Meta description: 150-160 chars with CTA
+- 10-12 diverse keywords covering: date, event, theme, "this day in history", "today in history"
 
-IMPORTANT: Return ONLY valid JSON. No markdown fences. No extra text.`;
+═══ SOCIAL DISTRIBUTION ═══
+Generate platform-optimized captions:
+- Instagram: Engaging + emojis + storytelling hook + hashtags (2-3 lines)
+- Twitter/X: Viral hook + key fact (max 280 chars)
+- LinkedIn: Professional insight angle + lesson (2-3 lines)
+
+Return a JSON object with fields: title, content, excerpt, seo_title, meta_description, keywords, slug_suggestion, social_instagram, social_twitter, social_linkedin
+
+CRITICAL: Return ONLY valid JSON. No markdown fences. No extra text.`;
   } else {
-    systemPrompt = `You are a world-class productivity expert and SEO content strategist for DayMyTime – Smart Visual Scheduler, a productivity website for students, professionals, entrepreneurs, and busy individuals.
+    systemPrompt = `You are the GOD MODE productivity engine for DayMyTime – Smart Visual Scheduler. You combine the wisdom of Cal Newport, James Clear, Ali Abdaal, and the latest AI productivity research into one autonomous content system.
 
 Today's date: ${month} ${day}, ${year}
+${memoryBlock}${keywordBlock}${analyticsBlock}
 
-WRITE a 150-200 word "Daily Productivity Tip" following these rules:
+═══ TOPIC DECISION ENGINE ═══
+SCAN trending productivity topics and SELECT based on:
+1. Relevance to current season/time of year
+2. Trending on social media (AI tools, deep work, automation)
+3. High shareability potential
+4. Practical applicability (can be done TODAY)
+5. NOT in the recent titles list above
 
-TOPIC SELECTION:
-Focus on modern, trending productivity techniques:
-• Deep work & flow states
-• AI-powered productivity tools
-• Time blocking & calendar management
-• Focus techniques (Pomodoro, 90-min cycles)
-• Energy management & peak hours
-• Digital minimalism & distraction control
-• Smart scheduling & automation
-Pick something PRACTICAL that the reader can use TODAY.
+TOPIC CATEGORIES (rotate daily):
+• 🧠 Deep Work & Flow States
+• 🤖 AI-Powered Productivity (ChatGPT, Notion AI, automation)
+• ⏰ Time Blocking & Calendar Mastery
+• 🎯 Focus Techniques (Pomodoro, 90-min sprints, 2-min rule)
+• ⚡ Energy Management & Peak Performance
+• 📱 Digital Minimalism & Screen Time Control
+• 🗓️ Smart Scheduling & Weekly Planning
+• 💪 Habit Stacking & Atomic Habits
+• 🧘 Mindfulness & Mental Clarity for Productivity
+
+═══ CONTENT GENERATION ═══
+Write a 200-250 word tip that is INSTANTLY actionable:
 
 STYLE:
-• Simple, engaging English — mobile-first readability
-• Short paragraphs (2–3 lines max)
-• Friendly, motivating tone
-• Start with a relatable hook
+• Conversational, like advice from a smart friend
+• Mobile-first: short paragraphs (2-3 lines max)
+• Start with a relatable pain point or surprising fact
+• Include a specific, named technique or tool
 
-STRUCTURE the content field (use \\n\\n for paragraph breaks):
-1. Hook: Relatable problem or curiosity opener
-2. The tip explained simply with 2-3 specific steps
-3. "⚡ Quick Action" — one simple step the reader can do RIGHT NOW
-4. End with a motivating closer
-5. Include a natural reference: "Plan your day visually with DayMyTime's smart scheduler"
-6. Add: "Join our giveaway for exciting prizes!"
+STRUCTURE (use \\n\\n):
+1. 🎯 HOOK — Relatable problem or surprising stat
+2. THE TECHNIQUE — Named method explained in 2-3 clear steps
+3. 🔬 WHY IT WORKS — Brief science/psychology behind it
+4. ⚡ QUICK ACTION — ONE specific thing to do in the next 5 minutes
+5. 💪 MOTIVATOR — Inspiring closer that builds momentum
+6. 🔗 CTA: "Plan your day visually with DayMyTime's smart scheduler"
+7. 🎁 "Join our giveaway for exciting prizes!"
 
-Return a JSON object with these fields:
-- title: Catchy, benefit-driven tip title (max 80 chars)
-- content: The full 150-200 word tip as described above. Use \\n\\n for paragraph breaks.
-- excerpt: 1-sentence actionable preview (max 160 chars)
-- seo_title: SEO-optimized title with keyword front-loading (max 60 chars)
-- meta_description: Compelling meta description (150-160 chars)
-- keywords: 10-12 comma-separated SEO keywords including "productivity tip", "time management", and topic-specific terms
-- slug_suggestion: URL-friendly slug
-- social_instagram: Instagram caption with emojis (engaging, 2-3 lines)
-- social_twitter: Twitter/X caption (short viral hook, max 280 chars)
-- social_linkedin: LinkedIn caption (professional insight, 2-3 lines)
+═══ SEO + SOCIAL ═══
+Same rules as history: high-CTR title, front-loaded keywords, platform-specific social captions.
 
-IMPORTANT: Return ONLY valid JSON. No markdown fences. No extra text.`;
+Return a JSON object with fields: title, content, excerpt, seo_title, meta_description, keywords, slug_suggestion, social_instagram, social_twitter, social_linkedin
+
+CRITICAL: Return ONLY valid JSON. No markdown fences. No extra text.`;
   }
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -284,7 +433,13 @@ IMPORTANT: Return ONLY valid JSON. No markdown fences. No extra text.`;
       model: "google/gemini-3-flash-preview",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Generate ${type === "history" ? `a trending, viral-worthy "This Day in History" article` : `a modern, actionable daily productivity tip`} for ${month} ${day}, ${year}. Make it highly engaging, SEO-optimized, and shareable.` }
+        {
+          role: "user",
+          content: `[GOD MODE] Generate ${type === "history"
+            ? `the most viral, trending "This Day in History" article for ${month} ${day}, ${year}`
+            : `the most actionable, shareable productivity tip for ${month} ${day}, ${year}`
+          }. Use your Decision Engine to pick the BEST topic. Ensure it's unique from recent posts. Optimize for SEO, engagement, and shareability. Execute at maximum quality.`
+        },
       ],
     }),
   });
@@ -293,8 +448,8 @@ IMPORTANT: Return ONLY valid JSON. No markdown fences. No extra text.`;
     if (response.status === 429) throw new Error("Rate limit exceeded. Try again later.");
     if (response.status === 402) throw new Error("Credits required. Top up in Settings.");
     const t = await response.text();
-    console.error("AI gateway error:", response.status, t);
-    throw new Error("AI generation failed");
+    log("ERROR", `AI gateway error: ${response.status}`, t);
+    throw new Error(`AI generation failed (${response.status})`);
   }
 
   const data = await response.json();
@@ -302,8 +457,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown fences. No extra text.`;
 
   try {
     const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+    log("INFO", `AI generated: "${parsed.title}"`);
+    return parsed;
   } catch {
+    log("WARN", "AI returned non-JSON, wrapping raw content");
     return { title: "Generated Content", content: raw, excerpt: raw.slice(0, 160) };
   }
 }
