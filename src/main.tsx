@@ -13,14 +13,14 @@ ReactDOM.createRoot(rootElement).render(
 );
 
 // Defer OneSignal to idle time after page is fully loaded
-if ('requestIdleCallback' in window) {
-  (window as any).requestIdleCallback(() => {
-    import('./lib/onesignal').then(m => m.initOneSignal());
-  });
+const initOnesignal = () => {
+  import('./lib/onesignal').then(m => m.initOneSignal());
+};
+
+if ('requestIdleCallback' in globalThis) {
+  requestIdleCallback(initOnesignal);
 } else {
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      import('./lib/onesignal').then(m => m.initOneSignal());
-    }, 3000);
+  globalThis.addEventListener('load', () => {
+    setTimeout(initOnesignal, 3000);
   }, { once: true });
 }
