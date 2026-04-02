@@ -47,6 +47,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { isAdmin } = useUserRole();
+  const isMobile = useIsMobile();
   const [teamMemberCount, setTeamMemberCount] = useState(0);
   const [displayName, setDisplayName] = useState('');
   const [isPro, setIsPro] = useState(false);
