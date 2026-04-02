@@ -801,6 +801,14 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
                     <Badge variant={post.status === 'published' ? 'default' : post.status === 'scheduled' ? 'outline' : 'secondary'} className="text-xs shrink-0">
                       {post.status}
                     </Badge>
+                    {(() => {
+                      const seo = getSeoScore(post);
+                      return (
+                        <span className={`text-[10px] font-bold ${seo.color} shrink-0`} title={`SEO Score: ${seo.score}%`}>
+                          {seo.label} {seo.score}%
+                        </span>
+                      );
+                    })()}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count} · 👁 {viewCounts[post.id] || 0}
