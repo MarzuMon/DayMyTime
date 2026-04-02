@@ -303,6 +303,7 @@ export default function TodayTip() {
       </main>
 
       {/* Engagement Overlays */}
+      <LiveJoinNotification />
       {todayTip && (
         <>
           <LikeNudge

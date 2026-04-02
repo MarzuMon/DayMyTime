@@ -315,6 +315,7 @@ export default function History() {
       </main>
 
       {/* Engagement Overlays */}
+      <LiveJoinNotification />
       {todayPost && (
         <>
           <LikeNudge
