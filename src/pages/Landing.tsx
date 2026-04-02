@@ -191,14 +191,13 @@ export default function Landing() {
                 Smart Visual Scheduler
               </div>
 
-              <h1 className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-75 font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+              <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-4 sm:mb-6">
                 Make Every Day{' '}
                 <span className="text-gradient">Count</span>
               </h1>
 
-              <p className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-100 text-muted-foreground text-lg sm:text-xl max-w-lg mx-auto lg:mx-0 mb-8 leading-relaxed">
-                Discover productivity tips, inspiring history stories, and practical ideas to improve your daily life.
-                Plan smart. Live better.
+              <p className="text-muted-foreground text-base sm:text-xl max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed">
+                Productivity tips, history stories & smart scheduling. Plan smart. Live better.
               </p>
 
               <div className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-150 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
