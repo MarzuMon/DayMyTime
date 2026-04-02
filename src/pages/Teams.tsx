@@ -132,7 +132,8 @@ export default function Teams() {
     });
 
     if (error || data?.error) {
-      toast({ title: 'Failed', description: data?.error || error?.message, variant: 'destructive' });
+      console.error('Invite error:', error || data?.error);
+      toast({ title: 'Failed', description: 'Could not send invitation. Please try again.', variant: 'destructive' });
     } else {
       const inviteUrl = `${window.location.origin}/accept-invite?token=${data.invitation.token}`;
       toast({ title: 'Invitation created!', description: `Share the invite link with ${inviteEmail}` });
