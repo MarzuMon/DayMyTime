@@ -31,6 +31,7 @@ import { z } from "zod";
 import SEOHead from "@/components/SEOHead";
 import { motion } from "framer-motion";
 import NewsletterSubscribe from "@/components/NewsletterSubscribe";
+import NotificationBanner from "@/components/NotificationBanner";
 
 const formSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
@@ -213,6 +214,7 @@ export default function Giveaway() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <NotificationBanner />
       <SEOHead
         title="Giveaway – DayMyTime | Win Exciting Prizes"
         description="Participate in the DayMyTime giveaway. Upload your WhatsApp status screenshot to enter and win exciting prizes!"
