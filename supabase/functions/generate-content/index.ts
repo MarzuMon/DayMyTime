@@ -300,7 +300,7 @@ serve(async (req) => {
             () => generateAI(LOVABLE_API_KEY, "tip", memory, topTopics),
             "Tip generation"
           );
-          await insertPost(db, "daily_tips", content, today);
+          await insertPost(db, "daily_tips", content, today, LOVABLE_API_KEY);
           results.push("tip");
         }
       }
