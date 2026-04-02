@@ -42,6 +42,8 @@ export default function CommentSection({ postId, postType, requireSubscription =
       </h3>
 
       {canComment ? (
+        <>
+        <SuggestedComments onSelect={(s) => setText(s)} />
         <div className="flex gap-2 mb-4">
           <Textarea
             value={text}
