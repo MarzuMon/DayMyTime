@@ -34,6 +34,7 @@ import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 import NotificationBanner from "@/components/NotificationBanner";
 import ReferralProgressCard from "@/components/ReferralProgressCard";
 import LiveJoinNotification from "@/components/LiveJoinNotification";
+import ReferralLeaderboard from "@/components/ReferralLeaderboard";
 
 const formSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
