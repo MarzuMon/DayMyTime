@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Gift, Copy, Check, Users, Trophy, Share2, Sparkles } from 'lucide-react';
+import { Gift, Copy, Check, Users, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
