@@ -90,7 +90,8 @@ export default function Teams() {
       brand_color: newColor,
     }).select().single();
     if (error) {
-      toast({ title: 'Failed', description: error.message, variant: 'destructive' });
+      console.error('Create team error:', error);
+      toast({ title: 'Failed', description: 'Could not create team. Please try again.', variant: 'destructive' });
     } else if (data) {
       await supabase.from('team_members').insert({ team_id: data.id, user_id: user.id, role: 'owner' });
       toast({ title: 'Team created!' });
