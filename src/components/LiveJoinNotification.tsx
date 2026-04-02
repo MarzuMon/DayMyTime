@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 
 const MESSAGES = [
@@ -9,7 +8,6 @@ const MESSAGES = [
 ];
 
 interface LiveJoinNotificationProps {
-  /** Page context for relevance */
   context?: 'giveaway' | 'general';
 }
 
@@ -19,14 +17,12 @@ export default function LiveJoinNotification({ context = 'general' }: LiveJoinNo
   const shownRef = useRef(false);
 
   useEffect(() => {
-    // Only show once per page load, after a random delay
     if (shownRef.current) return;
-    const delay = (15 + Math.random() * 30) * 1000; // 15-45s
+    const delay = (15 + Math.random() * 30) * 1000;
 
     const timer = setTimeout(async () => {
       shownRef.current = true;
 
-      // Fetch real aggregated data
       const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
       const { count } = await supabase
         .from('profiles')
@@ -39,7 +35,6 @@ export default function LiveJoinNotification({ context = 'general' }: LiveJoinNo
         const msgFn = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
         setMessage(msgFn(recentJoins));
       } else {
-        // Fallback: show total from today
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         const { count: todayCount } = await supabase
@@ -50,7 +45,6 @@ export default function LiveJoinNotification({ context = 'general' }: LiveJoinNo
         if (todayCount && todayCount > 0) {
           setMessage(`🎉 ${todayCount} new members today`);
         } else {
-          // Show giveaway-specific or generic
           setMessage(context === 'giveaway'
             ? '🎁 Join the giveaway before it ends!'
             : '✨ Join DayMyTime to boost your productivity!'
@@ -65,21 +59,13 @@ export default function LiveJoinNotification({ context = 'general' }: LiveJoinNo
     return () => clearTimeout(timer);
   }, [context]);
 
+  if (!visible) return null;
+
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ x: -300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -300, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-20 left-4 z-50 max-w-xs"
-        >
-          <div className="rounded-xl border border-border bg-background/95 backdrop-blur-md px-4 py-3 shadow-lg">
-            <p className="text-xs font-medium">{message}</p>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="fixed bottom-20 left-4 z-50 max-w-xs animate-in slide-in-from-left-4 fade-in duration-300">
+      <div className="rounded-xl border border-border bg-background/95 backdrop-blur-md px-4 py-3 shadow-lg">
+        <p className="text-xs font-medium">{message}</p>
+      </div>
+    </div>
   );
 }

@@ -177,28 +177,27 @@ export default function Landing() {
       </nav>
 
       {/* Hero — CSS animations only, no framer-motion */}
-      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28" aria-label="Hero">
+      <section className="relative pt-24 pb-14 sm:pt-40 sm:pb-28" aria-label="Hero">
         <div className="absolute inset-0 gradient-hero" aria-hidden="true" />
-        <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl will-change-auto" aria-hidden="true" />
-        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl will-change-auto" aria-hidden="true" />
+        <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl will-change-auto hidden sm:block" aria-hidden="true" />
+        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl will-change-auto hidden sm:block" aria-hidden="true" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-primary/20 text-xs font-semibold text-primary mb-6 tracking-wide">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-primary/20 text-xs font-semibold text-primary mb-4 sm:mb-6 tracking-wide">
                 <Sparkles className="h-3.5 w-3.5" />
                 Smart Visual Scheduler
               </div>
 
-              <h1 className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-75 font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+              <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-4 sm:mb-6">
                 Make Every Day{' '}
                 <span className="text-gradient">Count</span>
               </h1>
 
-              <p className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-100 text-muted-foreground text-lg sm:text-xl max-w-lg mx-auto lg:mx-0 mb-8 leading-relaxed">
-                Discover productivity tips, inspiring history stories, and practical ideas to improve your daily life.
-                Plan smart. Live better.
+              <p className="text-muted-foreground text-base sm:text-xl max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed">
+                Productivity tips, history stories & smart scheduling. Plan smart. Live better.
               </p>
 
               <div className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-150 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
@@ -210,8 +209,8 @@ export default function Landing() {
                 </Button>
               </div>
 
-              {/* Content Section Buttons */}
-              <div className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-200 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
+              {/* Content Section Buttons — hidden on mobile to reduce above-fold weight */}
+              <div className="hidden sm:flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
                 <Button size="sm" variant="outline" onClick={() => navigate('/auth')} className="rounded-xl glass gap-1.5">
                   🚀 Start Free Scheduler
                 </Button>

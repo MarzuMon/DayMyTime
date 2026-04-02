@@ -99,17 +99,23 @@
     <meta name="twitter:image" content="https://daymytime.com/images/logo_D-full.png" />
     <meta name="twitter:image:alt" content="DayMyTime Smart Visual Scheduler" />
 
-    <!-- AdSense - deferred to reduce TBT -->
+    <!-- AdSense - deferred to reduce TBT: loads on first user interaction -->
     <script>
-      window.addEventListener('load', function() {
-        setTimeout(function() {
+      (function(){
+        var loaded = false;
+        function loadAds() {
+          if (loaded) return;
+          loaded = true;
           var s = document.createElement('script');
           s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4393861879798471';
           s.async = true;
           s.crossOrigin = 'anonymous';
           document.head.appendChild(s);
-        }, 5000);
-      });
+        }
+        ['scroll','click','touchstart','keydown'].forEach(function(e){
+          addEventListener(e, loadAds, {once:true, passive:true});
+        });
+      })();
     </script>
 
     <!-- Razorpay - lazy loaded only when needed -->
