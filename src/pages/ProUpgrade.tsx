@@ -71,7 +71,8 @@ export default function ProUpgrade() {
             },
           });
           if (verifyError) {
-            toast({ title: 'Verification failed', description: verifyError.message, variant: 'destructive' });
+            console.error('Payment verification error:', verifyError);
+            toast({ title: 'Verification failed', description: 'Payment verification failed. Please contact support.', variant: 'destructive' });
           } else {
             setIsPro(true);
             toast({ title: '🎉 Welcome to Pro!', description: 'Your account has been upgraded.' });
@@ -84,7 +85,8 @@ export default function ProUpgrade() {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (err: any) {
-      toast({ title: 'Payment failed', description: err.message || 'Please try again.', variant: 'destructive' });
+      console.error('Payment error:', err);
+      toast({ title: 'Payment failed', description: 'Something went wrong. Please try again.', variant: 'destructive' });
     }
     setProcessing(false);
   };

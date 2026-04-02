@@ -90,7 +90,8 @@ export default function Teams() {
       brand_color: newColor,
     }).select().single();
     if (error) {
-      toast({ title: 'Failed', description: error.message, variant: 'destructive' });
+      console.error('Create team error:', error);
+      toast({ title: 'Failed', description: 'Could not create team. Please try again.', variant: 'destructive' });
     } else if (data) {
       await supabase.from('team_members').insert({ team_id: data.id, user_id: user.id, role: 'owner' });
       toast({ title: 'Team created!' });
@@ -131,7 +132,8 @@ export default function Teams() {
     });
 
     if (error || data?.error) {
-      toast({ title: 'Failed', description: data?.error || error?.message, variant: 'destructive' });
+      console.error('Invite error:', error || data?.error);
+      toast({ title: 'Failed', description: 'Could not send invitation. Please try again.', variant: 'destructive' });
     } else {
       const inviteUrl = `${window.location.origin}/accept-invite?token=${data.invitation.token}`;
       toast({ title: 'Invitation created!', description: `Share the invite link with ${inviteEmail}` });
@@ -163,7 +165,8 @@ export default function Teams() {
       body: { teamId: selectedTeam.id },
     });
     if (error || data?.error) {
-      toast({ title: 'Failed', description: data?.error || error?.message, variant: 'destructive' });
+      console.error('Generate link error:', error || data?.error);
+      toast({ title: 'Failed', description: 'Could not generate invite link. Please try again.', variant: 'destructive' });
     } else {
       const inviteUrl = `${window.location.origin}/accept-invite?token=${data.token}`;
       try {

@@ -85,7 +85,8 @@ export default function AlarmToneSelector({ value, onChange, showLabel = true }:
 
     const { error: uploadError } = await supabase.storage.from('custom-tones').upload(path, file);
     if (uploadError) {
-      toast({ title: 'Upload failed', description: uploadError.message, variant: 'destructive' });
+      console.error('Tone upload error:', uploadError);
+      toast({ title: 'Upload failed', description: 'Could not upload the tone. Please try again.', variant: 'destructive' });
       setUploading(false);
       return;
     }

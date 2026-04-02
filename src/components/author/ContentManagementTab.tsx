@@ -141,7 +141,8 @@ export default function ContentManagementTab() {
     const path = `${activeTab}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from('content-images').upload(path, file);
     if (error) {
-      toast.error('Upload failed: ' + error.message);
+      console.error('Content image upload error:', error);
+      toast.error('Image upload failed. Please try again.');
       setter(false);
       return;
     }
@@ -203,7 +204,7 @@ export default function ContentManagementTab() {
       ({ error } = await supabase.from(table).insert(payload as any));
     }
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { console.error('Save post error:', error); toast.error('Failed to save post. Please try again.'); return; }
     toast.success(status === 'published' ? 'Published!' : status === 'scheduled' ? 'Scheduled!' : 'Draft saved!');
     setDialogOpen(false);
     fetchAll();
@@ -211,13 +212,13 @@ export default function ContentManagementTab() {
 
   const deletePost = async (id: string) => {
     const { error } = await supabase.from(table).delete().eq('id', id);
-    if (error) toast.error(error.message);
+    if (error) { console.error('Delete post error:', error); toast.error('Failed to delete post.'); }
     else { toast.success('Post deleted'); fetchAll(); }
   };
 
   const publishPost = async (id: string) => {
     const { error } = await supabase.from(table).update({ status: 'published' } as any).eq('id', id);
-    if (error) toast.error(error.message);
+    if (error) { console.error('Publish error:', error); toast.error('Failed to publish post.'); }
     else { toast.success('Published!'); fetchAll(); }
   };
 
@@ -241,7 +242,8 @@ export default function ContentManagementTab() {
         toast.success('Content generated! Review and publish.');
       }
     } catch (e: any) {
-      toast.error(e.message || 'Failed to generate content');
+      console.error('Generate content error:', e);
+      toast.error('Failed to generate content. Please try again.');
     }
     setGenerating(false);
   };
@@ -262,7 +264,8 @@ export default function ContentManagementTab() {
       setScheduleDialogOpen(false);
       fetchAll();
     } catch (e: any) {
-      toast.error(e.message || 'Failed to schedule content');
+      console.error('Schedule content error:', e);
+      toast.error('Failed to schedule content. Please try again.');
     }
     setScheduling(false);
   };

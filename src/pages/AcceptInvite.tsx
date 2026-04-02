@@ -67,7 +67,8 @@ export default function AcceptInvite() {
     });
 
     if (memberError) {
-      toast({ title: 'Failed', description: memberError.message, variant: 'destructive' });
+      console.error('Join team error:', memberError);
+      toast({ title: 'Failed', description: 'Could not join the team. Please try again.', variant: 'destructive' });
       setProcessing(false);
       return;
     }
