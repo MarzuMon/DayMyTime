@@ -7,6 +7,7 @@ import { useComments } from '@/hooks/use-comments';
 import { useSubscription } from '@/hooks/use-subscription';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import SuggestedComments from '@/components/SuggestedComments';
 
 interface CommentSectionProps {
   postId: string;
