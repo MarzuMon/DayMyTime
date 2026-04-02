@@ -313,6 +313,22 @@ export default function History() {
         )}
       </main>
 
+      {/* Engagement Overlays */}
+      {todayPost && (
+        <>
+          <LikeNudge
+            visible={engagement.showLikeNudge}
+            onDismiss={engagement.dismissLikeNudge}
+            onLikeClick={() => {
+              engagement.dismissLikeNudge();
+              document.querySelector('[data-like-button]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+          />
+          <EngagementPopup visible={engagement.showEngagementPopup} onDismiss={engagement.dismissEngagementPopup} />
+          <SocialProofToast postId={todayPost.id} postType="history" visible={engagement.showSocialProof} onDismiss={engagement.dismissSocialProof} />
+        </>
+      )}
+
       {/* Footer */}
       <footer className="border-t py-8" role="contentinfo">
         <div className="max-w-4xl mx-auto px-4">

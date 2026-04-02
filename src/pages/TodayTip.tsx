@@ -301,6 +301,22 @@ export default function TodayTip() {
         )}
       </main>
 
+      {/* Engagement Overlays */}
+      {todayTip && (
+        <>
+          <LikeNudge
+            visible={engagement.showLikeNudge}
+            onDismiss={engagement.dismissLikeNudge}
+            onLikeClick={() => {
+              engagement.dismissLikeNudge();
+              document.querySelector('[data-like-button]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+          />
+          <EngagementPopup visible={engagement.showEngagementPopup} onDismiss={engagement.dismissEngagementPopup} />
+          <SocialProofToast postId={todayTip.id} postType="tip" visible={engagement.showSocialProof} onDismiss={engagement.dismissSocialProof} />
+        </>
+      )}
+
       <footer className="border-t py-8" role="contentinfo">
         <div className="max-w-4xl mx-auto px-4">
           <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground mb-4" aria-label="Footer navigation">
