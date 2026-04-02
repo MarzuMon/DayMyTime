@@ -107,6 +107,10 @@ export default function ContentManagementTab() {
   const [scheduleType, setScheduleType] = useState<'history' | 'tips' | 'both'>('both');
   const [scheduling, setScheduling] = useState(false);
 
+  const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
+  const [socialDialogOpen, setSocialDialogOpen] = useState(false);
+  const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
+
   useEffect(() => { fetchAll(); fetchAnalytics(); }, []);
 
   const fetchAll = async () => {
