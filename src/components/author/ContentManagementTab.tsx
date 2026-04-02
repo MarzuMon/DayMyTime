@@ -422,11 +422,13 @@ export default function ContentManagementTab() {
         <TabsContent value="history">
           <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
             onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
+            onCopySocials={(p) => { setSocialDialogPost(p); setSocialDialogOpen(true); }}
             viewCounts={viewCounts} loading={loading} />
         </TabsContent>
         <TabsContent value="tips">
           <PostList posts={posts} onEdit={openEdit} onDelete={deletePost} onPublish={publishPost}
             onShare={sharePost} onPreview={previewPost} onCopyLink={copyLink}
+            onCopySocials={(p) => { setSocialDialogPost(p); setSocialDialogOpen(true); }}
             viewCounts={viewCounts} loading={loading} />
         </TabsContent>
       </Tabs>
