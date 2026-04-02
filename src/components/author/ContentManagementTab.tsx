@@ -110,11 +110,39 @@ export default function ContentManagementTab() {
   const [scheduleType, setScheduleType] = useState<'history' | 'tips' | 'both'>('both');
   const [scheduling, setScheduling] = useState(false);
 
+  // GOD MODE stats
+  const [godModeStats, setGodModeStats] = useState<{
+    recentHistoryCount: number;
+    recentTipCount: number;
+    topPages: { path: string; views: number }[];
+    lastHistoryDate: string | null;
+    lastTipDate: string | null;
+  }>({ recentHistoryCount: 0, recentTipCount: 0, topPages: [], lastHistoryDate: null, lastTipDate: null });
+
   const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
 
-  useEffect(() => { fetchAll(); fetchAnalytics(); }, []);
+  useEffect(() => { fetchAll(); fetchAnalytics(); fetchGodModeStats(); }, []);
+
+  const fetchGodModeStats = async () => {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+    const [hRes, tRes, pvRes] = await Promise.all([
+      supabase.from('history_posts').select('title, publish_date').gte('publish_date', thirtyDaysAgo).order('publish_date', { ascending: false }).limit(30),
+      supabase.from('daily_tips').select('title, publish_date').gte('publish_date', thirtyDaysAgo).order('publish_date', { ascending: false }).limit(30),
+      supabase.from('page_views').select('page_path').order('created_at', { ascending: false }).limit(100),
+    ]);
+    const pathCounts: Record<string, number> = {};
+    (pvRes.data || []).forEach((v: any) => { pathCounts[v.page_path] = (pathCounts[v.page_path] || 0) + 1; });
+    const topPages = Object.entries(pathCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([path, views]) => ({ path, views }));
+    setGodModeStats({
+      recentHistoryCount: hRes.data?.length || 0,
+      recentTipCount: tRes.data?.length || 0,
+      topPages,
+      lastHistoryDate: hRes.data?.[0]?.publish_date || null,
+      lastTipDate: tRes.data?.[0]?.publish_date || null,
+    });
+  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -348,6 +376,43 @@ export default function ContentManagementTab() {
               <p className="text-xl font-bold flex items-center justify-center gap-1"><Eye className="h-4 w-4" />{totalViews}</p>
               <p className="text-xs text-muted-foreground">Page Views</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Auto-Publish Settings */}
+      {/* GOD MODE Status Panel */}
+      <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" /> GOD MODE Engine Status
+            <Badge variant="outline" className="ml-auto text-xs border-primary/50 text-primary">Active</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.recentHistoryCount}</p>
+              <p className="text-[10px] text-muted-foreground">History (30d)</p>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.recentTipCount}</p>
+              <p className="text-[10px] text-muted-foreground">Tips (30d)</p>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.recentHistoryCount + godModeStats.recentTipCount}</p>
+              <p className="text-[10px] text-muted-foreground">Memory Items</p>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.topPages.length}</p>
+              <p className="text-[10px] text-muted-foreground">Top Topics</p>
+            </div>
+          </div>
+          <div className="space-y-1.5 text-xs text-muted-foreground">
+            <p>🧠 <strong>Memory:</strong> AI avoids {godModeStats.recentHistoryCount + godModeStats.recentTipCount} recent titles for unique content</p>
+            <p>📊 <strong>Analytics:</strong> {godModeStats.topPages.length > 0 ? godModeStats.topPages.slice(0, 3).map(t => t.path).join(', ') : 'Collecting data...'}</p>
+            <p>📅 <strong>Last History:</strong> {godModeStats.lastHistoryDate || 'None'} | <strong>Last Tip:</strong> {godModeStats.lastTipDate || 'None'}</p>
+            <p>🔄 <strong>Features:</strong> Dedup prevention • 3x retry • Memory-aware • Analytics-informed</p>
           </div>
         </CardContent>
       </Card>
