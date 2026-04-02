@@ -141,7 +141,8 @@ export default function ContentManagementTab() {
     const path = `${activeTab}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from('content-images').upload(path, file);
     if (error) {
-      toast.error('Upload failed: ' + error.message);
+      console.error('Content image upload error:', error);
+      toast.error('Image upload failed. Please try again.');
       setter(false);
       return;
     }
