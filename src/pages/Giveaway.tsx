@@ -483,6 +483,9 @@ export default function Giveaway() {
             <ReferralProgressCard />
           </motion.div>
 
+          {/* Top Referrers Leaderboard */}
+          <ReferralLeaderboard />
+
           {/* Like */}
           <LikeButton postId="00000000-0000-0000-0000-000000000000" postType="giveaway" variant="ghost" />
 
