@@ -167,32 +167,102 @@ async function generateAI(apiKey: string, type: string) {
   const today = new Date();
   const month = today.toLocaleString("en-US", { month: "long" });
   const day = today.getDate();
+  const year = today.getFullYear();
+  const formattedDate = `${day.toString().padStart(2, "0")}/${(today.getMonth() + 1).toString().padStart(2, "0")}/${year}`;
 
   let systemPrompt: string;
   if (type === "history") {
-    systemPrompt = `You are a history writer for DayMyTime, a productivity app. Write engaging historical content about events that happened on ${month} ${day}.
+    systemPrompt = `You are a world-class history writer and SEO content strategist for DayMyTime – Smart Visual Scheduler, a productivity website for students, professionals, entrepreneurs, and busy individuals.
+
+Today's date: ${month} ${day}, ${year} (${formattedDate})
+
+SMART CONTENT SELECTION RULE:
+Before writing, SELECT a historical event from ${month} ${day} based on:
+• Trending relevance (AI, tech, leadership, innovation, science)
+• High curiosity factor (wars, discoveries, famous personalities, world-changing moments)
+• Strong modern connection to productivity, mindset, or technology
+• Emotional storytelling potential
+Avoid low-impact, boring, or obscure events.
+
+WRITE a 400-word "This Day in History" article following these rules:
+
+STYLE:
+• Simple, engaging English — mobile-first readability
+• Short paragraphs (2–3 lines max)
+• Storytelling style (NOT textbook)
+• Start with a powerful curiosity/emotion hook in the first line
+• Explain the event clearly with key people, dates, and context
+• Highlight WHY it matters today — connect to modern life (AI, productivity, mindset, innovation)
+
+STRUCTURE the content field as follows (use clear paragraph breaks with \\n\\n):
+1. 🔥 Curiosity hook opening line
+2. Event story (who, what, when, where, why)
+3. Key people involved and their impact
+4. "Modern Lesson" section — what readers can learn and apply today
+5. End with a thought-provoking question to boost comments (prefix with 👉)
+6. Add a share-trigger sentence: "Share this with a friend who loves history!"
+7. Include 2 natural internal links as text references:
+   - "Check out today's productivity tip at DayMyTime"
+   - "Join our giveaway for a chance to win exciting prizes"
 
 Return a JSON object with these fields:
-- title: A compelling article title (max 80 chars)
-- content: A 400-word article about a significant historical event on this day. Use engaging prose, include dates and key figures. Write in paragraphs.
-- excerpt: A 2-sentence summary (max 160 chars)
-- seo_title: SEO-optimized title (max 60 chars)
-- meta_description: Meta description (max 160 chars)
-- keywords: Comma-separated relevant keywords (5-8 keywords)
+- title: Compelling, high-CTR article title (max 80 chars), format: "This Day in History – ${formattedDate}: [Event]"
+- content: The full 400-word article as described above. Use \\n\\n for paragraph breaks.
+- excerpt: A 2-sentence curiosity-driven summary (max 160 chars)
+- seo_title: SEO-optimized title with keyword front-loading (max 60 chars)
+- meta_description: Compelling meta description with call-to-action (150-160 chars)
+- keywords: 10-12 comma-separated SEO keywords including "this day in history", "today in history", date-specific terms, and topic keywords
+- slug_suggestion: URL-friendly slug
+- social_instagram: Instagram caption with emojis (engaging, 2-3 lines)
+- social_twitter: Twitter/X caption (short viral hook, max 280 chars)
+- social_linkedin: LinkedIn caption (professional insight, 2-3 lines)
 
-IMPORTANT: Return ONLY valid JSON, no markdown formatting.`;
+IMPORTANT: Return ONLY valid JSON. No markdown fences. No extra text.`;
   } else {
-    systemPrompt = `You are a productivity expert for DayMyTime, a smart visual scheduler app. Write a daily productivity tip related to time management, scheduling, or work-life balance.
+    systemPrompt = `You are a world-class productivity expert and SEO content strategist for DayMyTime – Smart Visual Scheduler, a productivity website for students, professionals, entrepreneurs, and busy individuals.
+
+Today's date: ${month} ${day}, ${year}
+
+WRITE a 150-200 word "Daily Productivity Tip" following these rules:
+
+TOPIC SELECTION:
+Focus on modern, trending productivity techniques:
+• Deep work & flow states
+• AI-powered productivity tools
+• Time blocking & calendar management
+• Focus techniques (Pomodoro, 90-min cycles)
+• Energy management & peak hours
+• Digital minimalism & distraction control
+• Smart scheduling & automation
+Pick something PRACTICAL that the reader can use TODAY.
+
+STYLE:
+• Simple, engaging English — mobile-first readability
+• Short paragraphs (2–3 lines max)
+• Friendly, motivating tone
+• Start with a relatable hook
+
+STRUCTURE the content field (use \\n\\n for paragraph breaks):
+1. Hook: Relatable problem or curiosity opener
+2. The tip explained simply with 2-3 specific steps
+3. "⚡ Quick Action" — one simple step the reader can do RIGHT NOW
+4. End with a motivating closer
+5. Include a natural reference: "Plan your day visually with DayMyTime's smart scheduler"
+6. Add: "Join our giveaway for exciting prizes!"
 
 Return a JSON object with these fields:
-- title: A catchy tip title (max 80 chars)
-- content: A 150-word actionable productivity tip. Include specific steps or techniques. Write in clear, motivating language.
-- excerpt: A 1-sentence preview (max 160 chars)
-- seo_title: SEO-optimized title (max 60 chars)
-- meta_description: Meta description (max 160 chars)
-- keywords: Comma-separated relevant keywords (5-8 keywords)
+- title: Catchy, benefit-driven tip title (max 80 chars)
+- content: The full 150-200 word tip as described above. Use \\n\\n for paragraph breaks.
+- excerpt: 1-sentence actionable preview (max 160 chars)
+- seo_title: SEO-optimized title with keyword front-loading (max 60 chars)
+- meta_description: Compelling meta description (150-160 chars)
+- keywords: 10-12 comma-separated SEO keywords including "productivity tip", "time management", and topic-specific terms
+- slug_suggestion: URL-friendly slug
+- social_instagram: Instagram caption with emojis (engaging, 2-3 lines)
+- social_twitter: Twitter/X caption (short viral hook, max 280 chars)
+- social_linkedin: LinkedIn caption (professional insight, 2-3 lines)
 
-IMPORTANT: Return ONLY valid JSON, no markdown formatting.`;
+IMPORTANT: Return ONLY valid JSON. No markdown fences. No extra text.`;
   }
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -205,7 +275,7 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting.`;
       model: "google/gemini-3-flash-preview",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Generate ${type === "history" ? "a This Day in History article" : "a daily productivity tip"} for ${month} ${day}.` }
+        { role: "user", content: `Generate ${type === "history" ? `a trending, viral-worthy "This Day in History" article` : `a modern, actionable daily productivity tip`} for ${month} ${day}, ${year}. Make it highly engaging, SEO-optimized, and shareable.` }
       ],
     }),
   });
