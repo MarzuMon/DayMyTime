@@ -165,7 +165,7 @@ const Index = () => {
           {/* Top bar */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" />
+              <img src="/images/logo-icon.webp" alt="DayMyTime" className="h-9 w-9 rounded-xl shadow-glow" width={36} height={36} fetchPriority="high" />
               <div className="hidden sm:block">
                 <span className="font-display font-bold text-base">DayMyTime</span>
               </div>
