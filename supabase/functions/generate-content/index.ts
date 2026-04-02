@@ -329,7 +329,7 @@ serve(async (req) => {
           () => generateAI(LOVABLE_API_KEY, t, memory, topTopics),
           `${t} generation`
         );
-        await insertPost(db, tableName, content, targetDate);
+        await insertPost(db, tableName, content, targetDate, LOVABLE_API_KEY);
         results.push(t);
       }
 
