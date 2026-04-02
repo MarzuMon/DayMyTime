@@ -217,6 +217,7 @@ export default function Giveaway() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NotificationBanner />
+      <LiveJoinNotification context="giveaway" />
       <SEOHead
         title="Giveaway – DayMyTime | Win Exciting Prizes"
         description="Participate in the DayMyTime giveaway. Upload your WhatsApp status screenshot to enter and win exciting prizes!"
