@@ -165,7 +165,8 @@ export default function Teams() {
       body: { teamId: selectedTeam.id },
     });
     if (error || data?.error) {
-      toast({ title: 'Failed', description: data?.error || error?.message, variant: 'destructive' });
+      console.error('Generate link error:', error || data?.error);
+      toast({ title: 'Failed', description: 'Could not generate invite link. Please try again.', variant: 'destructive' });
     } else {
       const inviteUrl = `${window.location.origin}/accept-invite?token=${data.token}`;
       try {

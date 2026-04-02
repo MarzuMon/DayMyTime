@@ -26,7 +26,8 @@ export function useAdminSetting<T>(key: string, defaultValue: T) {
       .from('admin_settings')
       .upsert({ key, value: newValue as unknown as Json, updated_at: new Date().toISOString() }, { onConflict: 'key' });
     if (error) {
-      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
+      console.error('Admin settings save error:', error);
+      toast({ title: 'Save failed', description: 'Could not save settings. Please try again.', variant: 'destructive' });
     } else {
       toast({ title: 'Saved', description: `${key} settings updated.` });
     }

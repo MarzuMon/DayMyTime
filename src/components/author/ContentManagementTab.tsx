@@ -264,7 +264,8 @@ export default function ContentManagementTab() {
       setScheduleDialogOpen(false);
       fetchAll();
     } catch (e: any) {
-      toast.error(e.message || 'Failed to schedule content');
+      console.error('Schedule content error:', e);
+      toast.error('Failed to schedule content. Please try again.');
     }
     setScheduling(false);
   };

@@ -66,7 +66,8 @@ export default function Profile() {
       default_alarm_tone: defaultAlarmTone,
     }).eq('id', user.id);
     if (error) {
-      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
+      console.error('Profile save error:', error);
+      toast({ title: 'Save failed', description: 'Could not save profile. Please try again.', variant: 'destructive' });
     } else {
       toast({ title: 'Profile updated!' });
     }

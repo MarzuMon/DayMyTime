@@ -85,7 +85,8 @@ export default function ProUpgrade() {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (err: any) {
-      toast({ title: 'Payment failed', description: err.message || 'Please try again.', variant: 'destructive' });
+      console.error('Payment error:', err);
+      toast({ title: 'Payment failed', description: 'Something went wrong. Please try again.', variant: 'destructive' });
     }
     setProcessing(false);
   };
