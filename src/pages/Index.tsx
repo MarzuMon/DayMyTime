@@ -364,11 +364,12 @@ const Index = () => {
           </>
         )}
 
-        <Suspense fallback={null}><ReferralSection /></Suspense>
-        <Suspense fallback={null}><AdBanner /></Suspense>
+        {/* Defer heavy below-fold components on mobile */}
+        {!isMobile && <Suspense fallback={null}><ReferralSection /></Suspense>}
+        {!isMobile && <Suspense fallback={null}><AdBanner /></Suspense>}
       </main>
 
-      <Suspense fallback={null}><InstallPrompt /></Suspense>
+      {!isMobile && <Suspense fallback={null}><InstallPrompt /></Suspense>}
       <Suspense fallback={null}><PromoPopup isPro={isPro} /></Suspense>
 
       {/* FAB */}
