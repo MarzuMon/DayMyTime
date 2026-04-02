@@ -862,6 +862,9 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
                     📱
                   </Button>
                 )}
+                <Button size="sm" variant="ghost" onClick={() => onRegenerateImage(post)} disabled={regeneratingImageId === post.id} title="Regenerate Image">
+                  {regeneratingImageId === post.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                </Button>
                 <Button size="sm" variant="ghost" onClick={() => onPreview(post)} title="Preview">
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
