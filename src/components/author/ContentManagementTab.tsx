@@ -243,7 +243,14 @@ export default function ContentManagementTab() {
           meta_description: data.meta_description || prev.meta_description,
           keywords: data.keywords || prev.keywords,
         }));
-        toast.success('Content generated! Review and publish.');
+        if (data.social_instagram || data.social_twitter || data.social_linkedin) {
+          setGeneratedSocials({
+            instagram: data.social_instagram || '',
+            twitter: data.social_twitter || '',
+            linkedin: data.social_linkedin || '',
+          });
+        }
+        toast.success('Content generated with social captions! Review and publish.');
       }
     } catch (e: any) {
       console.error('Generate content error:', e);
