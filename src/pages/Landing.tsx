@@ -209,8 +209,8 @@ export default function Landing() {
                 </Button>
               </div>
 
-              {/* Content Section Buttons */}
-              <div className="animate-in fade-in slide-in-from-bottom-3 duration-400 delay-200 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
+              {/* Content Section Buttons — hidden on mobile to reduce above-fold weight */}
+              <div className="hidden sm:flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
                 <Button size="sm" variant="outline" onClick={() => navigate('/auth')} className="rounded-xl glass gap-1.5">
                   🚀 Start Free Scheduler
                 </Button>
