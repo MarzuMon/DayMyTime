@@ -794,11 +794,12 @@ function ImageUploadField({ label, mode, onModeChange, value, onValueChange, upl
   );
 }
 
-function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCopyLink, onCopySocials, viewCounts, loading }: {
+function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCopyLink, onCopySocials, onRegenerateImage, regeneratingImageId, viewCounts, loading }: {
   posts: Post[]; onEdit: (p: Post) => void; onDelete: (id: string) => void;
   onPublish: (id: string) => void; onShare: (p: Post, platform: string) => void;
   onPreview: (p: Post) => void; onCopyLink: (p: Post) => void;
   onCopySocials: (p: Post) => void;
+  onRegenerateImage: (p: Post) => void; regeneratingImageId: string | null;
   viewCounts: Record<string, number>; loading: boolean;
 }) {
   if (loading) return <div className="text-center py-10 text-muted-foreground">Loading...</div>;
