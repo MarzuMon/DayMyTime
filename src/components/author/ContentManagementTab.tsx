@@ -212,7 +212,7 @@ export default function ContentManagementTab() {
 
   const deletePost = async (id: string) => {
     const { error } = await supabase.from(table).delete().eq('id', id);
-    if (error) toast.error(error.message);
+    if (error) { console.error('Delete post error:', error); toast.error('Failed to delete post.'); }
     else { toast.success('Post deleted'); fetchAll(); }
   };
 
