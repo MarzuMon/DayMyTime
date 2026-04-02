@@ -47,7 +47,8 @@ export default function Profile() {
     const path = `${user.id}/avatar.${ext}`;
     const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (error) {
-      toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
+      console.error('Avatar upload error:', error);
+      toast({ title: 'Upload failed', description: 'Could not upload avatar. Please try again.', variant: 'destructive' });
     } else {
       const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
       setAvatarUrl(publicUrl + '?t=' + Date.now());
