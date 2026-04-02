@@ -177,10 +177,10 @@ export default function Landing() {
       </nav>
 
       {/* Hero — CSS animations only, no framer-motion */}
-      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28" aria-label="Hero">
+      <section className="relative pt-24 pb-14 sm:pt-40 sm:pb-28" aria-label="Hero">
         <div className="absolute inset-0 gradient-hero" aria-hidden="true" />
-        <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl will-change-auto" aria-hidden="true" />
-        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl will-change-auto" aria-hidden="true" />
+        <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl will-change-auto hidden sm:block" aria-hidden="true" />
+        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl will-change-auto hidden sm:block" aria-hidden="true" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
