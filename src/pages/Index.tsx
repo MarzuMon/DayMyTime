@@ -121,7 +121,7 @@ const Index = () => {
     const d = new Date(s.scheduledTime);
     return !isToday(d) && !isTomorrow(d) && isAfter(d, startOfToday()) && !s.isCompleted;
   });
-  const completedSchedules = filtered.filter(s => s.isCompleted);
+  const _completedSchedules = filtered.filter(s => s.isCompleted);
 
   // Quick stats
   const todayTotal = schedules.filter(s => isToday(new Date(s.scheduledTime))).length;
