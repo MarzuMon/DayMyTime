@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AlarmToneSelector from '@/components/AlarmToneSelector';
 import SEOHead from '@/components/SEOHead';
+import ReferralProgressCard from '@/components/ReferralProgressCard';
 import type { AlarmTone } from '@/lib/types';
 
 export default function Profile() {
@@ -137,6 +138,9 @@ export default function Profile() {
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
           Save Changes
         </Button>
+
+        {/* Referral Dashboard */}
+        <ReferralProgressCard />
 
         {!isPro && (
           <Button variant="outline" className="w-full" onClick={() => navigate('/pro')}>

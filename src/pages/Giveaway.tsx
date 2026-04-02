@@ -32,6 +32,8 @@ import SEOHead from "@/components/SEOHead";
 import { motion } from "framer-motion";
 import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 import NotificationBanner from "@/components/NotificationBanner";
+import ReferralProgressCard from "@/components/ReferralProgressCard";
+import LiveJoinNotification from "@/components/LiveJoinNotification";
 
 const formSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
@@ -215,6 +217,7 @@ export default function Giveaway() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NotificationBanner />
+      <LiveJoinNotification context="giveaway" />
       <SEOHead
         title="Giveaway – DayMyTime | Win Exciting Prizes"
         description="Participate in the DayMyTime giveaway. Upload your WhatsApp status screenshot to enter and win exciting prizes!"
@@ -471,6 +474,14 @@ export default function Giveaway() {
               </div>
             </motion.section>
           )}
+
+          {/* Referral Viral Loop */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <h2 className="font-display text-xl font-bold flex items-center gap-2 mb-4">
+              🎯 Invite Friends to Increase Winning Chance
+            </h2>
+            <ReferralProgressCard />
+          </motion.div>
 
           {/* Like */}
           <LikeButton postId="00000000-0000-0000-0000-000000000000" postType="giveaway" variant="ghost" />
