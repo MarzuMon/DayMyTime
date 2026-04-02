@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, MessageSquare, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SocialProofToastProps {
@@ -41,24 +40,16 @@ export default function SocialProofToast({ postId, postType, visible, onDismiss 
     return () => clearTimeout(autoHide);
   }, [visible, postId, postType]);
 
+  if (!visible || !message) return null;
+
   return (
-    <AnimatePresence>
-      {visible && message && (
-        <motion.div
-          initial={{ x: 300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 300, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed top-20 right-4 z-50 max-w-xs"
-        >
-          <div className="flex items-center gap-2.5 rounded-xl border border-border bg-background/95 backdrop-blur-md px-4 py-3 shadow-lg">
-            <p className="text-xs font-medium flex-1">{message}</p>
-            <button onClick={onDismiss} className="shrink-0 p-1 rounded-lg hover:bg-muted transition-colors" aria-label="Close">
-              <X className="h-3.5 w-3.5 text-muted-foreground" />
-            </button>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="fixed top-20 right-4 z-50 max-w-xs animate-in slide-in-from-right-4 fade-in duration-300">
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-background/95 backdrop-blur-md px-4 py-3 shadow-lg">
+        <p className="text-xs font-medium flex-1">{message}</p>
+        <button onClick={onDismiss} className="shrink-0 p-1 rounded-lg hover:bg-muted transition-colors" aria-label="Close">
+          <X className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </div>
+    </div>
   );
 }
