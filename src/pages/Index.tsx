@@ -27,11 +27,6 @@ const BottomNav = lazy(() => import('@/components/BottomNav'));
 const PromoPopup = lazy(() => import('@/components/PromoPopup'));
 const TimelineView = lazy(() => import('@/components/TimelineView'));
 
-// Lazy load motion only when needed (saves ~30KB on mobile initial load)
-const MotionDiv = lazy(() =>
-  import('framer-motion').then(m => ({ default: m.motion.div }))
-);
-
 type ViewMode = 'list' | 'timeline';
 
 const Index = () => {
