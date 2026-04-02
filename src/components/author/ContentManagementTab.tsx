@@ -381,6 +381,43 @@ export default function ContentManagementTab() {
       </Card>
 
       {/* Auto-Publish Settings */}
+      {/* GOD MODE Status Panel */}
+      <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" /> GOD MODE Engine Status
+            <Badge variant="outline" className="ml-auto text-xs border-primary/50 text-primary">Active</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.recentHistoryCount}</p>
+              <p className="text-[10px] text-muted-foreground">History (30d)</p>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.recentTipCount}</p>
+              <p className="text-[10px] text-muted-foreground">Tips (30d)</p>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.recentHistoryCount + godModeStats.recentTipCount}</p>
+              <p className="text-[10px] text-muted-foreground">Memory Items</p>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary text-center">
+              <p className="text-lg font-bold">{godModeStats.topPages.length}</p>
+              <p className="text-[10px] text-muted-foreground">Top Topics</p>
+            </div>
+          </div>
+          <div className="space-y-1.5 text-xs text-muted-foreground">
+            <p>🧠 <strong>Memory:</strong> AI avoids {godModeStats.recentHistoryCount + godModeStats.recentTipCount} recent titles for unique content</p>
+            <p>📊 <strong>Analytics:</strong> {godModeStats.topPages.length > 0 ? godModeStats.topPages.slice(0, 3).map(t => t.path).join(', ') : 'Collecting data...'}</p>
+            <p>📅 <strong>Last History:</strong> {godModeStats.lastHistoryDate || 'None'} | <strong>Last Tip:</strong> {godModeStats.lastTipDate || 'None'}</p>
+            <p>🔄 <strong>Features:</strong> Dedup prevention • 3x retry • Memory-aware • Analytics-informed</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Auto-Publish Settings */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
