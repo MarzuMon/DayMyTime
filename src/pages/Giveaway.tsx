@@ -34,6 +34,7 @@ import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 import NotificationBanner from "@/components/NotificationBanner";
 import ReferralProgressCard from "@/components/ReferralProgressCard";
 import LiveJoinNotification from "@/components/LiveJoinNotification";
+import ReferralLeaderboard from "@/components/ReferralLeaderboard";
 
 const formSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255),
@@ -482,6 +483,9 @@ export default function Giveaway() {
             </h2>
             <ReferralProgressCard />
           </motion.div>
+
+          {/* Top Referrers Leaderboard */}
+          <ReferralLeaderboard />
 
           {/* Like */}
           <LikeButton postId="00000000-0000-0000-0000-000000000000" postType="giveaway" variant="ghost" />
