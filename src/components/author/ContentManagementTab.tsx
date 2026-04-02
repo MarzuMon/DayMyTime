@@ -138,6 +138,28 @@ export default function ContentManagementTab() {
   const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
+  const [regeneratingImageId, setRegeneratingImageId] = useState<string | null>(null);
+
+  const regenerateImage = async (post: Post) => {
+    setRegeneratingImageId(post.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: { type: activeTab === 'history' ? 'history' : 'tip', regenerate_image_only: true, post_title: post.title }
+      });
+      if (error) throw error;
+      if (data?.featured_image) {
+        await supabase.from(table).update({ featured_image: data.featured_image } as any).eq('id', post.id);
+        toast.success('Image regenerated!');
+        fetchAll();
+      } else {
+        toast.error('No image was generated. Please try again.');
+      }
+    } catch (e: any) {
+      console.error('Regenerate image error:', e);
+      toast.error('Failed to regenerate image.');
+    }
+    setRegeneratingImageId(null);
+  };
 
   useEffect(() => { fetchAll(); fetchAnalytics(); fetchGodModeStats(); }, []);
 
