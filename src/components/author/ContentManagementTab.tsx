@@ -281,6 +281,9 @@ export default function ContentManagementTab() {
     toast.success(status === 'published' ? 'Published!' : status === 'scheduled' ? 'Scheduled!' : 'Draft saved!');
     setDialogOpen(false);
     fetchAll();
+    if (status === 'published') {
+      import('@/lib/seo-utils').then(m => m.pingSearchEngines()).catch(() => {});
+    }
   };
 
   const deletePost = async (id: string) => {
