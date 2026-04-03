@@ -24,7 +24,7 @@ User-agent: facebookexternalhit
 Allow: /
 
 User-agent: *
-Allow: /
+Disallow: /
 Allow: /topics/
 Disallow: /app
 Disallow: /profile
