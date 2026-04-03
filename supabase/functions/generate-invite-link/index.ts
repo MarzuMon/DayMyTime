@@ -1,9 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const ALLOWED_ORIGINS = [
-  'https://daymytime.lovable.app',
   'https://daymytime.com',
   'https://www.daymytime.com',
+  'https://daymytime.lovable.app',
 ]
 
 function getCorsHeaders(req: Request) {
