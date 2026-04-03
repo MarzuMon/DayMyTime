@@ -56,6 +56,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    mode === "production" && asyncCssPlugin(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: false,
