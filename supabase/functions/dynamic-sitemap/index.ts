@@ -33,9 +33,10 @@ Deno.serve(async (req) => {
     { loc: "https://daymytime.com/topics/today-in-history", priority: "0.8", changefreq: "weekly" },
     { loc: "https://daymytime.com/topics/self-improvement", priority: "0.8", changefreq: "weekly" },
     { loc: "https://daymytime.com/topics/life-hacks", priority: "0.8", changefreq: "weekly" },
-    { loc: "https://daymytime.com/auth", priority: "0.7", changefreq: "monthly" },
     { loc: "https://daymytime.com/about", priority: "0.7", changefreq: "monthly" },
+    { loc: "https://daymytime.com/giveaway", priority: "0.7", changefreq: "weekly" },
     { loc: "https://daymytime.com/contact", priority: "0.6", changefreq: "monthly" },
+    { loc: "https://daymytime.com/pro", priority: "0.6", changefreq: "monthly" },
     { loc: "https://daymytime.com/privacy", priority: "0.3", changefreq: "yearly" },
     { loc: "https://daymytime.com/terms", priority: "0.3", changefreq: "yearly" },
     { loc: "https://daymytime.com/disclaimer", priority: "0.3", changefreq: "yearly" },
@@ -60,6 +61,13 @@ Deno.serve(async (req) => {
   }
 
   xml += `</urlset>`;
+
+  // Best-effort ping Google & Bing about updated sitemap
+  const sitemapUrl = "https://daymytime.com/sitemap.xml";
+  Promise.allSettled([
+    fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`),
+    fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`),
+  ]).catch(() => {});
 
   return new Response(xml, {
     headers: { ...corsHeaders, "Cache-Control": "public, max-age=3600" },
