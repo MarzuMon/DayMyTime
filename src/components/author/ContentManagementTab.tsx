@@ -292,7 +292,11 @@ export default function ContentManagementTab() {
   const publishPost = async (id: string) => {
     const { error } = await supabase.from(table).update({ status: 'published' } as any).eq('id', id);
     if (error) { console.error('Publish error:', error); toast.error('Failed to publish post.'); }
-    else { toast.success('Published!'); fetchAll(); }
+    else {
+      toast.success('Published!');
+      fetchAll();
+      import('@/lib/seo-utils').then(m => m.pingSearchEngines()).catch(() => {});
+    }
   };
 
   const generateContent = async () => {
