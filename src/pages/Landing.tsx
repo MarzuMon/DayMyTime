@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { lazy, Suspense, useState, useCallback, useEffect } from 'react';
 import SEOHead from '@/components/SEOHead';
+import { generateFaqJsonLd, generateWebsiteJsonLd } from '@/lib/seo-utils';
 
 const NewsletterSubscribe = lazy(() => import('@/components/NewsletterSubscribe'));
 const PromotionsBanner = lazy(() => import('@/components/PromotionsBanner'));
