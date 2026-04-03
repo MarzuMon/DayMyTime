@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { lazy, Suspense, useState, useCallback, useEffect } from 'react';
 import SEOHead from '@/components/SEOHead';
+import { generateFaqJsonLd, generateWebsiteJsonLd } from '@/lib/seo-utils';
 
 const NewsletterSubscribe = lazy(() => import('@/components/NewsletterSubscribe'));
 const PromotionsBanner = lazy(() => import('@/components/PromotionsBanner'));
@@ -149,6 +150,8 @@ export default function Landing() {
         canonical="https://daymytime.com/"
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateWebsiteJsonLd()) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateFaqJsonLd(faqs)) }} />
 
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50" role="navigation" aria-label="Main navigation">
