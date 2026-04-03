@@ -12,6 +12,13 @@ ReactDOM.createRoot(rootElement).render(
   </React.StrictMode>,
 );
 
+// Register service worker after page is interactive (non-render-blocking)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/registerSW.js').catch(() => {});
+  });
+}
+
 // Defer OneSignal to first user interaction to break critical request chain
 let onesignalLoaded = false;
 const loadOnesignal = () => {
