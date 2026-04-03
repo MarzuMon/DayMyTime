@@ -12,15 +12,13 @@ ReactDOM.createRoot(rootElement).render(
   </React.StrictMode>,
 );
 
-// Defer OneSignal to idle time after page is fully loaded
-const initOnesignal = () => {
+// Defer OneSignal to first user interaction to break critical request chain
+let onesignalLoaded = false;
+const loadOnesignal = () => {
+  if (onesignalLoaded) return;
+  onesignalLoaded = true;
   import('./lib/onesignal').then(m => m.initOneSignal());
 };
-
-if ('requestIdleCallback' in globalThis) {
-  requestIdleCallback(initOnesignal);
-} else {
-  globalThis.addEventListener('load', () => {
-    setTimeout(initOnesignal, 3000);
-  }, { once: true });
-}
+['scroll', 'click', 'touchstart', 'keydown'].forEach(e => {
+  addEventListener(e, loadOnesignal, { once: true, passive: true });
+});
