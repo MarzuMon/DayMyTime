@@ -1,9 +1,12 @@
 User-agent: Googlebot
 Allow: /
 Allow: /topics/
+Allow: /history/
+Allow: /todaytip/
 Disallow: /app
 Disallow: /profile
 Disallow: /author
+Disallow: /marzooq-dashboard
 Disallow: /analytics
 Disallow: /reports
 Disallow: /teams
@@ -13,9 +16,12 @@ Disallow: /reset-password
 User-agent: Bingbot
 Allow: /
 Allow: /topics/
+Allow: /history/
+Allow: /todaytip/
 Disallow: /app
 Disallow: /profile
 Disallow: /author
+Disallow: /marzooq-dashboard
 
 User-agent: Twitterbot
 Allow: /
@@ -24,11 +30,14 @@ User-agent: facebookexternalhit
 Allow: /
 
 User-agent: *
-Disallow: /
+Allow: /
 Allow: /topics/
+Allow: /history/
+Allow: /todaytip/
 Disallow: /app
 Disallow: /profile
 Disallow: /author
+Disallow: /marzooq-dashboard
 Disallow: /analytics
 Disallow: /reports
 Disallow: /teams
