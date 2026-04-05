@@ -319,7 +319,7 @@ export default function ContentManagementTab() {
     else {
       toast.success('Published!');
       fetchAll();
-      import('@/lib/seo-utils').then(m => m.pingSearchEngines()).catch(() => {});
+      import('@/seo').then(m => m.pingSitemapToSearchEngines()).catch(() => {});
     }
   };
 
