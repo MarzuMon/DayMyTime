@@ -257,16 +257,33 @@ export default function ContentManagementTab() {
     }
     setSaving(true);
     const status = overrideStatus || form.status;
-    const slug = generateSlug(form.title, form.publish_date);
+
+    // Run SEO pipeline before saving
+    const { runSEO, pingSitemapToSearchEngines } = await import('@/seo');
+    const seoResult = await runSEO({
+      title: form.title,
+      content: form.content,
+      excerpt: form.excerpt || form.content.slice(0, 160),
+      authorName: form.author_name,
+      publishDate: form.publish_date,
+      type: activeTab === 'history' ? 'history' : 'tips',
+      featuredImage: form.featured_image || null,
+      explicitKeywords: form.keywords || null,
+      seoTitle: form.seo_title || null,
+      metaDescription: form.meta_description || null,
+    });
+
     const payload = {
-      title: form.title, slug, content: form.content, excerpt: form.excerpt || form.content.slice(0, 160),
+      title: form.title, slug: seoResult.slug, content: seoResult.optimizedContent,
+      excerpt: form.excerpt || form.content.slice(0, 160),
       featured_image: form.featured_image || null,
       featured_image_2: form.featured_image_2 || null,
       image_align: form.image_align,
       author_name: form.author_name,
-      publish_date: form.publish_date, seo_title: form.seo_title || form.title,
-      meta_description: form.meta_description || form.excerpt || form.content.slice(0, 160),
-      keywords: form.keywords, status,
+      publish_date: form.publish_date,
+      seo_title: seoResult.metaTags.title,
+      meta_description: seoResult.metaTags.description,
+      keywords: seoResult.keywords.join(', '), status,
       ...(editingPost ? {} : { created_by: user?.id }),
     };
 
@@ -278,11 +295,15 @@ export default function ContentManagementTab() {
     }
     setSaving(false);
     if (error) { console.error('Save post error:', error); toast.error('Failed to save post. Please try again.'); return; }
-    toast.success(status === 'published' ? 'Published!' : status === 'scheduled' ? 'Scheduled!' : 'Draft saved!');
+    toast.success(
+      status === 'published'
+        ? `Published! SEO Score: ${seoResult.seoScore}%`
+        : status === 'scheduled' ? 'Scheduled!' : 'Draft saved!'
+    );
     setDialogOpen(false);
     fetchAll();
     if (status === 'published') {
-      import('@/lib/seo-utils').then(m => m.pingSearchEngines()).catch(() => {});
+      pingSitemapToSearchEngines().catch(() => {});
     }
   };
 
