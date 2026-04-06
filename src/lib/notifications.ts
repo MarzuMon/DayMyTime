@@ -110,9 +110,10 @@ function showPreReminder(schedule: Schedule, minutes: number) {
 }
 
 function snoozeSchedule(schedule: Schedule, onUpdate?: () => void) {
+  const snoozeMin = getSnoozeMinutes();
   const snoozedSchedule: Schedule = {
     ...schedule,
-    scheduledTime: new Date(Date.now() + SNOOZE_MINUTES * 60 * 1000).toISOString(),
+    scheduledTime: new Date(Date.now() + snoozeMin * 60 * 1000).toISOString(),
   };
   scheduleNotification(snoozedSchedule, onUpdate);
 }
