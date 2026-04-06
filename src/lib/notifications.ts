@@ -34,12 +34,14 @@ export function scheduleNotification(schedule: Schedule, onUpdate?: () => void, 
 
   if (delay <= 0 || schedule.isCompleted) return;
 
-  // Schedule 10-minute pre-reminder for Pro users
-  if (isPro) {
-    const preDelay = delay - PRE_REMINDER_MINUTES * 60 * 1000;
+  // Schedule pre-reminder (free users use prefs, Pro users always get it)
+  const preMinutes = getPreReminderMinutes();
+  const reminderMin = isPro ? Math.max(preMinutes, 10) : preMinutes;
+  if (reminderMin > 0) {
+    const preDelay = delay - reminderMin * 60 * 1000;
     if (preDelay > 0) {
       const preTimer = window.setTimeout(() => {
-        showPreReminder(schedule);
+        showPreReminder(schedule, reminderMin);
         preReminderTimers.delete(schedule.id);
       }, preDelay);
       preReminderTimers.set(schedule.id, preTimer);
