@@ -117,7 +117,7 @@ export default function NotificationPreferences() {
         )}
 
         {permission === 'granted' && (
-          <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+          <Badge variant="outline" className="text-xs text-primary border-primary/30">
             ✅ Notifications active
           </Badge>
         )}
