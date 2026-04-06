@@ -144,8 +144,8 @@ function showNotification(schedule: Schedule, onUpdate?: () => void) {
           : "📌";
 
   const body = schedule.meetingLink
-    ? `${schedule.description || "Starts now"}\n🔗 Click to join | 💤 Close to snooze ${SNOOZE_MINUTES}min`
-    : `${schedule.description || "Starts now"}\n💤 Close to snooze ${SNOOZE_MINUTES}min`;
+    ? `${schedule.description || "Starts now"}\n🔗 Click to join | 💤 Close to snooze ${snoozeMin}min`
+    : `${schedule.description || "Starts now"}\n💤 Close to snooze ${snoozeMin}min`;
 
   const notification = new Notification(`${catEmoji} ${schedule.title}`, {
     body,
