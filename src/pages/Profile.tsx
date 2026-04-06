@@ -140,6 +140,9 @@ export default function Profile() {
           Save Changes
         </Button>
 
+        {/* Notification Preferences */}
+        <NotificationPreferences />
+
         {/* Referral Dashboard */}
         <ReferralProgressCard />
 
