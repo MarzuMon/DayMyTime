@@ -73,20 +73,35 @@ function getPreviewUrl(post: Post, type: 'history' | 'tips'): string {
   return `${base}/${post.slug}`;
 }
 
-function getSeoScore(post: Post): { score: number; label: string; color: string } {
+interface SeoBreakdown {
+  label: string;
+  passed: boolean;
+  points: number;
+  max: number;
+}
+
+function getSeoScore(post: Post): { score: number; label: string; color: string; breakdown: SeoBreakdown[] } {
+  const breakdown: SeoBreakdown[] = [
+    { label: 'Title length (>10 chars)', passed: !!(post.title && post.title.length > 10), points: 0, max: 15 },
+    { label: 'SEO title set', passed: !!post.seo_title, points: 0, max: 12 },
+    { label: 'Meta description (≥50 chars)', passed: !!(post.meta_description && post.meta_description.length >= 50), points: 0, max: 12 },
+    { label: 'Keywords (≥3)', passed: !!(post.keywords && post.keywords.split(',').length >= 3), points: 0, max: 12 },
+    { label: 'Excerpt (≥30 chars)', passed: !!(post.excerpt && post.excerpt.length >= 30), points: 0, max: 10 },
+    { label: 'Featured image', passed: !!post.featured_image, points: 0, max: 12 },
+    { label: 'Content length (≥100 chars)', passed: !!(post.content && post.content.length >= 100), points: 0, max: 12 },
+    { label: 'Instagram caption', passed: !!post.social_instagram, points: 0, max: 5 },
+    { label: 'Twitter caption', passed: !!post.social_twitter, points: 0, max: 5 },
+    { label: 'LinkedIn caption', passed: !!post.social_linkedin, points: 0, max: 5 },
+  ];
   let score = 0;
-  if (post.title && post.title.length > 10) score += 20;
-  if (post.seo_title) score += 15;
-  if (post.meta_description && post.meta_description.length >= 50) score += 15;
-  if (post.keywords && post.keywords.split(',').length >= 3) score += 15;
-  if (post.excerpt && post.excerpt.length >= 30) score += 10;
-  if (post.social_instagram) score += 8;
-  if (post.social_twitter) score += 8;
-  if (post.social_linkedin) score += 9;
-  if (score >= 90) return { score, label: 'A+', color: 'text-green-500' };
-  if (score >= 70) return { score, label: 'B', color: 'text-yellow-500' };
-  if (score >= 50) return { score, label: 'C', color: 'text-orange-500' };
-  return { score, label: 'D', color: 'text-red-500' };
+  breakdown.forEach(b => { b.points = b.passed ? b.max : 0; score += b.points; });
+  const getGrade = (s: number) => {
+    if (s >= 90) return { label: 'A+', color: 'text-green-500' };
+    if (s >= 70) return { label: 'B', color: 'text-yellow-500' };
+    if (s >= 50) return { label: 'C', color: 'text-orange-500' };
+    return { label: 'D', color: 'text-red-500' };
+  };
+  return { score, ...getGrade(score), breakdown };
 }
 
 export default function ContentManagementTab() {
