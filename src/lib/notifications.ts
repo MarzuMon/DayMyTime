@@ -1,10 +1,17 @@
 import { Schedule } from "./types";
 import { playAlarmTone, stopAlarmTone } from "./alarmTones";
+import { getNotifPrefs } from "@/components/NotificationPreferences";
 
 let scheduledTimers: Map<string, number> = new Map();
 let preReminderTimers: Map<string, number> = new Map();
-const SNOOZE_MINUTES = 5;
-const PRE_REMINDER_MINUTES = 10;
+
+function getSnoozeMinutes() {
+  return parseInt(getNotifPrefs().snoozeMinutes) || 5;
+}
+
+function getPreReminderMinutes() {
+  return parseInt(getNotifPrefs().reminderMinutes) || 0;
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!("Notification" in window)) return false;
