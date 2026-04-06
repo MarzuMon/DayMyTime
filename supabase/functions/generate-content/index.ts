@@ -430,12 +430,18 @@ async function generateAI(apiKey: string, type: string, memory: Memory, topTopic
 Today's date: ${month} ${day}, ${year} (${formattedDate})
 ${memoryBlock}${keywordBlock}${analyticsBlock}
 
+═══ CRITICAL DATE RULE ═══
+You MUST write about a historical event that happened ON THIS EXACT CALENDAR DATE: ${month} ${day}.
+The event MUST have occurred on ${month} ${day} in some past year. Do NOT pick events from other dates.
+Example: If today is April 6, write about something that happened on April 6 in history (any year).
+
 ═══ DECISION ENGINE ═══
 Before writing, you MUST:
-1. SCAN all major historical events on ${month} ${day} across centuries
+1. SCAN all major historical events that happened specifically on ${month} ${day} across centuries
 2. SCORE each event on: Trending Relevance (AI, tech, leadership, innovation) × Curiosity Factor × Modern Connection × Emotional Impact × Monetization Potential
 3. SELECT the event with the HIGHEST composite score
 4. VERIFY it's not in the recent titles list above
+5. CONFIRM the event truly occurred on ${month} ${day}
 
 ═══ CONTENT GENERATION ═══
 Write a 400-500 word "This Day in History" masterpiece:
@@ -539,7 +545,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences. No extra text.`;
         {
           role: "user",
           content: `[GOD MODE] Generate ${type === "history"
-            ? `the most viral, trending "This Day in History" article for ${month} ${day}, ${year}`
+            ? `the most viral, trending "This Day in History" article for ${month} ${day}, ${year}. IMPORTANT: The event MUST have happened on ${month} ${day} in some past year — not any other date.`
             : `the most actionable, shareable productivity tip for ${month} ${day}, ${year}`
           }. Use your Decision Engine to pick the BEST topic. Ensure it's unique from recent posts. Optimize for SEO, engagement, and shareability. Execute at maximum quality.`
         },
