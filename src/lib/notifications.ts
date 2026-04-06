@@ -121,12 +121,17 @@ function snoozeSchedule(schedule: Schedule, onUpdate?: () => void) {
 function showNotification(schedule: Schedule, onUpdate?: () => void) {
   if (Notification.permission !== "granted") return;
 
-  // Play alarm tone
-  try {
-    playAlarmTone(schedule.alarmTone || "default");
-    setTimeout(() => stopAlarmTone(), 10000);
-  } catch (e) {
-    console.warn("Could not play alarm tone:", e);
+  const prefs = getNotifPrefs();
+  const snoozeMin = getSnoozeMinutes();
+
+  // Play alarm tone based on prefs
+  if (prefs.soundEnabled) {
+    try {
+      playAlarmTone(schedule.alarmTone || "default");
+      setTimeout(() => stopAlarmTone(), 10000);
+    } catch (e) {
+      console.warn("Could not play alarm tone:", e);
+    }
   }
 
   const catEmoji =
