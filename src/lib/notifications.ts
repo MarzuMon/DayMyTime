@@ -81,7 +81,7 @@ export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () =>
   schedules.filter((s) => !s.isCompleted).forEach((s) => scheduleNotification(s, onUpdate, isPro));
 }
 
-function showPreReminder(schedule: Schedule) {
+function showPreReminder(schedule: Schedule, minutes: number) {
   if (Notification.permission !== "granted") return;
 
   const catEmoji =
@@ -91,8 +91,8 @@ function showPreReminder(schedule: Schedule) {
           : "📌";
 
   const body = schedule.meetingLink
-    ? `Starting in ${PRE_REMINDER_MINUTES} minutes\n🔗 ${schedule.description || "Get ready!"}`
-    : `Starting in ${PRE_REMINDER_MINUTES} minutes\n${schedule.description || "Get ready!"}`;
+    ? `Starting in ${minutes} minutes\n🔗 ${schedule.description || "Get ready!"}`
+    : `Starting in ${minutes} minutes\n${schedule.description || "Get ready!"}`;
 
   const notification = new Notification(`⏰ ${catEmoji} ${schedule.title} — Soon!`, {
     body,
