@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AlarmToneSelector from '@/components/AlarmToneSelector';
+import NotificationPreferences from '@/components/NotificationPreferences';
 import SEOHead from '@/components/SEOHead';
 import ReferralProgressCard from '@/components/ReferralProgressCard';
 import type { AlarmTone } from '@/lib/types';
