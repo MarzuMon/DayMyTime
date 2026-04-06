@@ -1,10 +1,17 @@
 import { Schedule } from "./types";
 import { playAlarmTone, stopAlarmTone } from "./alarmTones";
+import { getNotifPrefs } from "@/components/NotificationPreferences";
 
 let scheduledTimers: Map<string, number> = new Map();
 let preReminderTimers: Map<string, number> = new Map();
-const SNOOZE_MINUTES = 5;
-const PRE_REMINDER_MINUTES = 10;
+
+function getSnoozeMinutes() {
+  return parseInt(getNotifPrefs().snoozeMinutes) || 5;
+}
+
+function getPreReminderMinutes() {
+  return parseInt(getNotifPrefs().reminderMinutes) || 0;
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!("Notification" in window)) return false;
@@ -27,12 +34,14 @@ export function scheduleNotification(schedule: Schedule, onUpdate?: () => void, 
 
   if (delay <= 0 || schedule.isCompleted) return;
 
-  // Schedule 10-minute pre-reminder for Pro users
-  if (isPro) {
-    const preDelay = delay - PRE_REMINDER_MINUTES * 60 * 1000;
+  // Schedule pre-reminder (free users use prefs, Pro users always get it)
+  const preMinutes = getPreReminderMinutes();
+  const reminderMin = isPro ? Math.max(preMinutes, 10) : preMinutes;
+  if (reminderMin > 0) {
+    const preDelay = delay - reminderMin * 60 * 1000;
     if (preDelay > 0) {
       const preTimer = window.setTimeout(() => {
-        showPreReminder(schedule);
+        showPreReminder(schedule, reminderMin);
         preReminderTimers.delete(schedule.id);
       }, preDelay);
       preReminderTimers.set(schedule.id, preTimer);
@@ -72,7 +81,7 @@ export function scheduleAllNotifications(schedules: Schedule[], onUpdate?: () =>
   schedules.filter((s) => !s.isCompleted).forEach((s) => scheduleNotification(s, onUpdate, isPro));
 }
 
-function showPreReminder(schedule: Schedule) {
+function showPreReminder(schedule: Schedule, minutes: number) {
   if (Notification.permission !== "granted") return;
 
   const catEmoji =
@@ -82,8 +91,8 @@ function showPreReminder(schedule: Schedule) {
           : "📌";
 
   const body = schedule.meetingLink
-    ? `Starting in ${PRE_REMINDER_MINUTES} minutes\n🔗 ${schedule.description || "Get ready!"}`
-    : `Starting in ${PRE_REMINDER_MINUTES} minutes\n${schedule.description || "Get ready!"}`;
+    ? `Starting in ${minutes} minutes\n🔗 ${schedule.description || "Get ready!"}`
+    : `Starting in ${minutes} minutes\n${schedule.description || "Get ready!"}`;
 
   const notification = new Notification(`⏰ ${catEmoji} ${schedule.title} — Soon!`, {
     body,
@@ -101,9 +110,10 @@ function showPreReminder(schedule: Schedule) {
 }
 
 function snoozeSchedule(schedule: Schedule, onUpdate?: () => void) {
+  const snoozeMin = getSnoozeMinutes();
   const snoozedSchedule: Schedule = {
     ...schedule,
-    scheduledTime: new Date(Date.now() + SNOOZE_MINUTES * 60 * 1000).toISOString(),
+    scheduledTime: new Date(Date.now() + snoozeMin * 60 * 1000).toISOString(),
   };
   scheduleNotification(snoozedSchedule, onUpdate);
 }
@@ -111,12 +121,17 @@ function snoozeSchedule(schedule: Schedule, onUpdate?: () => void) {
 function showNotification(schedule: Schedule, onUpdate?: () => void) {
   if (Notification.permission !== "granted") return;
 
-  // Play alarm tone
-  try {
-    playAlarmTone(schedule.alarmTone || "default");
-    setTimeout(() => stopAlarmTone(), 10000);
-  } catch (e) {
-    console.warn("Could not play alarm tone:", e);
+  const prefs = getNotifPrefs();
+  const snoozeMin = getSnoozeMinutes();
+
+  // Play alarm tone based on prefs
+  if (prefs.soundEnabled) {
+    try {
+      playAlarmTone(schedule.alarmTone || "default");
+      setTimeout(() => stopAlarmTone(), 10000);
+    } catch (e) {
+      console.warn("Could not play alarm tone:", e);
+    }
   }
 
   const catEmoji =
@@ -129,8 +144,8 @@ function showNotification(schedule: Schedule, onUpdate?: () => void) {
           : "📌";
 
   const body = schedule.meetingLink
-    ? `${schedule.description || "Starts now"}\n🔗 Click to join | 💤 Close to snooze ${SNOOZE_MINUTES}min`
-    : `${schedule.description || "Starts now"}\n💤 Close to snooze ${SNOOZE_MINUTES}min`;
+    ? `${schedule.description || "Starts now"}\n🔗 Click to join | 💤 Close to snooze ${snoozeMin}min`
+    : `${schedule.description || "Starts now"}\n💤 Close to snooze ${snoozeMin}min`;
 
   const notification = new Notification(`${catEmoji} ${schedule.title}`, {
     body,
@@ -154,14 +169,14 @@ function showNotification(schedule: Schedule, onUpdate?: () => void) {
 
   notification.onclose = () => {
     stopAlarmTone();
-    // If user dismissed without clicking, snooze automatically
-    if (!userClicked) {
+    // If user dismissed without clicking, snooze automatically (if enabled)
+    if (!userClicked && prefs.autoSnooze) {
       snoozeSchedule(schedule, onUpdate);
     }
   };
 
   // Duration complete notification
-  if (schedule.duration) {
+  if (schedule.duration && prefs.durationAlert) {
     window.setTimeout(
       () => {
         new Notification(`✅ ${schedule.title} — Duration Complete`, {
