@@ -169,14 +169,14 @@ function showNotification(schedule: Schedule, onUpdate?: () => void) {
 
   notification.onclose = () => {
     stopAlarmTone();
-    // If user dismissed without clicking, snooze automatically
-    if (!userClicked) {
+    // If user dismissed without clicking, snooze automatically (if enabled)
+    if (!userClicked && prefs.autoSnooze) {
       snoozeSchedule(schedule, onUpdate);
     }
   };
 
   // Duration complete notification
-  if (schedule.duration) {
+  if (schedule.duration && prefs.durationAlert) {
     window.setTimeout(
       () => {
         new Notification(`✅ ${schedule.title} — Duration Complete`, {
