@@ -545,7 +545,7 @@ CRITICAL: Return ONLY valid JSON. No markdown fences. No extra text.`;
         {
           role: "user",
           content: `[GOD MODE] Generate ${type === "history"
-            ? `the most viral, trending "This Day in History" article for ${month} ${day}, ${year}`
+            ? `the most viral, trending "This Day in History" article for ${month} ${day}, ${year}. IMPORTANT: The event MUST have happened on ${month} ${day} in some past year — not any other date.`
             : `the most actionable, shareable productivity tip for ${month} ${day}, ${year}`
           }. Use your Decision Engine to pick the BEST topic. Ensure it's unique from recent posts. Optimize for SEO, engagement, and shareability. Execute at maximum quality.`
         },

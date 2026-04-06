@@ -845,102 +845,120 @@ function PostList({ posts, onEdit, onDelete, onPublish, onShare, onPreview, onCo
   onRegenerateImage: (p: Post) => void; regeneratingImageId: string | null;
   viewCounts: Record<string, number>; loading: boolean;
 }) {
+  const [expandedSeo, setExpandedSeo] = useState<string | null>(null);
+
   if (loading) return <div className="text-center py-10 text-muted-foreground">Loading...</div>;
   if (posts.length === 0) return <div className="text-center py-10 text-muted-foreground">No posts yet. Create one!</div>;
   return (
     <div className="space-y-3">
-      {posts.map(post => (
-        <Card key={post.id}>
-          <CardContent className="py-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
-                  {post.featured_image ? (
-                    <img src={post.featured_image} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-                      <FileText className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-medium text-sm truncate">{post.title}</h3>
-                    <Badge variant={post.status === 'published' ? 'default' : post.status === 'scheduled' ? 'outline' : 'secondary'} className="text-xs shrink-0">
-                      {post.status}
-                    </Badge>
-                    {(() => {
-                      const seo = getSeoScore(post);
-                      return (
-                        <span className={`text-[10px] font-bold ${seo.color} shrink-0`} title={`SEO Score: ${seo.score}%`}>
-                          {seo.label} {seo.score}%
-                        </span>
-                      );
-                    })()}
+      {posts.map(post => {
+        const seo = getSeoScore(post);
+        return (
+          <Card key={post.id}>
+            <CardContent className="py-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
+                    {post.featured_image ? (
+                      <img src={post.featured_image} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count} · 👁 {viewCounts[post.id] || 0}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-medium text-sm truncate">{post.title}</h3>
+                      <Badge variant={post.status === 'published' ? 'default' : post.status === 'scheduled' ? 'outline' : 'secondary'} className="text-xs shrink-0">
+                        {post.status}
+                      </Badge>
+                      <button
+                        onClick={() => setExpandedSeo(expandedSeo === post.id ? null : post.id)}
+                        className={`text-[10px] font-bold ${seo.color} shrink-0 hover:underline cursor-pointer`}
+                        title="Click for SEO breakdown"
+                      >
+                        {seo.label} {seo.score}%
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(post.publish_date), 'MMM d, yyyy')} · {post.author_name} · ❤️ {post.likes_count} · 👁 {viewCounts[post.id] || 0}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
+                  <Button size="sm" variant="ghost" onClick={() => onShare(post, 'twitter')} title="Tweet">
+                    <Twitter className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => onShare(post, 'facebook')} title="Facebook">
+                    <Facebook className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => onShare(post, 'linkedin')} title="LinkedIn">
+                    <Linkedin className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => onShare(post, 'instagram')} title="Instagram">
+                    <Instagram className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => onCopyLink(post)} title="Copy Link">
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                  {(post.social_instagram || post.social_twitter || post.social_linkedin) && (
+                    <Button size="sm" variant="ghost" onClick={() => onCopySocials(post)} title="Copy Social Captions" className="text-primary">
+                      📱
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={() => onRegenerateImage(post)} disabled={regeneratingImageId === post.id} title="Regenerate Image">
+                    {regeneratingImageId === post.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => onPreview(post)} title="Preview">
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                  {post.status !== 'published' && (
+                    <Button size="sm" variant="ghost" onClick={() => onPublish(post.id)} title="Publish">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={() => onEdit(post)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="ghost" className="text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete post?</AlertDialogTitle>
+                        <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDelete(post.id)}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
-                {/* Share buttons */}
-                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'twitter')} title="Tweet">
-                  <Twitter className="h-3.5 w-3.5" />
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'facebook')} title="Facebook">
-                  <Facebook className="h-3.5 w-3.5" />
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'linkedin')} title="LinkedIn">
-                  <Linkedin className="h-3.5 w-3.5" />
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => onShare(post, 'instagram')} title="Instagram">
-                  <Instagram className="h-3.5 w-3.5" />
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => onCopyLink(post)} title="Copy Link">
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-                {(post.social_instagram || post.social_twitter || post.social_linkedin) && (
-                  <Button size="sm" variant="ghost" onClick={() => onCopySocials(post)} title="Copy Social Captions" className="text-primary">
-                    📱
-                  </Button>
-                )}
-                <Button size="sm" variant="ghost" onClick={() => onRegenerateImage(post)} disabled={regeneratingImageId === post.id} title="Regenerate Image">
-                  {regeneratingImageId === post.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => onPreview(post)} title="Preview">
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </Button>
-                {post.status !== 'published' && (
-                  <Button size="sm" variant="ghost" onClick={() => onPublish(post.id)} title="Publish">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                )}
-                <Button size="sm" variant="ghost" onClick={() => onEdit(post)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="ghost" className="text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete post?</AlertDialogTitle>
-                      <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => onDelete(post.id)}>Delete</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              {/* SEO Breakdown Panel */}
+              {expandedSeo === post.id && (
+                <div className="mt-3 pt-3 border-t">
+                  <p className="text-xs font-semibold mb-2">SEO Breakdown — {seo.score}% ({seo.label})</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {seo.breakdown.map((b, i) => (
+                      <div key={i} className="flex items-center gap-1.5 text-[11px]">
+                        <span>{b.passed ? '✅' : '❌'}</span>
+                        <span className={b.passed ? 'text-foreground' : 'text-muted-foreground'}>{b.label}</span>
+                        <span className="text-muted-foreground ml-auto">{b.points}/{b.max}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
