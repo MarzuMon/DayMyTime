@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import {
   Plus, Edit, Trash2, Eye, Sparkles, Loader2, Calendar, FileText, Lightbulb, Send,
   Upload, Image, AlignLeft, AlignCenter, AlignRight, Clock, Timer,
-  Twitter, Facebook, Linkedin, Instagram, Copy, ExternalLink, BarChart3, Heart, RefreshCw
+  Twitter, Facebook, Linkedin, Instagram, Youtube, Copy, ExternalLink, BarChart3, Heart, RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -152,7 +152,7 @@ export default function ContentManagementTab() {
     lastTipDate: string | null;
   }>({ recentHistoryCount: 0, recentTipCount: 0, topPages: [], lastHistoryDate: null, lastTipDate: null });
 
-  const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
+  const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string; youtube: string } | null>(null);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
   const [regeneratingImageId, setRegeneratingImageId] = useState<string | null>(null);
@@ -357,14 +357,15 @@ export default function ContentManagementTab() {
           meta_description: data.meta_description || prev.meta_description,
           keywords: data.keywords || prev.keywords,
         }));
-        if (data.social_instagram || data.social_twitter || data.social_linkedin) {
+        if (data.social_instagram || data.social_twitter || data.social_linkedin || data.social_youtube_short) {
           setGeneratedSocials({
             instagram: data.social_instagram || '',
             twitter: data.social_twitter || '',
             linkedin: data.social_linkedin || '',
+            youtube: data.social_youtube_short || '',
           });
         }
-        toast.success('Content generated with social captions! Review and publish.');
+        toast.success('Content generated with social captions + YouTube Short script! Review and publish.');
       }
     } catch (e: any) {
       console.error('Generate content error:', e);
@@ -729,6 +730,15 @@ export default function ContentManagementTab() {
                         <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(generatedSocials.linkedin); toast.success('LinkedIn caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
                       </div>
                       <p className="text-xs text-muted-foreground bg-secondary p-2 rounded">{generatedSocials.linkedin}</p>
+                    </div>
+                  )}
+                  {generatedSocials.youtube && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="flex items-center gap-1"><Youtube className="h-3.5 w-3.5" /> YouTube Short / Reel Script</Label>
+                        <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(generatedSocials.youtube); toast.success('YouTube Short script copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                      </div>
+                      <pre className="text-xs text-muted-foreground bg-secondary p-2 rounded whitespace-pre-wrap font-mono">{generatedSocials.youtube}</pre>
                     </div>
                   )}
                 </div>
