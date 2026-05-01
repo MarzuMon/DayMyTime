@@ -121,6 +121,7 @@ export type Database = {
           social_instagram: string | null
           social_linkedin: string | null
           social_twitter: string | null
+          social_youtube_short: string | null
           status: string
           title: string
           updated_at: string
@@ -144,6 +145,7 @@ export type Database = {
           social_instagram?: string | null
           social_linkedin?: string | null
           social_twitter?: string | null
+          social_youtube_short?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -167,6 +169,7 @@ export type Database = {
           social_instagram?: string | null
           social_linkedin?: string | null
           social_twitter?: string | null
+          social_youtube_short?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -355,6 +358,7 @@ export type Database = {
           social_instagram: string | null
           social_linkedin: string | null
           social_twitter: string | null
+          social_youtube_short: string | null
           status: string
           title: string
           updated_at: string
@@ -378,6 +382,7 @@ export type Database = {
           social_instagram?: string | null
           social_linkedin?: string | null
           social_twitter?: string | null
+          social_youtube_short?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -401,6 +406,7 @@ export type Database = {
           social_instagram?: string | null
           social_linkedin?: string | null
           social_twitter?: string | null
+          social_youtube_short?: string | null
           status?: string
           title?: string
           updated_at?: string
