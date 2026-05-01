@@ -796,6 +796,59 @@ export default function ContentManagementTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Social captions dialog for existing posts */}
+      <Dialog open={socialDialogOpen} onOpenChange={setSocialDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">📱 Social Captions & YouTube Short</DialogTitle>
+          </DialogHeader>
+          {socialDialogPost && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">For: <span className="font-medium text-foreground">{socialDialogPost.title}</span></p>
+              {socialDialogPost.social_instagram && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Instagram className="h-3.5 w-3.5" /> Instagram</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_instagram!); toast.success('Instagram caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <p className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap">{socialDialogPost.social_instagram}</p>
+                </div>
+              )}
+              {socialDialogPost.social_twitter && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Twitter className="h-3.5 w-3.5" /> Twitter / X</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_twitter!); toast.success('Twitter caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <p className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap">{socialDialogPost.social_twitter}</p>
+                </div>
+              )}
+              {socialDialogPost.social_linkedin && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Linkedin className="h-3.5 w-3.5" /> LinkedIn</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_linkedin!); toast.success('LinkedIn caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <p className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap">{socialDialogPost.social_linkedin}</p>
+                </div>
+              )}
+              {socialDialogPost.social_youtube_short && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Youtube className="h-3.5 w-3.5" /> YouTube Short / Reel Script</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_youtube_short!); toast.success('YouTube Short script copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <pre className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap font-mono">{socialDialogPost.social_youtube_short}</pre>
+                </div>
+              )}
+              {!socialDialogPost.social_instagram && !socialDialogPost.social_twitter && !socialDialogPost.social_linkedin && !socialDialogPost.social_youtube_short && (
+                <p className="text-sm text-muted-foreground text-center py-6">No social captions generated for this post yet. Re-generate it to add them.</p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
