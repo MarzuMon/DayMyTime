@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import {
   Plus, Edit, Trash2, Eye, Sparkles, Loader2, Calendar, FileText, Lightbulb, Send,
   Upload, Image, AlignLeft, AlignCenter, AlignRight, Clock, Timer,
-  Twitter, Facebook, Linkedin, Instagram, Copy, ExternalLink, BarChart3, Heart, RefreshCw
+  Twitter, Facebook, Linkedin, Instagram, Youtube, Copy, ExternalLink, BarChart3, Heart, RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -46,6 +46,7 @@ interface Post {
   social_instagram?: string | null;
   social_twitter?: string | null;
   social_linkedin?: string | null;
+  social_youtube_short?: string | null;
 }
 
 const emptyPost = {
@@ -89,9 +90,10 @@ function getSeoScore(post: Post): { score: number; label: string; color: string;
     { label: 'Excerpt (≥30 chars)', passed: !!(post.excerpt && post.excerpt.length >= 30), points: 0, max: 10 },
     { label: 'Featured image', passed: !!post.featured_image, points: 0, max: 12 },
     { label: 'Content length (≥100 chars)', passed: !!(post.content && post.content.length >= 100), points: 0, max: 12 },
-    { label: 'Instagram caption', passed: !!post.social_instagram, points: 0, max: 5 },
-    { label: 'Twitter caption', passed: !!post.social_twitter, points: 0, max: 5 },
-    { label: 'LinkedIn caption', passed: !!post.social_linkedin, points: 0, max: 5 },
+    { label: 'Instagram caption', passed: !!post.social_instagram, points: 0, max: 4 },
+    { label: 'Twitter caption', passed: !!post.social_twitter, points: 0, max: 4 },
+    { label: 'LinkedIn caption', passed: !!post.social_linkedin, points: 0, max: 4 },
+    { label: 'YouTube Short script', passed: !!post.social_youtube_short, points: 0, max: 3 },
   ];
   let score = 0;
   breakdown.forEach(b => { b.points = b.passed ? b.max : 0; score += b.points; });
@@ -150,7 +152,7 @@ export default function ContentManagementTab() {
     lastTipDate: string | null;
   }>({ recentHistoryCount: 0, recentTipCount: 0, topPages: [], lastHistoryDate: null, lastTipDate: null });
 
-  const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string } | null>(null);
+  const [generatedSocials, setGeneratedSocials] = useState<{ instagram: string; twitter: string; linkedin: string; youtube: string } | null>(null);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [socialDialogPost, setSocialDialogPost] = useState<Post | null>(null);
   const [regeneratingImageId, setRegeneratingImageId] = useState<string | null>(null);
@@ -355,14 +357,15 @@ export default function ContentManagementTab() {
           meta_description: data.meta_description || prev.meta_description,
           keywords: data.keywords || prev.keywords,
         }));
-        if (data.social_instagram || data.social_twitter || data.social_linkedin) {
+        if (data.social_instagram || data.social_twitter || data.social_linkedin || data.social_youtube_short) {
           setGeneratedSocials({
             instagram: data.social_instagram || '',
             twitter: data.social_twitter || '',
             linkedin: data.social_linkedin || '',
+            youtube: data.social_youtube_short || '',
           });
         }
-        toast.success('Content generated with social captions! Review and publish.');
+        toast.success('Content generated with social captions + YouTube Short script! Review and publish.');
       }
     } catch (e: any) {
       console.error('Generate content error:', e);
@@ -729,6 +732,15 @@ export default function ContentManagementTab() {
                       <p className="text-xs text-muted-foreground bg-secondary p-2 rounded">{generatedSocials.linkedin}</p>
                     </div>
                   )}
+                  {generatedSocials.youtube && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="flex items-center gap-1"><Youtube className="h-3.5 w-3.5" /> YouTube Short / Reel Script</Label>
+                        <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(generatedSocials.youtube); toast.success('YouTube Short script copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                      </div>
+                      <pre className="text-xs text-muted-foreground bg-secondary p-2 rounded whitespace-pre-wrap font-mono">{generatedSocials.youtube}</pre>
+                    </div>
+                  )}
                 </div>
               </details>
             )}
@@ -782,6 +794,59 @@ export default function ContentManagementTab() {
               Generate & Publish
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Social captions dialog for existing posts */}
+      <Dialog open={socialDialogOpen} onOpenChange={setSocialDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">📱 Social Captions & YouTube Short</DialogTitle>
+          </DialogHeader>
+          {socialDialogPost && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">For: <span className="font-medium text-foreground">{socialDialogPost.title}</span></p>
+              {socialDialogPost.social_instagram && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Instagram className="h-3.5 w-3.5" /> Instagram</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_instagram!); toast.success('Instagram caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <p className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap">{socialDialogPost.social_instagram}</p>
+                </div>
+              )}
+              {socialDialogPost.social_twitter && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Twitter className="h-3.5 w-3.5" /> Twitter / X</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_twitter!); toast.success('Twitter caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <p className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap">{socialDialogPost.social_twitter}</p>
+                </div>
+              )}
+              {socialDialogPost.social_linkedin && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Linkedin className="h-3.5 w-3.5" /> LinkedIn</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_linkedin!); toast.success('LinkedIn caption copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <p className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap">{socialDialogPost.social_linkedin}</p>
+                </div>
+              )}
+              {socialDialogPost.social_youtube_short && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="flex items-center gap-1"><Youtube className="h-3.5 w-3.5" /> YouTube Short / Reel Script</Label>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { navigator.clipboard.writeText(socialDialogPost.social_youtube_short!); toast.success('YouTube Short script copied!'); }}><Copy className="h-3 w-3 mr-1" /> Copy</Button>
+                  </div>
+                  <pre className="text-xs bg-secondary p-2 rounded whitespace-pre-wrap font-mono">{socialDialogPost.social_youtube_short}</pre>
+                </div>
+              )}
+              {!socialDialogPost.social_instagram && !socialDialogPost.social_twitter && !socialDialogPost.social_linkedin && !socialDialogPost.social_youtube_short && (
+                <p className="text-sm text-muted-foreground text-center py-6">No social captions generated for this post yet. Re-generate it to add them.</p>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

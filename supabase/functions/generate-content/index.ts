@@ -199,6 +199,7 @@ async function insertPost(db: any, table: string, content: any, targetDate: stri
     social_instagram: content.social_instagram || null,
     social_twitter: content.social_twitter || null,
     social_linkedin: content.social_linkedin || null,
+    social_youtube_short: content.social_youtube_short || null,
   });
 
   if (error) {
@@ -477,8 +478,9 @@ Generate platform-optimized captions:
 - Instagram: Engaging + emojis + storytelling hook + hashtags (2-3 lines)
 - Twitter/X: Viral hook + key fact (max 280 chars)
 - LinkedIn: Professional insight angle + lesson (2-3 lines)
+- YouTube Short / Reel script (45-60 seconds, vertical 9:16): Format as a structured script with [HOOK 0-3s], [BUILD 3-15s], [PAYOFF 15-45s], [CTA 45-60s]. Include on-screen text cues in CAPS, voiceover lines, and 3-5 viral hashtags at the end. Make it punchy, high-retention, and shareable.
 
-Return a JSON object with fields: title, content, excerpt, seo_title, meta_description, keywords, slug_suggestion, social_instagram, social_twitter, social_linkedin
+Return a JSON object with fields: title, content, excerpt, seo_title, meta_description, keywords, slug_suggestion, social_instagram, social_twitter, social_linkedin, social_youtube_short
 
 CRITICAL: Return ONLY valid JSON. No markdown fences. No extra text.`;
   } else {
@@ -527,7 +529,9 @@ STRUCTURE (use \\n\\n):
 ═══ SEO + SOCIAL ═══
 Same rules as history: high-CTR title, front-loaded keywords, platform-specific social captions.
 
-Return a JSON object with fields: title, content, excerpt, seo_title, meta_description, keywords, slug_suggestion, social_instagram, social_twitter, social_linkedin
+Return a JSON object with fields: title, content, excerpt, seo_title, meta_description, keywords, slug_suggestion, social_instagram, social_twitter, social_linkedin, social_youtube_short
+
+For social_youtube_short: Generate a 45-60s vertical Reel/Short script with [HOOK 0-3s], [BUILD 3-15s], [PAYOFF 15-45s], [CTA 45-60s] sections, on-screen text in CAPS, voiceover lines, and 3-5 viral hashtags.
 
 CRITICAL: Return ONLY valid JSON. No markdown fences. No extra text.`;
   }
