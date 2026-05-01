@@ -46,6 +46,7 @@ interface Post {
   social_instagram?: string | null;
   social_twitter?: string | null;
   social_linkedin?: string | null;
+  social_youtube_short?: string | null;
 }
 
 const emptyPost = {
@@ -89,9 +90,10 @@ function getSeoScore(post: Post): { score: number; label: string; color: string;
     { label: 'Excerpt (≥30 chars)', passed: !!(post.excerpt && post.excerpt.length >= 30), points: 0, max: 10 },
     { label: 'Featured image', passed: !!post.featured_image, points: 0, max: 12 },
     { label: 'Content length (≥100 chars)', passed: !!(post.content && post.content.length >= 100), points: 0, max: 12 },
-    { label: 'Instagram caption', passed: !!post.social_instagram, points: 0, max: 5 },
-    { label: 'Twitter caption', passed: !!post.social_twitter, points: 0, max: 5 },
-    { label: 'LinkedIn caption', passed: !!post.social_linkedin, points: 0, max: 5 },
+    { label: 'Instagram caption', passed: !!post.social_instagram, points: 0, max: 4 },
+    { label: 'Twitter caption', passed: !!post.social_twitter, points: 0, max: 4 },
+    { label: 'LinkedIn caption', passed: !!post.social_linkedin, points: 0, max: 4 },
+    { label: 'YouTube Short script', passed: !!post.social_youtube_short, points: 0, max: 3 },
   ];
   let score = 0;
   breakdown.forEach(b => { b.points = b.passed ? b.max : 0; score += b.points; });
