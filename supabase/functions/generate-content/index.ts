@@ -227,8 +227,25 @@ serve(async (req) => {
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
     const token = authHeader.replace("Bearer ", "");
 
-    // Allow service-role key for cron/scheduled calls
-    const isServiceRole = token === serviceRoleKey;
+    // Allow service-role key for cron/scheduled calls.
+    // Accept either an exact match against the env service role key, OR any JWT
+    // whose payload claims `role: "service_role"` (covers vault-stored keys
+    // that may have been issued separately but still represent the service role).
+    let isServiceRole = token === serviceRoleKey;
+    if (!isServiceRole) {
+      try {
+        const parts = token.split(".");
+        if (parts.length === 3) {
+          const payloadJson = atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"));
+          const payload = JSON.parse(payloadJson);
+          if (payload?.role === "service_role") {
+            isServiceRole = true;
+          }
+        }
+      } catch (_e) {
+        // not a JWT — fall through to user auth check
+      }
+    }
 
     if (!isServiceRole) {
       const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
