@@ -581,6 +581,65 @@ export type Database = {
         }
         Relationships: []
       }
+      question_edit_proposals: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          id: string
+          proposed_domain: string
+          proposed_module: string | null
+          proposed_normalized_text: string
+          proposed_question: string
+          question_id: string
+          reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          id?: string
+          proposed_domain?: string
+          proposed_module?: string | null
+          proposed_normalized_text: string
+          proposed_question: string
+          question_id: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          id?: string
+          proposed_domain?: string
+          proposed_module?: string | null
+          proposed_normalized_text?: string
+          proposed_question?: string
+          question_id?: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_edit_proposals_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           created_at: string
@@ -983,6 +1042,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_question_edit_proposal: {
+        Args: { _admin_note?: string; _proposal_id: string }
+        Returns: undefined
+      }
       check_subscription_expiry: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }

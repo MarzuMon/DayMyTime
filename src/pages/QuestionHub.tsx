@@ -14,6 +14,8 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/use-user-role";
 import SEOHead from "@/components/SEOHead";
+import EditProposalDialog from "@/components/questionHub/EditProposalDialog";
+import EditProposalsAdmin from "@/components/questionHub/EditProposalsAdmin";
 import {
   DOMAINS,
   type Domain,
@@ -112,6 +114,13 @@ export default function QuestionHub() {
           </p>
         </header>
 
+        {isAdmin && (
+          <section className="mb-8 rounded-lg border border-border/60 bg-card/50 p-4">
+            <h2 className="mb-3 text-lg font-semibold">Edit Proposals (Admin)</h2>
+            <EditProposalsAdmin />
+          </section>
+        )}
+
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -169,6 +178,10 @@ export default function QuestionHub() {
                       {bookmarks.includes(q.id) ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
                       {bookmarks.includes(q.id) ? "Saved" : "Save"}
                     </Button>
+                    <EditProposalDialog
+                      questionId={q.id}
+                      initial={{ question: q.question, domain: q.domain, module: q.module }}
+                    />
                     {isAdmin && (
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleAdminDelete(q.id)}>
                         <Trash2 className="h-4 w-4" /> Delete
