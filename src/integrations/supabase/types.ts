@@ -581,6 +581,48 @@ export type Database = {
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          module: string | null
+          normalized_text: string
+          question: string
+          screenshot_url: string | null
+          source: string
+          status: string
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string
+          id?: string
+          module?: string | null
+          normalized_text: string
+          question: string
+          screenshot_url?: string | null
+          source?: string
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          module?: string | null
+          normalized_text?: string
+          question?: string
+          screenshot_url?: string | null
+          source?: string
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           code: string
