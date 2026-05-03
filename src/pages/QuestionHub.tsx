@@ -14,6 +14,8 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/use-user-role";
 import SEOHead from "@/components/SEOHead";
+import EditProposalDialog from "@/components/questionHub/EditProposalDialog";
+import EditProposalsAdmin from "@/components/questionHub/EditProposalsAdmin";
 import {
   DOMAINS,
   type Domain,
@@ -169,6 +171,10 @@ export default function QuestionHub() {
                       {bookmarks.includes(q.id) ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
                       {bookmarks.includes(q.id) ? "Saved" : "Save"}
                     </Button>
+                    <EditProposalDialog
+                      questionId={q.id}
+                      initial={{ question: q.question, domain: q.domain, module: q.module }}
+                    />
                     {isAdmin && (
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleAdminDelete(q.id)}>
                         <Trash2 className="h-4 w-4" /> Delete
