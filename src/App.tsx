@@ -30,6 +30,7 @@ const CategoryPage = lazyWithRetry(() => import("./pages/CategoryPage"), "catego
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "not-found");
 const Unsubscribe = lazyWithRetry(() => import("./pages/Unsubscribe"), "unsubscribe");
 const Giveaway = lazyWithRetry(() => import("./pages/Giveaway"), "giveaway");
+const QuestionHub = lazyWithRetry(() => import("./pages/QuestionHub"), "question-hub");
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ export default function App() {
               <Route path="/topics/:category" element={<PageTransition><CategoryPage /></PageTransition>} />
               <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
               <Route path="/giveaway" element={<PageTransition><Giveaway /></PageTransition>} />
+              <Route path="/question-hub" element={<PageTransition><QuestionHub /></PageTransition>} />
 
               {/* Protected routes */}
               <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
