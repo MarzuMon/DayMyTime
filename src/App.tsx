@@ -11,7 +11,6 @@ const Landing = lazyWithRetry(() => import("./pages/Landing"), "landing");
 const Auth = lazyWithRetry(() => import("./pages/Auth"), "auth");
 const Index = lazyWithRetry(() => import("./pages/Index"), "index");
 const Profile = lazyWithRetry(() => import("./pages/Profile"), "profile");
-const ProUpgrade = lazyWithRetry(() => import("./pages/ProUpgrade"), "pro-upgrade");
 const Author = lazyWithRetry(() => import("./pages/Author"), "marzooq-dashboard");
 const Teams = lazyWithRetry(() => import("./pages/Teams"), "teams");
 const Contact = lazyWithRetry(() => import("./pages/Contact"), "contact");
@@ -29,7 +28,6 @@ const Topics = lazyWithRetry(() => import("./pages/Topics"), "topics");
 const CategoryPage = lazyWithRetry(() => import("./pages/CategoryPage"), "category-page");
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "not-found");
 const Unsubscribe = lazyWithRetry(() => import("./pages/Unsubscribe"), "unsubscribe");
-const Giveaway = lazyWithRetry(() => import("./pages/Giveaway"), "giveaway");
 const QuestionHub = lazyWithRetry(() => import("./pages/QuestionHub"), "question-hub");
 
 const queryClient = new QueryClient();
@@ -66,13 +64,13 @@ export default function App() {
               <Route path="/topics" element={<PageTransition><Topics /></PageTransition>} />
               <Route path="/topics/:category" element={<PageTransition><CategoryPage /></PageTransition>} />
               <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
-              <Route path="/giveaway" element={<PageTransition><Giveaway /></PageTransition>} />
+              
               <Route path="/question-hub" element={<PageTransition><QuestionHub /></PageTransition>} />
 
               {/* Protected routes */}
               <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
-              <Route path="/pro" element={<ProtectedRoute><PageTransition><ProUpgrade /></PageTransition></ProtectedRoute>} />
+              
               <Route path="/marzooq-dashboard" element={<ProtectedRoute><PageTransition><Author /></PageTransition></ProtectedRoute>} />
               <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
               <Route path="/analytics" element={<ProtectedRoute><PageTransition><Analytics /></PageTransition></ProtectedRoute>} />

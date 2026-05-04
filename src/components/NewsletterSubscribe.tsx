@@ -14,14 +14,10 @@ interface NewsletterSubscribeProps {
   description?: string;
   icon?: string;
   variant?: "accent" | "primary" | "default";
-  context?: "giveaway" | "history" | "tips" | "default";
+  context?: "history" | "tips" | "default";
 }
 
 const CONTEXT_COPY: Record<string, { title: string; description: string }> = {
-  giveaway: {
-    title: "🎁 Get New Giveaway Posts",
-    description: "Subscribe for new giveaway alerts. No spam.",
-  },
   history: {
     title: "📬 Get daily history updates",
     description: "Subscribe to receive articles directly in your inbox.",

@@ -33,10 +33,11 @@ export interface SeoMetaTags {
   articleAuthor?: string;
 }
 
-const DEFAULT_IMAGE = `${SITE_URL}/images/logo_D-full.png`;
+const DEFAULT_IMAGE = `${SITE_URL}/images/og-default.jpg`;
 
 /**
  * Generate complete SEO meta tags from post data.
+ * Falls back to a generic OG image only when the post has no featured image.
  */
 export function generateSeoMeta(input: SeoMetaInput): SeoMetaTags {
   const title = truncate(input.seoTitle || input.title, 60);
