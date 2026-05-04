@@ -1,6 +1,5 @@
-import { Heart, X, Gift, MessageSquare } from 'lucide-react';
+import { Heart, X, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 
 interface LikeNudgeProps {
   visible: boolean;
@@ -30,8 +29,6 @@ interface EngagementPopupProps {
 }
 
 export function EngagementPopup({ visible, onDismiss }: EngagementPopupProps) {
-  const navigate = useNavigate();
-
   if (!visible) return null;
   return (
     <div className="fixed bottom-20 right-4 z-50 max-w-xs w-72 animate-in zoom-in-95 fade-in duration-300">
@@ -58,12 +55,6 @@ export function EngagementPopup({ visible, onDismiss }: EngagementPopupProps) {
             <MessageSquare className="h-3.5 w-3.5" /> Comment
           </Button>
         </div>
-        <button
-          onClick={() => { onDismiss(); navigate('/giveaway'); }}
-          className="mt-2 w-full flex items-center justify-center gap-1.5 text-xs text-primary font-medium hover:underline"
-        >
-          <Gift className="h-3.5 w-3.5" /> Like + Comment to enter giveaway!
-        </button>
       </div>
     </div>
   );
