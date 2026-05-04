@@ -263,81 +263,6 @@ export type Database = {
         }
         Relationships: []
       }
-      giveaway_config: {
-        Row: {
-          active_image_url: string | null
-          expiry_date: string | null
-          id: string
-          is_finished: boolean
-          start_count: number
-          updated_at: string
-        }
-        Insert: {
-          active_image_url?: string | null
-          expiry_date?: string | null
-          id?: string
-          is_finished?: boolean
-          start_count?: number
-          updated_at?: string
-        }
-        Update: {
-          active_image_url?: string | null
-          expiry_date?: string | null
-          id?: string
-          is_finished?: boolean
-          start_count?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      giveaway_contributions: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          image_url: string
-          phone: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          image_url: string
-          phone: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          image_url?: string
-          phone?: string
-        }
-        Relationships: []
-      }
-      giveaway_winners: {
-        Row: {
-          created_at: string
-          id: string
-          image_url: string | null
-          name: string
-          video_url: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          name?: string
-          video_url?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          name?: string
-          video_url?: string | null
-        }
-        Relationships: []
-      }
       history_posts: {
         Row: {
           author_name: string
@@ -514,7 +439,6 @@ export type Database = {
           default_alarm_tone: string
           display_name: string
           id: string
-          is_pro: boolean
           updated_at: string
         }
         Insert: {
@@ -524,7 +448,6 @@ export type Database = {
           default_alarm_tone?: string
           display_name?: string
           id: string
-          is_pro?: boolean
           updated_at?: string
         }
         Update: {
@@ -534,49 +457,6 @@ export type Database = {
           default_alarm_tone?: string
           display_name?: string
           id?: string
-          is_pro?: boolean
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      promotions: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          image_url: string | null
-          is_active: boolean
-          is_finished: boolean
-          reward_days: number
-          target_signups: number
-          title: string
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          is_finished?: boolean
-          reward_days?: number
-          target_signups?: number
-          title: string
-          type?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          is_finished?: boolean
-          reward_days?: number
-          target_signups?: number
-          title?: string
-          type?: string
           updated_at?: string
         }
         Relationships: []
@@ -681,56 +561,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      referral_codes: {
-        Row: {
-          code: string
-          created_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      referral_signups: {
-        Row: {
-          created_at: string
-          id: string
-          referral_code_id: string
-          referred_user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          referral_code_id: string
-          referred_user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          referral_code_id?: string
-          referred_user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "referral_signups_referral_code_id_fkey"
-            columns: ["referral_code_id"]
-            isOneToOne: false
-            referencedRelation: "referral_codes"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       schedule_completions: {
         Row: {
@@ -847,48 +677,6 @@ export type Database = {
           created_at?: string
           id?: string
           keyword?: string
-        }
-        Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          amount: number
-          created_at: string
-          expires_at: string
-          id: string
-          plan: string
-          razorpay_order_id: string | null
-          razorpay_payment_id: string | null
-          razorpay_subscription_id: string | null
-          started_at: string
-          status: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          expires_at: string
-          id?: string
-          plan?: string
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          razorpay_subscription_id?: string | null
-          started_at?: string
-          status?: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          expires_at?: string
-          id?: string
-          plan?: string
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          razorpay_subscription_id?: string | null
-          started_at?: string
-          status?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -1046,7 +834,6 @@ export type Database = {
         Args: { _admin_note?: string; _proposal_id: string }
         Returns: undefined
       }
-      check_subscription_expiry: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1056,7 +843,6 @@ export type Database = {
         Returns: number
       }
       get_auth_email: { Args: never; Returns: string }
-      get_giveaway_count: { Args: never; Returns: number }
       get_invitation_by_token: {
         Args: { invite_token: string }
         Returns: {
