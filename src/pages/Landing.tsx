@@ -37,6 +37,14 @@ const testimonials = [
   { name: 'Ananya K.', role: 'Freelancer', text: 'The analytics feature helps me understand where my time actually goes.', rating: 5 },
 ];
 
+const faqs = [
+  { q: 'Is DayMyTime free to use?', a: 'Yes! DayMyTime is completely free for all users — visual scheduling, meeting alerts, analytics, custom tones, and unlimited schedules are all included.' },
+  { q: 'How do meeting alerts work?', a: "When you add a meeting link (Zoom, Google Meet, or Teams), DayMyTime detects the platform automatically. You'll get a browser notification with a one-tap \"Join Now\" button when it's time." },
+  { q: 'Can I use DayMyTime on my phone?', a: 'Absolutely! DayMyTime is a fully responsive web app that works beautifully on mobile browsers. You can even install it as a PWA for an app-like experience.' },
+  { q: 'What meeting platforms are supported?', a: "We currently support Google Meet, Zoom, and Microsoft Teams. Just paste your meeting link and we'll detect the platform automatically." },
+  { q: 'Is my data secure?', a: 'Yes. All data is stored securely with encryption. We use industry-standard authentication and never share your personal information.' },
+];
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
