@@ -362,7 +362,7 @@ const Index = () => {
 
       </main>
 
-      {!isMobile && <Suspense fallback={null}><InstallPrompt /></Suspense>
+      {!isMobile && <Suspense fallback={null}><InstallPrompt /></Suspense>}
 
       {/* FAB */}
       <button
