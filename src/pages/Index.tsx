@@ -54,7 +54,7 @@ const Index = () => {
   useEffect(() => {
     refreshSchedules().then(s => {
       setNotifPermission(getNotificationPermission());
-      scheduleAllNotifications(s, refreshSchedules, isPro);
+      scheduleAllNotifications(s, refreshSchedules);
     });
     supabase.from('team_members').select('id', { count: 'exact', head: true })
       .then(({ count }) => setTeamMemberCount(count ?? 0));
@@ -72,7 +72,7 @@ const Index = () => {
     const granted = await requestNotificationPermission();
     setNotifPermission(granted ? 'granted' : 'denied');
     if (granted) {
-      scheduleAllNotifications(schedules, refreshSchedules, isPro);
+      scheduleAllNotifications(schedules, refreshSchedules);
       toast({ title: '🔔 Notifications enabled', description: "You'll get alerts when schedules are due." });
     } else {
       toast({ title: 'Notifications blocked', description: 'Enable them in browser settings.', variant: 'destructive' });
@@ -83,19 +83,19 @@ const Index = () => {
     const updated = editingSchedule ? await updateSchedule(schedule) : await addSchedule(schedule);
     setSchedules(updated);
     setEditingSchedule(null);
-    scheduleAllNotifications(updated, refreshSchedules, isPro);
+    scheduleAllNotifications(updated, refreshSchedules);
   };
 
   const handleDelete = async (id: string) => {
     const updated = await deleteSchedule(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules, isPro);
+    scheduleAllNotifications(updated, refreshSchedules);
   };
 
   const handleToggle = async (id: string) => {
     const updated = await toggleComplete(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules, isPro);
+    scheduleAllNotifications(updated, refreshSchedules);
   };
 
   const handleEdit = (schedule: Schedule) => {
