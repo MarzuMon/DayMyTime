@@ -60,7 +60,7 @@ const pricingPro = [
 ];
 
 const faqs = [
-  { q: 'Is DayMyTime free to use?', a: 'Yes! The Free plan includes visual scheduling, meeting alerts, and basic task management. Upgrade to Pro for advanced features like analytics, custom tones, and unlimited schedules.' },
+  { q: 'Is DayMyTime free to use?', a: 'Yes! DayMyTime is completely free for all users — visual scheduling, meeting alerts, analytics, custom tones, and unlimited schedules are all included.' },
   { q: 'How do meeting alerts work?', a: 'When you add a meeting link (Zoom, Google Meet, or Teams), DayMyTime detects the platform automatically. You\'ll get a browser notification with a one-tap "Join Now" button when it\'s time.' },
   { q: 'Can I use DayMyTime on my phone?', a: 'Absolutely! DayMyTime is a fully responsive web app that works beautifully on mobile browsers. You can even install it as a PWA for an app-like experience.' },
   { q: 'What meeting platforms are supported?', a: 'We currently support Google Meet, Zoom, and Microsoft Teams. Just paste your meeting link and we\'ll detect the platform automatically.' },
