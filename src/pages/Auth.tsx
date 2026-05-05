@@ -77,23 +77,6 @@ export default function Auth() {
     return <Navigate to={redirectTo || '/app'} replace />;
   }
 
-  const trackReferral = async (userId: string) => {
-    if (!refCode) return;
-    try {
-      const { data: codeData } = await supabase
-        .from('referral_codes')
-        .select('id')
-        .eq('code', refCode)
-        .maybeSingle();
-      if (codeData) {
-        await supabase.from('referral_signups').insert({
-          referral_code_id: codeData.id,
-          referred_user_id: userId,
-        });
-      }
-    } catch {}
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
