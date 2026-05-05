@@ -20,11 +20,8 @@ import DashboardSkeleton from '@/components/DashboardSkeleton';
 // Lazy load all non-critical components
 const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
 const WeeklyPlanView = lazy(() => import('@/components/WeeklyPlanView'));
-const AdBanner = lazy(() => import('@/components/AdBanner'));
-const ReferralSection = lazy(() => import('@/components/ReferralSection'));
 const InstallPrompt = lazy(() => import('@/components/InstallPrompt'));
 const BottomNav = lazy(() => import('@/components/BottomNav'));
-const PromoPopup = lazy(() => import('@/components/PromoPopup'));
 const TimelineView = lazy(() => import('@/components/TimelineView'));
 
 type ViewMode = 'list' | 'timeline';
@@ -57,7 +54,7 @@ const Index = () => {
   useEffect(() => {
     refreshSchedules().then(s => {
       setNotifPermission(getNotificationPermission());
-      scheduleAllNotifications(s, refreshSchedules, isPro);
+      scheduleAllNotifications(s, refreshSchedules);
     });
     supabase.from('team_members').select('id', { count: 'exact', head: true })
       .then(({ count }) => setTeamMemberCount(count ?? 0));
@@ -65,10 +62,9 @@ const Index = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('profiles').select('display_name, is_pro').eq('id', user.id).maybeSingle()
+    supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
       .then(({ data }) => {
         setDisplayName(data?.display_name || '');
-        setIsPro(data?.is_pro || false);
       });
   }, [user]);
 
@@ -76,7 +72,7 @@ const Index = () => {
     const granted = await requestNotificationPermission();
     setNotifPermission(granted ? 'granted' : 'denied');
     if (granted) {
-      scheduleAllNotifications(schedules, refreshSchedules, isPro);
+      scheduleAllNotifications(schedules, refreshSchedules);
       toast({ title: '🔔 Notifications enabled', description: "You'll get alerts when schedules are due." });
     } else {
       toast({ title: 'Notifications blocked', description: 'Enable them in browser settings.', variant: 'destructive' });
@@ -87,19 +83,19 @@ const Index = () => {
     const updated = editingSchedule ? await updateSchedule(schedule) : await addSchedule(schedule);
     setSchedules(updated);
     setEditingSchedule(null);
-    scheduleAllNotifications(updated, refreshSchedules, isPro);
+    scheduleAllNotifications(updated, refreshSchedules);
   };
 
   const handleDelete = async (id: string) => {
     const updated = await deleteSchedule(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules, isPro);
+    scheduleAllNotifications(updated, refreshSchedules);
   };
 
   const handleToggle = async (id: string) => {
     const updated = await toggleComplete(id);
     setSchedules(updated);
-    scheduleAllNotifications(updated, refreshSchedules, isPro);
+    scheduleAllNotifications(updated, refreshSchedules);
   };
 
   const handleEdit = (schedule: Schedule) => {
@@ -364,13 +360,9 @@ const Index = () => {
           </>
         )}
 
-        {/* Defer heavy below-fold components on mobile */}
-        {!isMobile && <Suspense fallback={null}><ReferralSection /></Suspense>}
-        {!isMobile && <Suspense fallback={null}><AdBanner /></Suspense>}
       </main>
 
       {!isMobile && <Suspense fallback={null}><InstallPrompt /></Suspense>}
-      <Suspense fallback={null}><PromoPopup isPro={isPro} /></Suspense>
 
       {/* FAB */}
       <button

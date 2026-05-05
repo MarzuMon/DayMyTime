@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { motion } from 'framer-motion';
 import SEOHead from '@/components/SEOHead';
-import ReferralPromoCard from '@/components/ReferralPromoCard';
+
 
 function ForgotPassword({ email: parentEmail }: { email: string }) {
   const email = parentEmail;
@@ -77,23 +77,6 @@ export default function Auth() {
     return <Navigate to={redirectTo || '/app'} replace />;
   }
 
-  const trackReferral = async (userId: string) => {
-    if (!refCode) return;
-    try {
-      const { data: codeData } = await supabase
-        .from('referral_codes')
-        .select('id')
-        .eq('code', refCode)
-        .maybeSingle();
-      if (codeData) {
-        await supabase.from('referral_signups').insert({
-          referral_code_id: codeData.id,
-          referred_user_id: userId,
-        });
-      }
-    } catch {}
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
@@ -111,18 +94,9 @@ export default function Auth() {
           sessionStorage.removeItem('dmt_session_only');
         }
 
-        const storedRef = localStorage.getItem('dmt_ref');
-        if (storedRef) {
-          const { data: { user: loggedUser } } = await supabase.auth.getUser();
-          if (loggedUser) {
-            await trackReferral(loggedUser.id);
-            localStorage.removeItem('dmt_ref');
-          }
-        }
         navigate(redirectTo || '/app');
       }
     } else {
-      if (refCode) localStorage.setItem('dmt_ref', refCode);
       const { error } = await signUp(email, password, displayName);
       if (error) {
         toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
@@ -330,7 +304,7 @@ export default function Auth() {
             Continue with Apple
           </Button>
 
-          <ReferralPromoCard compact />
+          
 
           <p className="text-center text-sm text-muted-foreground mt-4">
             {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}

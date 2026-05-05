@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, ArrowLeft, Camera, Save, Loader2, Crown } from 'lucide-react';
+import { CalendarDays, ArrowLeft, Camera, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import AlarmToneSelector from '@/components/AlarmToneSelector';
 import NotificationPreferences from '@/components/NotificationPreferences';
 import SEOHead from '@/components/SEOHead';
-import ReferralProgressCard from '@/components/ReferralProgressCard';
 import type { AlarmTone } from '@/lib/types';
 
 export default function Profile() {
@@ -22,20 +21,18 @@ export default function Profile() {
   const [displayName, setDisplayName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [defaultAlarmTone, setDefaultAlarmTone] = useState<AlarmTone>('default');
-  const [isPro, setIsPro] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('profiles').select('display_name, avatar_url, default_alarm_tone, is_pro').eq('id', user.id).single()
+    supabase.from('profiles').select('display_name, avatar_url, default_alarm_tone').eq('id', user.id).single()
       .then(({ data }) => {
         if (data) {
           setDisplayName(data.display_name || '');
           setAvatarUrl(data.avatar_url);
           setDefaultAlarmTone((data.default_alarm_tone as AlarmTone) || 'default');
-          setIsPro(data.is_pro);
         }
         setLoading(false);
       });
@@ -49,8 +46,7 @@ export default function Profile() {
     const path = `${user.id}/avatar.${ext}`;
     const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (error) {
-      console.error('Avatar upload error:', error);
-      toast({ title: 'Upload failed', description: 'Could not upload avatar. Please try again.', variant: 'destructive' });
+      toast({ title: 'Upload failed', description: 'Could not upload avatar.', variant: 'destructive' });
     } else {
       const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
       setAvatarUrl(publicUrl + '?t=' + Date.now());
@@ -68,8 +64,7 @@ export default function Profile() {
       default_alarm_tone: defaultAlarmTone,
     }).eq('id', user.id);
     if (error) {
-      console.error('Profile save error:', error);
-      toast({ title: 'Save failed', description: 'Could not save profile. Please try again.', variant: 'destructive' });
+      toast({ title: 'Save failed', variant: 'destructive' });
     } else {
       toast({ title: 'Profile updated!' });
     }
@@ -88,16 +83,10 @@ export default function Profile() {
           </Button>
           <CalendarDays className="h-5 w-5 text-primary" aria-hidden="true" />
           <span className="font-display font-bold">My Profile</span>
-          {isPro && (
-            <span className="ml-auto px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-bold flex items-center gap-1">
-              <Crown className="h-3 w-3" /> PRO
-            </span>
-          )}
         </div>
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 py-8 sm:py-10 space-y-8">
-        {/* Avatar */}
         <div className="flex flex-col items-center gap-4">
           <div className="relative group">
             <div className="h-24 w-24 rounded-full bg-secondary border-2 border-primary/20 overflow-hidden flex items-center justify-center">
@@ -122,13 +111,11 @@ export default function Profile() {
           <p className="text-xs text-muted-foreground">{user?.email}</p>
         </div>
 
-        {/* Display Name */}
         <div className="space-y-2">
           <Label htmlFor="profile-name" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Display Name</Label>
           <Input id="profile-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" autoComplete="name" />
         </div>
 
-        {/* Default Alarm Tone */}
         <div className="space-y-2">
           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Default Alarm Tone</Label>
           <p className="text-xs text-muted-foreground">This tone will be auto-selected for new schedules.</p>
@@ -140,17 +127,7 @@ export default function Profile() {
           Save Changes
         </Button>
 
-        {/* Notification Preferences */}
         <NotificationPreferences />
-
-        {/* Referral Dashboard */}
-        <ReferralProgressCard />
-
-        {!isPro && (
-          <Button variant="outline" className="w-full" onClick={() => navigate('/pro')}>
-            <Crown className="h-4 w-4 mr-2 text-accent" /> Upgrade to Pro
-          </Button>
-        )}
       </main>
     </div>
   );
