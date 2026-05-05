@@ -41,7 +41,6 @@ export default function PrivacyPolicy() {
         <ul>
           <li>To provide, maintain, and improve the DayMyTime service.</li>
           <li>To send you notifications about your schedules.</li>
-          <li>To process payments for Pro subscriptions.</li>
           <li>To respond to your support inquiries.</li>
         </ul>
 
@@ -51,7 +50,6 @@ export default function PrivacyPolicy() {
         <h2>4. Third-Party Services</h2>
         <p>We integrate with the following services:</p>
         <ul>
-          <li><strong>Razorpay:</strong> For processing Pro subscription payments. Your payment information is handled directly by Razorpay and is never stored on our servers.</li>
           <li><strong>Meeting platforms:</strong> We store meeting links you provide but do not access your Zoom, Google Meet, or Teams accounts.</li>
         </ul>
 

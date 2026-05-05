@@ -42,7 +42,6 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [teamMemberCount, setTeamMemberCount] = useState(0);
   const [displayName, setDisplayName] = useState('');
-  const [isPro, setIsPro] = useState(false);
 
   const refreshSchedules = useCallback(async () => {
     const s = await getSchedules();
