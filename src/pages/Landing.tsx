@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star, Sparkles, Users, BarChart3, ChevronDown, Play, ArrowUp } from 'lucide-react';
+import { CalendarDays, Clock, Bell, Video, Moon, Sun, ArrowRight, Star, Sparkles, Users, BarChart3, ChevronDown, Play, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { lazy, Suspense, useState, useCallback, useEffect } from 'react';
@@ -37,52 +37,6 @@ const testimonials = [
   { name: 'Ananya K.', role: 'Freelancer', text: 'The analytics feature helps me understand where my time actually goes.', rating: 5 },
 ];
 
-const pricingFree = [
-  'Visual timetable',
-  'Meeting alerts',
-  'Basic scheduling',
-  'Timeline view',
-  'Browser notifications',
-  '20 schedules/day',
-];
-
-const pricingPro = [
-  'Everything in Free',
-  'No ads',
-  'Advanced alerts',
-  'Priority reminders',
-  'Smart analytics',
-  'Custom alarm tones',
-  'Team workspaces',
-  'Unlimited schedules',
-  'Cloud backup & sync',
-  'Future AI scheduling',
-];
-
-const faqs = [
-  { q: 'Is DayMyTime free to use?', a: 'Yes! DayMyTime is completely free for all users — visual scheduling, meeting alerts, analytics, custom tones, and unlimited schedules are all included.' },
-  { q: 'How do meeting alerts work?', a: 'When you add a meeting link (Zoom, Google Meet, or Teams), DayMyTime detects the platform automatically. You\'ll get a browser notification with a one-tap "Join Now" button when it\'s time.' },
-  { q: 'Can I use DayMyTime on my phone?', a: 'Absolutely! DayMyTime is a fully responsive web app that works beautifully on mobile browsers. You can even install it as a PWA for an app-like experience.' },
-  { q: 'What meeting platforms are supported?', a: 'We currently support Google Meet, Zoom, and Microsoft Teams. Just paste your meeting link and we\'ll detect the platform automatically.' },
-  { q: 'How does the Pro plan pricing work?', a: 'Pro is $5/month (₹199/month). You can also earn a free month by referring 20 friends! Cancel anytime, no hidden fees.' },
-  { q: 'Is my data secure?', a: 'Yes. All data is stored securely with encryption. We use industry-standard authentication and never share your personal information.' },
-];
-
-const pricingRows = [
-  { feature: 'Add / Edit / Delete Schedules', free: true, pro: true },
-  { feature: 'Meeting Link Integration', free: true, pro: true },
-  { feature: 'Browser Notifications', free: true, pro: true },
-  { feature: 'Timeline View', free: true, pro: true },
-  { feature: 'Active Schedules', free: '20 / day', pro: 'Unlimited' },
-  { feature: 'Themes', free: 'Light only', pro: 'All themes' },
-  { feature: 'Ad-Free Experience', free: false, pro: true },
-  { feature: 'Smart Analytics', free: false, pro: true },
-  { feature: 'Cloud Backup & Sync', free: false, pro: true },
-  { feature: 'Custom Alarm Tones', free: false, pro: true },
-  { feature: 'Team Workspaces', free: false, pro: true },
-  { feature: 'Advanced Repeat Options', free: false, pro: true },
-];
-
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -91,7 +45,6 @@ const jsonLd = {
   "operatingSystem": "Web",
   "offers": [
     { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free" },
-    { "@type": "Offer", "price": "5", "priceCurrency": "USD", "name": "Pro Monthly" },
   ],
   "description": "Make every day count with DayMyTime. Discover productivity tips, inspiring history stories, and practical self improvement ideas. Free visual scheduler.",
   "url": "https://daymytime.com",
