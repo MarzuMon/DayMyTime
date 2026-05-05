@@ -415,7 +415,7 @@ export default function Landing() {
               <h4 className="font-display font-semibold text-sm mb-3">Product</h4>
               <nav className="space-y-2 text-sm" aria-label="Product links">
                 <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Features</button>
-                <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
+                <a href="/todaytip" className="block text-muted-foreground hover:text-foreground transition-colors">Blog</a>
                 <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
               </nav>
             </div>
