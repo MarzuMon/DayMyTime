@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, Clock, Bell, Video, Moon, Sun, Check, X, ArrowRight, Star, Sparkles, Users, BarChart3, ChevronDown, Play, ArrowUp } from 'lucide-react';
+import { CalendarDays, Clock, Bell, Video, Moon, Sun, ArrowRight, Star, Sparkles, Users, BarChart3, ChevronDown, Play, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { lazy, Suspense, useState, useCallback, useEffect } from 'react';
@@ -37,50 +37,12 @@ const testimonials = [
   { name: 'Ananya K.', role: 'Freelancer', text: 'The analytics feature helps me understand where my time actually goes.', rating: 5 },
 ];
 
-const pricingFree = [
-  'Visual timetable',
-  'Meeting alerts',
-  'Basic scheduling',
-  'Timeline view',
-  'Browser notifications',
-  '20 schedules/day',
-];
-
-const pricingPro = [
-  'Everything in Free',
-  'No ads',
-  'Advanced alerts',
-  'Priority reminders',
-  'Smart analytics',
-  'Custom alarm tones',
-  'Team workspaces',
-  'Unlimited schedules',
-  'Cloud backup & sync',
-  'Future AI scheduling',
-];
-
 const faqs = [
   { q: 'Is DayMyTime free to use?', a: 'Yes! DayMyTime is completely free for all users — visual scheduling, meeting alerts, analytics, custom tones, and unlimited schedules are all included.' },
-  { q: 'How do meeting alerts work?', a: 'When you add a meeting link (Zoom, Google Meet, or Teams), DayMyTime detects the platform automatically. You\'ll get a browser notification with a one-tap "Join Now" button when it\'s time.' },
+  { q: 'How do meeting alerts work?', a: "When you add a meeting link (Zoom, Google Meet, or Teams), DayMyTime detects the platform automatically. You'll get a browser notification with a one-tap \"Join Now\" button when it's time." },
   { q: 'Can I use DayMyTime on my phone?', a: 'Absolutely! DayMyTime is a fully responsive web app that works beautifully on mobile browsers. You can even install it as a PWA for an app-like experience.' },
-  { q: 'What meeting platforms are supported?', a: 'We currently support Google Meet, Zoom, and Microsoft Teams. Just paste your meeting link and we\'ll detect the platform automatically.' },
-  { q: 'How does the Pro plan pricing work?', a: 'Pro is $5/month (₹199/month). You can also earn a free month by referring 20 friends! Cancel anytime, no hidden fees.' },
+  { q: 'What meeting platforms are supported?', a: "We currently support Google Meet, Zoom, and Microsoft Teams. Just paste your meeting link and we'll detect the platform automatically." },
   { q: 'Is my data secure?', a: 'Yes. All data is stored securely with encryption. We use industry-standard authentication and never share your personal information.' },
-];
-
-const pricingRows = [
-  { feature: 'Add / Edit / Delete Schedules', free: true, pro: true },
-  { feature: 'Meeting Link Integration', free: true, pro: true },
-  { feature: 'Browser Notifications', free: true, pro: true },
-  { feature: 'Timeline View', free: true, pro: true },
-  { feature: 'Active Schedules', free: '20 / day', pro: 'Unlimited' },
-  { feature: 'Themes', free: 'Light only', pro: 'All themes' },
-  { feature: 'Ad-Free Experience', free: false, pro: true },
-  { feature: 'Smart Analytics', free: false, pro: true },
-  { feature: 'Cloud Backup & Sync', free: false, pro: true },
-  { feature: 'Custom Alarm Tones', free: false, pro: true },
-  { feature: 'Team Workspaces', free: false, pro: true },
-  { feature: 'Advanced Repeat Options', free: false, pro: true },
 ];
 
 const jsonLd = {
@@ -91,7 +53,6 @@ const jsonLd = {
   "operatingSystem": "Web",
   "offers": [
     { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free" },
-    { "@type": "Offer", "price": "5", "priceCurrency": "USD", "name": "Pro Monthly" },
   ],
   "description": "Make every day count with DayMyTime. Discover productivity tips, inspiring history stories, and practical self improvement ideas. Free visual scheduler.",
   "url": "https://daymytime.com",
@@ -163,16 +124,15 @@ export default function Landing() {
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
             <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Features</button>
             <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
-            <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
+            <a href="/todaytip" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a>
             <button onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">FAQ</button>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="rounded-xl">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="hidden sm:flex rounded-xl">Sign In</Button>
             <Button size="sm" onClick={() => navigate('/auth')} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90">
-              Start Free <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              Sign In <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Button>
           </div>
         </div>
@@ -214,7 +174,7 @@ export default function Landing() {
               {/* Content Section Buttons — hidden on mobile to reduce above-fold weight */}
               <div className="hidden sm:flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
                 <Button size="sm" variant="outline" onClick={() => navigate('/auth')} className="rounded-xl glass gap-1.5">
-                  🚀 Start Free Scheduler
+                  🔐 Sign In
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => navigate('/about')} className="rounded-xl glass gap-1.5">
                   📖 Learn More
@@ -398,85 +358,6 @@ export default function Landing() {
       </section>
 
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20 sm:py-28" aria-label="Pricing">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-4 uppercase tracking-wider">Pricing</span>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-3">Simple, transparent pricing</h2>
-            <p className="text-muted-foreground">Start free. Upgrade when you need more power.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12 max-w-3xl mx-auto">
-            {/* Free Card */}
-            <div className="rounded-2xl border bg-card p-8 shadow-card">
-              <h3 className="font-display font-bold text-lg mb-1">Free</h3>
-              <p className="text-4xl font-display font-bold mb-1">$0<span className="text-base font-normal text-muted-foreground">/mo</span></p>
-              <p className="text-sm text-muted-foreground mb-6">Perfect to get started</p>
-              <ul className="space-y-3 mb-8">
-                {pricingFree.map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full rounded-xl h-11" variant="outline" onClick={() => navigate('/auth')}>Get Started</Button>
-            </div>
-            {/* Pro Card */}
-            <div className="rounded-2xl border-2 border-primary bg-card p-8 shadow-elevated relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-16 translate-x-16" />
-              <span className="inline-block px-3 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-bold mb-3">Most Popular</span>
-              <h3 className="font-display font-bold text-lg mb-1">Pro</h3>
-              <p className="text-4xl font-display font-bold mb-1">$5<span className="text-base font-normal text-muted-foreground">/mo</span></p>
-              <p className="text-sm text-muted-foreground mb-6">Everything unlimited, ad-free</p>
-              <ul className="space-y-3 mb-8">
-                {pricingPro.slice(0, 8).map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full rounded-xl h-11 gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90" onClick={() => navigate('/auth')}>
-                Start Free Trial <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Comparison Table */}
-          <div className="rounded-2xl border bg-card overflow-hidden shadow-card max-w-3xl mx-auto">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[400px]">
-                <thead>
-                  <tr className="border-b bg-secondary/50">
-                    <th className="text-left p-4 font-display font-semibold">Feature</th>
-                    <th className="p-4 font-display font-semibold text-center w-24">Free</th>
-                    <th className="p-4 font-display font-semibold text-center w-24">Pro</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pricingRows.map(({ feature, free, pro }) => (
-                    <tr key={feature} className="border-b last:border-0 hover:bg-secondary/20 transition-colors">
-                      <td className="p-4 text-muted-foreground">{feature}</td>
-                      <td className="p-4 text-center">
-                        {free === true ? <Check className="h-4 w-4 text-primary mx-auto" aria-label="Included" /> :
-                         free === false ? <X className="h-4 w-4 text-muted-foreground/30 mx-auto" aria-label="Not included" /> :
-                         <span className="text-xs font-medium">{free}</span>}
-                      </td>
-                      <td className="p-4 text-center">
-                        {pro === true ? <Check className="h-4 w-4 text-primary mx-auto" aria-label="Included" /> :
-                         pro === false ? <X className="h-4 w-4 text-muted-foreground/30 mx-auto" aria-label="Not included" /> :
-                         <span className="text-xs font-medium">{pro}</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* FAQ */}
       <section id="faq" className="bg-secondary/30 py-20 sm:py-28" aria-label="FAQ">
@@ -534,7 +415,7 @@ export default function Landing() {
               <h4 className="font-display font-semibold text-sm mb-3">Product</h4>
               <nav className="space-y-2 text-sm" aria-label="Product links">
                 <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Features</button>
-                <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
+                <a href="/todaytip" className="block text-muted-foreground hover:text-foreground transition-colors">Blog</a>
                 <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="block text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
               </nav>
             </div>

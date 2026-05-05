@@ -103,7 +103,7 @@ export default function About() {
           <h2 className="font-display text-2xl font-bold mb-4">Ready to get started?</h2>
           <p className="text-muted-foreground mb-6">Join thousands of users who plan smarter with DayMyTime.</p>
           <Button size="lg" onClick={() => navigate('/auth')} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90">
-            Start Free Today
+            Sign In
           </Button>
         </motion.div>
       </main>
