@@ -62,10 +62,9 @@ const Index = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('profiles').select('display_name, is_pro').eq('id', user.id).maybeSingle()
+    supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
       .then(({ data }) => {
         setDisplayName(data?.display_name || '');
-        setIsPro(data?.is_pro || false);
       });
   }, [user]);
 
@@ -361,13 +360,9 @@ const Index = () => {
           </>
         )}
 
-        {/* Defer heavy below-fold components on mobile */}
-        {!isMobile && <Suspense fallback={null}><ReferralSection /></Suspense>}
-        {!isMobile && <Suspense fallback={null}><AdBanner /></Suspense>}
       </main>
 
-      {!isMobile && <Suspense fallback={null}><InstallPrompt /></Suspense>}
-      <Suspense fallback={null}><PromoPopup isPro={isPro} /></Suspense>
+      {!isMobile && <Suspense fallback={null}><InstallPrompt /></Suspense>
 
       {/* FAB */}
       <button
