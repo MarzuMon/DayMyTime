@@ -124,16 +124,15 @@ export default function Landing() {
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
             <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Features</button>
             <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
-            <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
+            <a href="/todaytip" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a>
             <button onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">FAQ</button>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="rounded-xl">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="hidden sm:flex rounded-xl">Sign In</Button>
             <Button size="sm" onClick={() => navigate('/auth')} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90">
-              Start Free <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              Sign In <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Button>
           </div>
         </div>
@@ -175,7 +174,7 @@ export default function Landing() {
               {/* Content Section Buttons — hidden on mobile to reduce above-fold weight */}
               <div className="hidden sm:flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 mt-4">
                 <Button size="sm" variant="outline" onClick={() => navigate('/auth')} className="rounded-xl glass gap-1.5">
-                  🚀 Start Free Scheduler
+                  🔐 Sign In
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => navigate('/about')} className="rounded-xl glass gap-1.5">
                   📖 Learn More
