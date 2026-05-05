@@ -33,7 +33,7 @@ export default function TermsOfService() {
         <p>By accessing or using DayMyTime ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
 
         <h2>2. Description of Service</h2>
-        <p>DayMyTime is a visual scheduling application that helps users manage their daily tasks, meetings, and notifications. The Service is available as a free tier and a paid Pro subscription.</p>
+        <p>DayMyTime is a visual scheduling application that helps users manage their daily tasks, meetings, and notifications. The Service is provided free of charge to all users.</p>
 
         <h2>3. User Accounts</h2>
         <ul>
@@ -42,15 +42,7 @@ export default function TermsOfService() {
           <li>You must be at least 13 years old to use the Service.</li>
         </ul>
 
-        <h2>4. Pro Subscription</h2>
-        <ul>
-          <li>Pro subscriptions are billed monthly (₹199/mo) or annually (₹1,499/yr).</li>
-          <li>Payments are processed through Razorpay.</li>
-          <li>You may cancel your subscription at any time. Access continues until the end of the billing period.</li>
-          <li>Refunds are handled on a case-by-case basis. Contact us for assistance.</li>
-        </ul>
-
-        <h2>5. Acceptable Use</h2>
+        <h2>4. Acceptable Use</h2>
         <p>You agree not to:</p>
         <ul>
           <li>Use the Service for any unlawful purpose.</li>

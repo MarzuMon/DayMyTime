@@ -60,7 +60,7 @@ const pricingPro = [
 ];
 
 const faqs = [
-  { q: 'Is DayMyTime free to use?', a: 'Yes! The Free plan includes visual scheduling, meeting alerts, and basic task management. Upgrade to Pro for advanced features like analytics, custom tones, and unlimited schedules.' },
+  { q: 'Is DayMyTime free to use?', a: 'Yes! DayMyTime is completely free for all users — visual scheduling, meeting alerts, analytics, custom tones, and unlimited schedules are all included.' },
   { q: 'How do meeting alerts work?', a: 'When you add a meeting link (Zoom, Google Meet, or Teams), DayMyTime detects the platform automatically. You\'ll get a browser notification with a one-tap "Join Now" button when it\'s time.' },
   { q: 'Can I use DayMyTime on my phone?', a: 'Absolutely! DayMyTime is a fully responsive web app that works beautifully on mobile browsers. You can even install it as a PWA for an app-like experience.' },
   { q: 'What meeting platforms are supported?', a: 'We currently support Google Meet, Zoom, and Microsoft Teams. Just paste your meeting link and we\'ll detect the platform automatically.' },
@@ -165,7 +165,6 @@ export default function Landing() {
             <button onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Screenshots</button>
             <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
             <button onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })} className="text-muted-foreground hover:text-foreground transition-colors">FAQ</button>
-            <button onClick={() => navigate('/giveaway')} className="text-primary font-semibold hover:text-primary/80 transition-colors">🎁 Giveaway</button>
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="rounded-xl">
@@ -219,9 +218,6 @@ export default function Landing() {
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => navigate('/about')} className="rounded-xl glass gap-1.5">
                   📖 Learn More
-                </Button>
-                <Button size="sm" onClick={() => navigate('/giveaway')} className="rounded-xl gradient-primary border-0 text-primary-foreground shadow-glow hover:opacity-90 gap-1.5">
-                  🎁 Join Giveaway
                 </Button>
               </div>
 
@@ -553,7 +549,6 @@ export default function Landing() {
                 <a href="/topics/self-improvement" className="block text-muted-foreground hover:text-foreground transition-colors">Self Improvement</a>
                 <a href="/about" className="block text-muted-foreground hover:text-foreground transition-colors">About</a>
                 <a href="/contact" className="block text-muted-foreground hover:text-foreground transition-colors">Contact</a>
-                <a href="/giveaway" className="block text-primary font-semibold hover:text-primary/80 transition-colors">🎁 Giveaway</a>
               </nav>
             </div>
             {/* Legal */}
