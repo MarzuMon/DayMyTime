@@ -7,7 +7,7 @@ import SEOHead from '@/components/SEOHead';
 import { generateFaqJsonLd, generateWebsiteJsonLd } from '@/lib/seo-utils';
 
 const NewsletterSubscribe = lazy(() => import('@/components/NewsletterSubscribe'));
-const PromotionsBanner = lazy(() => import('@/components/PromotionsBanner'));
+
 
 const features = [
   { icon: CalendarDays, title: 'Visual Scheduler', desc: 'Plan tasks using a beautiful timeline layout. See your entire day at a glance.', color: 'from-primary/20 to-primary/5' },
@@ -401,10 +401,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Promotions Banner */}
-      <Suspense fallback={null}>
-        <PromotionsBanner />
-      </Suspense>
 
       {/* Pricing */}
       <section id="pricing" className="py-20 sm:py-28" aria-label="Pricing">

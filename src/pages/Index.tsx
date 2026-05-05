@@ -20,11 +20,8 @@ import DashboardSkeleton from '@/components/DashboardSkeleton';
 // Lazy load all non-critical components
 const DailyScheduleSection = lazy(() => import('@/components/DailyScheduleSection'));
 const WeeklyPlanView = lazy(() => import('@/components/WeeklyPlanView'));
-const AdBanner = lazy(() => import('@/components/AdBanner'));
-const ReferralSection = lazy(() => import('@/components/ReferralSection'));
 const InstallPrompt = lazy(() => import('@/components/InstallPrompt'));
 const BottomNav = lazy(() => import('@/components/BottomNav'));
-const PromoPopup = lazy(() => import('@/components/PromoPopup'));
 const TimelineView = lazy(() => import('@/components/TimelineView'));
 
 type ViewMode = 'list' | 'timeline';
