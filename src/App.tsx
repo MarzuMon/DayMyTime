@@ -29,6 +29,8 @@ const CategoryPage = lazyWithRetry(() => import("./pages/CategoryPage"), "catego
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "not-found");
 const Unsubscribe = lazyWithRetry(() => import("./pages/Unsubscribe"), "unsubscribe");
 const QuestionHub = lazyWithRetry(() => import("./pages/QuestionHub"), "question-hub");
+const Community = lazyWithRetry(() => import("./pages/Community"), "community");
+const WritePost = lazyWithRetry(() => import("./pages/WritePost"), "write-post");
 
 const queryClient = new QueryClient();
 
@@ -66,8 +68,12 @@ export default function App() {
               <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
               
               <Route path="/question-hub" element={<PageTransition><QuestionHub /></PageTransition>} />
+              <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+              <Route path="/community/:slug" element={<PageTransition><Community /></PageTransition>} />
 
               {/* Protected routes */}
+              <Route path="/write" element={<ProtectedRoute><PageTransition><WritePost /></PageTransition></ProtectedRoute>} />
+              <Route path="/write/:id" element={<ProtectedRoute><PageTransition><WritePost /></PageTransition></ProtectedRoute>} />
               <Route path="/app" element={<ProtectedRoute><PageTransition><Index /></PageTransition></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
               
