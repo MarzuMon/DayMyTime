@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import SEOHead from '@/components/SEOHead';
-import RichTextEditor from '@/components/RichTextEditor';
+import RichTextEditor, { type RichTextEditorHandle } from '@/components/RichTextEditor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,7 +42,7 @@ export default function WritePost() {
 
   const featuredInputRef = useRef<HTMLInputElement>(null);
   const inlineInputRef = useRef<HTMLInputElement>(null);
-  const editorImageInsertRef = useRef<((url: string) => void) | null>(null);
+  const editorRef = useRef<RichTextEditorHandle>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
@@ -106,7 +106,7 @@ export default function WritePost() {
     setUploading(true);
     const url = await uploadImage(file);
     setUploading(false);
-    if (url && editorImageInsertRef.current) editorImageInsertRef.current(url);
+    if (url) editorRef.current?.insertImage(url);
     e.target.value = '';
   };
 
@@ -233,39 +233,16 @@ export default function WritePost() {
 
           <div className="space-y-2">
             <Label>Content</Label>
-            <RichTextEditorWithImage
+            <RichTextEditor
+              ref={editorRef}
               value={content}
               onChange={setContent}
-              onRequestImage={() => inlineInputRef.current?.click()}
-              registerInsert={(fn) => { editorImageInsertRef.current = fn; }}
+              onImageUploadRequest={() => inlineInputRef.current?.click()}
             />
             <input ref={inlineInputRef} type="file" accept="image/*" hidden onChange={handleInlineUpload} />
           </div>
         </div>
       </main>
     </div>
-  );
-}
-
-// Wrapper that captures the editor ref so we can insert images after async upload
-function RichTextEditorWithImage({
-  value, onChange, onRequestImage, registerInsert,
-}: {
-  value: string;
-  onChange: (html: string) => void;
-  onRequestImage: () => void;
-  registerInsert: (fn: (url: string) => void) => void;
-}) {
-  // Use a small wrapper editor to expose its insert function via the registerInsert callback.
-  // Because RichTextEditor manages its own editor instance, we re-mount once and use a module-level ref via DOM event.
-  // Simpler: emit a custom event the editor listens to.
-  const handleInsertViaEvent = (url: string) => {
-    document.dispatchEvent(new CustomEvent('rte:insert-image', { detail: { url } }));
-  };
-  // Register on first render
-  registerInsert(handleInsertViaEvent);
-
-  return (
-    <RichTextEditor value={value} onChange={onChange} onImageUploadRequest={onRequestImage} />
   );
 }
