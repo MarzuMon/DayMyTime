@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import SuggestedComments from '@/components/SuggestedComments';
+import ReportDialog from '@/components/ReportDialog';
 
 interface CommentSectionProps {
   postId: string;
