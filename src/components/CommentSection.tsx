@@ -8,15 +8,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import SuggestedComments from '@/components/SuggestedComments';
+import ReportDialog from '@/components/ReportDialog';
 
 interface CommentSectionProps {
   postId: string;
   postType: string;
   requireSubscription?: boolean;
+  notifyAuthorId?: string;
+  postSlug?: string;
+  postTitle?: string;
 }
 
-export default function CommentSection({ postId, postType }: CommentSectionProps) {
-  const { comments, loading, submitting, addComment } = useComments(postId, postType);
+export default function CommentSection({ postId, postType, notifyAuthorId, postSlug, postTitle }: CommentSectionProps) {
+  const { comments, loading, submitting, addComment } = useComments(postId, postType, {
+    authorId: notifyAuthorId, postSlug, postTitle,
+  });
   const { user } = useAuth();
   const [text, setText] = useState('');
   const navigate = useNavigate();
@@ -69,9 +75,14 @@ export default function CommentSection({ postId, postType }: CommentSectionProps
                   <span className="flex items-center gap-1.5 text-xs font-medium">
                     <UserIcon className="h-3 w-3" /> {c.user_name}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
+                    </span>
+                    {user && user.id !== c.user_id && (
+                      <ReportDialog targetType="comment" targetId={c.id} size="icon" />
+                    )}
+                  </div>
                 </div>
                 <p className="text-sm">{c.content}</p>
               </CardContent>

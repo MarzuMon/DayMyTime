@@ -5,6 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/use-theme';
 import SEOHead from '@/components/SEOHead';
 import BreadcrumbNav from '@/components/BreadcrumbNav';
+import LikeButton from '@/components/LikeButton';
+import CommentSection from '@/components/CommentSection';
+import ShareButtons from '@/components/ShareButtons';
+import ReportDialog from '@/components/ReportDialog';
+import NotificationBell from '@/components/NotificationBell';
+import { useTrackView } from '@/hooks/use-views';
+import { useFollow } from '@/hooks/use-follow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +20,10 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Sun, Moon, PenSquare, User, Calendar, Pencil, Trash2 } from 'lucide-react';
+import {
+  ArrowLeft, Sun, Moon, PenSquare, User, Calendar, Pencil, Trash2,
+  Eye, Flame, UserPlus, UserMinus,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -30,6 +40,9 @@ interface UserPost {
   author_name: string;
   status: string;
   created_at: string;
+  likes_count?: number;
+  comments_count?: number;
+  views_count?: number;
 }
 
 const PAGE_SIZE = 12;
@@ -44,6 +57,10 @@ export default function Community() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+
+  useTrackView(selected?.id);
+  const { following, followerCount, toggle: toggleFollow, loading: followLoading, isSelf } =
+    useFollow(selected?.author_id);
 
   useEffect(() => {
     if (slug) {
@@ -115,9 +132,13 @@ export default function Community() {
             <span className="font-display font-bold text-sm">Community</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => navigate(user ? '/write' : '/auth')} className="gap-1.5">
-              <PenSquare className="h-4 w-4" /> Write
+            <Button size="sm" variant="ghost" onClick={() => navigate('/community/trending')} className="gap-1.5">
+              <Flame className="h-4 w-4 text-orange-500" /> <span className="hidden sm:inline">Trending</span>
             </Button>
+            <Button size="sm" onClick={() => navigate(user ? '/write' : '/auth')} className="gap-1.5">
+              <PenSquare className="h-4 w-4" /> <span className="hidden sm:inline">Write</span>
+            </Button>
+            {user && <NotificationBell />}
             <Button size="icon" variant="ghost" onClick={toggleTheme} className="h-8 w-8">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
@@ -146,9 +167,23 @@ export default function Community() {
             )}
             <Badge variant="secondary" className="mb-3 capitalize">{selected.category}</Badge>
             <h1 className="font-display text-3xl sm:text-4xl font-bold mb-3">{selected.title}</h1>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
-              <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{selected.author_name || 'Anonymous'}</span>
+
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
+              <button
+                className="flex items-center gap-1 hover:text-foreground transition-colors"
+                onClick={() => navigate(`/user/${selected.author_id}`)}
+              >
+                <User className="h-3.5 w-3.5" />{selected.author_name || 'Anonymous'}
+              </button>
               <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
+              <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{selected.views_count || 0} views</span>
+              <span className="text-xs">· {followerCount} follower{followerCount === 1 ? '' : 's'}</span>
+              {!isSelf && user && (
+                <Button size="sm" variant={following ? 'outline' : 'default'} onClick={toggleFollow} disabled={followLoading} className="h-7">
+                  {following ? <><UserMinus className="h-3.5 w-3.5 mr-1" />Following</>
+                             : <><UserPlus className="h-3.5 w-3.5 mr-1" />Follow</>}
+                </Button>
+              )}
               {isOwner(selected) && (
                 <div className="ml-auto flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => navigate(`/write/${selected.id}`)}>
@@ -174,8 +209,32 @@ export default function Community() {
                 </div>
               )}
             </div>
+
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <LikeButton
+                postId={selected.id}
+                postType="community"
+                notifyAuthorId={selected.author_id}
+                postSlug={selected.slug}
+                postTitle={selected.title}
+              />
+              <ShareButtons url={`/community/${selected.slug}`} title={selected.title} />
+              {!isOwner(selected) && <ReportDialog targetType="post" targetId={selected.id} />}
+            </div>
+
             <div className="prose prose-sm dark:prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: selected.content }} />
+
+            <div className="mt-10 pt-6 border-t border-border">
+              <CommentSection
+                postId={selected.id}
+                postType="community"
+                notifyAuthorId={selected.author_id}
+                postSlug={selected.slug}
+                postTitle={selected.title}
+              />
+            </div>
+
             <div className="mt-10 pt-6 border-t border-border">
               <Button variant="outline" onClick={() => navigate('/community')}>
                 ← Back to Community
@@ -191,9 +250,14 @@ export default function Community() {
               <p className="text-muted-foreground max-w-xl mx-auto mb-6">
                 Stories, tips, and perspectives from the DayMyTime community.
               </p>
-              <Button size="lg" onClick={() => navigate(user ? '/write' : '/auth')} className="gap-2">
-                <PenSquare className="h-4 w-4" /> Write a Post
-              </Button>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button size="lg" onClick={() => navigate(user ? '/write' : '/auth')} className="gap-2">
+                  <PenSquare className="h-4 w-4" /> Write a Post
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => navigate('/community/trending')} className="gap-2">
+                  <Flame className="h-4 w-4 text-orange-500" /> Trending
+                </Button>
+              </div>
             </div>
 
             {posts.length === 0 ? (
@@ -215,9 +279,15 @@ export default function Community() {
                           <Badge variant="secondary" className="mb-2 text-[10px] capitalize">{post.category}</Badge>
                           <h3 className="font-display font-bold text-sm mb-1 line-clamp-2">{post.title}</h3>
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{post.excerpt}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {post.author_name || 'Anonymous'} · {format(new Date(post.created_at), 'MMM d')}
-                          </p>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span className="truncate">
+                              {post.author_name || 'Anonymous'} · {format(new Date(post.created_at), 'MMM d')}
+                            </span>
+                            <span className="flex items-center gap-2 shrink-0">
+                              <span>♥ {post.likes_count || 0}</span>
+                              <span className="flex items-center gap-0.5"><Eye className="h-3 w-3" />{post.views_count || 0}</span>
+                            </span>
+                          </div>
                         </CardContent>
                       </Card>
                     </motion.div>

@@ -15,13 +15,14 @@ import {
 } from 'recharts';
 import {
   ArrowLeft, Sun, Moon, Users, BarChart3,
-  Search, ShieldCheck, MessageSquare, UsersRound, FileText, Mail, Crown
+  Search, ShieldCheck, MessageSquare, UsersRound, FileText, Mail, Crown, Flag,
 } from 'lucide-react';
 
 import ContactMessagesTab from '@/components/author/ContactMessagesTab';
 import SeoKeywordsTab from '@/components/author/SeoKeywordsTab';
 import ContentManagementTab from '@/components/author/ContentManagementTab';
 import SubscriberManagementTab from '@/components/author/SubscriberManagementTab';
+import ReportsTab from '@/components/author/ReportsTab';
 
 export default function Author() {
   const { user: _user } = useAuth();
@@ -134,6 +135,7 @@ export default function Author() {
             <TabsTrigger value="subscribers"><Mail className="h-4 w-4 mr-1.5" /> Subscribers</TabsTrigger>
             <TabsTrigger value="seo"><Search className="h-4 w-4 mr-1.5" /> SEO</TabsTrigger>
             <TabsTrigger value="content"><FileText className="h-4 w-4 mr-1.5" /> Content</TabsTrigger>
+            <TabsTrigger value="reports"><Flag className="h-4 w-4 mr-1.5" /> Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics" className="space-y-4">
@@ -170,6 +172,10 @@ export default function Author() {
 
           <TabsContent value="content" className="space-y-4">
             <ContentManagementTab />
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-4">
+            <ReportsTab />
           </TabsContent>
         </Tabs>
       </main>

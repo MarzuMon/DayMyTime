@@ -2,8 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { createNotification } from '@/lib/notify';
 
-export function useLikes(postId: string, postType: string) {
+interface NotifyMeta {
+  authorId?: string;
+  postSlug?: string;
+  postTitle?: string;
+}
+
+export function useLikes(postId: string, postType: string, notifyMeta?: NotifyMeta) {
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -90,6 +97,19 @@ export function useLikes(postId: string, postType: string) {
           .from('post_likes')
           .insert({ post_id: postId, post_type: postType, user_id: user.id });
         if (error) throw error;
+        if (notifyMeta?.authorId) {
+          const actorName =
+            (user.user_metadata as any)?.display_name || user.email?.split('@')[0] || 'Someone';
+          createNotification({
+            recipientId: notifyMeta.authorId,
+            actorId: user.id,
+            actorName,
+            type: 'like',
+            postId,
+            postSlug: notifyMeta.postSlug,
+            postTitle: notifyMeta.postTitle,
+          });
+        }
       }
     } catch {
       // Revert optimistic update

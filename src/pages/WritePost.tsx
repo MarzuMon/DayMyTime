@@ -15,6 +15,7 @@ import {
 import { ArrowLeft, ImagePlus, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateSlug } from '@/seo/slugGenerator';
+import { canPostToday, recordPost, looksLikeSpam } from '@/lib/rateLimit';
 
 const schema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(200),
@@ -130,6 +131,18 @@ export default function WritePost() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (looksLikeSpam(`${title} ${content}`)) {
+      toast.error('Your post was blocked by our spam filter.');
+      return;
+    }
+    if (!isEdit) {
+      const { ok, remaining } = canPostToday(user.id, 5);
+      if (!ok) {
+        toast.error('Daily post limit reached (5/day). Try again tomorrow.');
+        return;
+      }
+      if (remaining <= 2) toast.message(`${remaining} post${remaining === 1 ? '' : 's'} left today`);
+    }
     setSaving(true);
     const baseSlug = generateSlug(title) || `post-${Date.now()}`;
     const finalSlug = await ensureUniqueSlug(baseSlug);
@@ -153,6 +166,7 @@ export default function WritePost() {
       });
       setSaving(false);
       if (error) { toast.error('Failed: ' + error.message); return; }
+      recordPost(user.id);
       toast.success('Post published!');
       navigate(`/community/${finalSlug}`);
     }
