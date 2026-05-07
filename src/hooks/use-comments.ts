@@ -94,6 +94,7 @@ export function useComments(postId: string, postType: string, notifyMeta?: Notif
         });
 
         if (error) throw error;
+        recordComment(user.id);
         if (notifyMeta?.authorId) {
           createNotification({
             recipientId: notifyMeta.authorId,
