@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { createNotification } from '@/lib/notify';
 
 export interface Comment {
   id: string;
@@ -11,7 +12,13 @@ export interface Comment {
   user_id: string;
 }
 
-export function useComments(postId: string, postType: string) {
+interface NotifyMeta {
+  authorId?: string;
+  postSlug?: string;
+  postTitle?: string;
+}
+
+export function useComments(postId: string, postType: string, notifyMeta?: NotifyMeta) {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,6 +93,17 @@ export function useComments(postId: string, postType: string) {
         });
 
         if (error) throw error;
+        if (notifyMeta?.authorId) {
+          createNotification({
+            recipientId: notifyMeta.authorId,
+            actorId: user.id,
+            actorName: profile?.display_name || user.email?.split('@')[0] || 'Someone',
+            type: 'comment',
+            postId,
+            postSlug: notifyMeta.postSlug,
+            postTitle: notifyMeta.postTitle,
+          });
+        }
         toast.success('Comment added! ✅');
         return true;
       } catch {
