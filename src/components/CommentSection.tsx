@@ -13,10 +13,15 @@ interface CommentSectionProps {
   postId: string;
   postType: string;
   requireSubscription?: boolean;
+  notifyAuthorId?: string;
+  postSlug?: string;
+  postTitle?: string;
 }
 
-export default function CommentSection({ postId, postType }: CommentSectionProps) {
-  const { comments, loading, submitting, addComment } = useComments(postId, postType);
+export default function CommentSection({ postId, postType, notifyAuthorId, postSlug, postTitle }: CommentSectionProps) {
+  const { comments, loading, submitting, addComment } = useComments(postId, postType, {
+    authorId: notifyAuthorId, postSlug, postTitle,
+  });
   const { user } = useAuth();
   const [text, setText] = useState('');
   const navigate = useNavigate();

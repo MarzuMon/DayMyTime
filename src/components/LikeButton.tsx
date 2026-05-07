@@ -8,10 +8,15 @@ interface LikeButtonProps {
   postType: string;
   variant?: 'default' | 'ghost' | 'outline';
   showCount?: boolean;
+  notifyAuthorId?: string;
+  postSlug?: string;
+  postTitle?: string;
 }
 
-export default function LikeButton({ postId, postType, variant = 'outline', showCount = true }: LikeButtonProps) {
-  const { liked, likeCount, toggleLike, loading } = useLikes(postId, postType);
+export default function LikeButton({ postId, postType, variant = 'outline', showCount = true, notifyAuthorId, postSlug, postTitle }: LikeButtonProps) {
+  const { liked, likeCount, toggleLike, loading } = useLikes(postId, postType, {
+    authorId: notifyAuthorId, postSlug, postTitle,
+  });
 
   return (
     <Button
