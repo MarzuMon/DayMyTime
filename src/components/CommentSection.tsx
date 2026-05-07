@@ -75,9 +75,14 @@ export default function CommentSection({ postId, postType, notifyAuthorId, postS
                   <span className="flex items-center gap-1.5 text-xs font-medium">
                     <UserIcon className="h-3 w-3" /> {c.user_name}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
+                    </span>
+                    {user && user.id !== c.user_id && (
+                      <ReportDialog targetType="comment" targetId={c.id} size="icon" />
+                    )}
+                  </div>
                 </div>
                 <p className="text-sm">{c.content}</p>
               </CardContent>
