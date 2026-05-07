@@ -166,6 +166,7 @@ export default function WritePost() {
       });
       setSaving(false);
       if (error) { toast.error('Failed: ' + error.message); return; }
+      recordPost(user.id);
       toast.success('Post published!');
       navigate(`/community/${finalSlug}`);
     }
