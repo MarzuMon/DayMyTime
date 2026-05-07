@@ -30,6 +30,8 @@ const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "not-found");
 const Unsubscribe = lazyWithRetry(() => import("./pages/Unsubscribe"), "unsubscribe");
 const QuestionHub = lazyWithRetry(() => import("./pages/QuestionHub"), "question-hub");
 const Community = lazyWithRetry(() => import("./pages/Community"), "community");
+const CommunityTrending = lazyWithRetry(() => import("./pages/CommunityTrending"), "community-trending");
+const UserProfile = lazyWithRetry(() => import("./pages/UserProfile"), "user-profile");
 const WritePost = lazyWithRetry(() => import("./pages/WritePost"), "write-post");
 
 const queryClient = new QueryClient();
@@ -69,7 +71,9 @@ export default function App() {
               
               <Route path="/question-hub" element={<PageTransition><QuestionHub /></PageTransition>} />
               <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+              <Route path="/community/trending" element={<PageTransition><CommunityTrending /></PageTransition>} />
               <Route path="/community/:slug" element={<PageTransition><Community /></PageTransition>} />
+              <Route path="/user/:id" element={<PageTransition><UserProfile /></PageTransition>} />
 
               {/* Protected routes */}
               <Route path="/write" element={<ProtectedRoute><PageTransition><WritePost /></PageTransition></ProtectedRoute>} />
