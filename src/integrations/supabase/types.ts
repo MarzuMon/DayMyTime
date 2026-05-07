@@ -356,6 +356,45 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          actor_name: string
+          created_at: string
+          id: string
+          is_read: boolean
+          post_id: string | null
+          post_slug: string | null
+          post_title: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_name?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          post_id?: string | null
+          post_slug?: string | null
+          post_title?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_name?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          post_id?: string | null
+          post_slug?: string | null
+          post_title?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
@@ -428,6 +467,57 @@ export type Database = {
           post_id?: string
           post_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      post_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id: string
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
+      post_views: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          viewer_key: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          viewer_key: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          viewer_key?: string
         }
         Relationships: []
       }
@@ -807,11 +897,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_posts: {
         Row: {
           author_id: string
           author_name: string
           category: string
+          comments_count: number
           content: string
           created_at: string
           excerpt: string
@@ -822,11 +934,13 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          views_count: number
         }
         Insert: {
           author_id: string
           author_name?: string
           category?: string
+          comments_count?: number
           content?: string
           created_at?: string
           excerpt?: string
@@ -837,11 +951,13 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          views_count?: number
         }
         Update: {
           author_id?: string
           author_name?: string
           category?: string
+          comments_count?: number
           content?: string
           created_at?: string
           excerpt?: string
@@ -852,6 +968,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          views_count?: number
         }
         Relationships: []
       }
